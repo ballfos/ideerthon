@@ -173,6 +173,9 @@ function RouteComponent() {
         const newMessages = snapshot.docs.map((doc) => {
           const data = doc.data();
           const createdAt = data.createdAt as Timestamp;
+          const favoritedBy = (data.favoritedBy || []) as string[];
+          const isFavorite = user ? favoritedBy.includes(user.uid) : false;
+
           return {
             id: doc.id,
             text: data.text,
@@ -181,7 +184,7 @@ function RouteComponent() {
               seconds: createdAt?.seconds || 0,
               nanoseconds: createdAt?.nanoseconds || 0,
             },
-            isFavorite: !!data.isFavorite,
+            isFavorite,
             isDiscarded: !!data.isDiscarded,
             isRecycled: !!data.isRecycled,
             agentName: data.agentName,

@@ -96,35 +96,59 @@ func (h *MessageHandler) ToggleFavorite(
 	ctx context.Context,
 	req *connect.Request[apiv1.ToggleFavoriteRequest],
 ) (*connect.Response[apiv1.ToggleFavoriteResponse], error) {
-	_, ok := middleware.GetUID(ctx)
+	uid, ok := middleware.GetUID(ctx)
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, fmt.Errorf("user not authenticated"))
 	}
 
 	docRef := h.firestore.Collection("talks").Doc(req.Msg.TalkId).Collection("messages").Doc(req.Msg.MessageId)
 
+	var isFavorite bool
 	err := h.firestore.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
 		doc, err := tx.Get(docRef)
 		if err != nil {
 			return err
 		}
 
-		isFavorite, _ := doc.Data()["isFavorite"].(bool)
-		return tx.Update(docRef, []firestore.Update{
-			{Path: "isFavorite", Value: !isFavorite},
-		})
+		data := doc.Data()
+		favoritedBy, _ := data["favoritedBy"].([]interface{})
+		
+		found := false
+		for _, u := range favoritedBy {
+			if s, ok := u.(string); ok && s == uid {
+				found = true
+				break
+			}
+		}
+
+		if found {
+			// Remove
+			return tx.Update(docRef, []firestore.Update{
+				{Path: "favoritedBy", Value: firestore.ArrayRemove(uid)},
+			})
+		} else {
+			// Add
+			return tx.Update(docRef, []firestore.Update{
+				{Path: "favoritedBy", Value: firestore.ArrayUnion(uid)},
+			})
+		}
 	})
 
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to toggle favorite: %v", err))
 	}
 
-	// 最終的な状態を取得して返す（トランザクション後）
-	doc, err := docRef.Get(ctx)
-	if err != nil {
-		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to fetch updated message: %v", err))
+	// 最終的な状態を再取得
+	updatedDoc, _ := docRef.Get(ctx)
+	updatedData := updatedDoc.Data()
+	updatedFavoritedBy, _ := updatedData["favoritedBy"].([]interface{})
+	isFavorite = false
+	for _, u := range updatedFavoritedBy {
+		if s, ok := u.(string); ok && s == uid {
+			isFavorite = true
+			break
+		}
 	}
-	isFavorite, _ := doc.Data()["isFavorite"].(bool)
 
 	return connect.NewResponse(&apiv1.ToggleFavoriteResponse{
 		IsFavorite: isFavorite,
@@ -135,15 +159,15 @@ func (h *MessageHandler) ListFavoriteMessages(
 	ctx context.Context,
 	req *connect.Request[apiv1.ListFavoriteMessagesRequest],
 ) (*connect.Response[apiv1.ListFavoriteMessagesResponse], error) {
-	_, ok := middleware.GetUID(ctx)
+	uid, ok := middleware.GetUID(ctx)
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, fmt.Errorf("user not authenticated"))
 	}
 
 	// CollectionGroup を使用してお気に入りを全件取得
-	// 注意: インデックス作成が必要な場合がありますが、エミュレータでは自動的に動作することが多いです
+	// 全ユーザー共通ではなく、ログイン中のユーザーが含まれるもののみ
 	iter := h.firestore.CollectionGroup("messages").
-		Where("isFavorite", "==", true).
+		Where("favoritedBy", "array-contains", uid).
 		Documents(ctx)
 
 	docs, err := iter.GetAll()

@@ -30,9 +30,9 @@ function RouteComponent() {
               key={talk.id}
               // @ts-ignore
               to={`/talks/${talk.id}`}
-              className="group relative flex w-full max-w-full items-center justify-between bg-white border-t-[2px] border-b-[8px] border-x-[3px] border-[#5C3A21] rounded-[24px] py-[1.2rem] px-4 shadow-sm transition-all duration-100 hover:brightness-[1.02] active:translate-y-[6px] active:border-b-[2px] active:mb-[6px] overflow-hidden"
+              className="group relative flex w-full max-w-full items-center justify-between bg-white border-t-[2px] border-b-[8px] border-x-[3px] border-[#d5cba1] rounded-[24px] py-[1.2rem] px-6 shadow-sm transition-all duration-100 hover:brightness-[1.02] active:translate-y-[6px] active:border-b-[2px] active:mb-[6px] overflow-hidden"
               style={{
-                boxShadow: '0 4px 0 0 #5C3A21'
+                boxShadow: '0 4px 0 0 #d5cba1'
               }}
             >
               <div className="flex flex-col overflow-hidden min-w-0 flex-1">
@@ -43,7 +43,7 @@ function RouteComponent() {
                   {talk.updatedAt ? new Date(talk.updatedAt.toMillis()).toLocaleString('ja-JP') : '未設定'}
                 </span>
               </div>
-              <span className="font-black text-2xl text-[#5C3A21] group-hover:translate-x-1 transition-transform ml-4">
+              <span className="font-black text-2xl text-[#a3967d] group-hover:translate-x-1 transition-transform ml-4">
                 {'>'}
               </span>
             </Link>
