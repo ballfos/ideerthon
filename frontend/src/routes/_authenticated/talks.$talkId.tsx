@@ -18,7 +18,7 @@ import { MessageInput } from "#/features/talks/components/message-input";
 import { Link } from "@tanstack/react-router";
 import { useTalks } from "@/features/talks";
 import { DesktopSidebar } from "#/components/ui/desktop-sidebar";
-// import { TalkControlToggle } from '#/features/talks/components/talk-control-toggle'
+import { TalkControlToggle } from '#/features/talks/components/talk-control-toggle'
 import { TalkStatus } from "#/gen/proto/api/v1/talk_pb";
 import { Plus, User, Loader2 } from "lucide-react";
 import { talkClient } from "#/lib/api";
@@ -225,8 +225,8 @@ function RouteComponent() {
                   to="/talks/$talkId"
                   params={{ talkId: rawTalk.id }}
                   className={`flex w-full max-w-full items-center justify-between p-3 rounded-xl transition-all text-sm group overflow-hidden ${rawTalk.id === talkId
-                      ? "bg-[#e8eed2]/50 text-[#5a4a35] shadow-inner"
-                      : "text-[#c2baa6] hover:bg-[#fcfaf2] hover:text-[#5a4a35]"
+                    ? "bg-[#e8eed2]/50 text-[#5a4a35] shadow-inner"
+                    : "text-[#c2baa6] hover:bg-[#fcfaf2] hover:text-[#5a4a35]"
                     }`}
                 >
                   <span className="truncate font-black tracking-tight flex-1 min-w-0 mr-2">
@@ -250,6 +250,13 @@ function RouteComponent() {
                 className="min-[451px]:h-20 min-[451px]:rounded-none min-[451px]:bg-transparent min-[451px]:from-transparent min-[451px]:to-transparent min-[451px]:shadow-none min-[451px]:border-b-0 shrink-0"
                 titleClassName="min-[451px]:text-[#7a6446] min-[451px]:drop-shadow-none"
               />
+
+              <div className="px-4 py-2 flex justify-center bg-[#fcfaf2]">
+                <TalkControlToggle
+                  talkId={talkId}
+                  status={talkStatus}
+                />
+              </div>
 
               <div className="flex-1 flex flex-col overflow-hidden bg-white/30 backdrop-blur-sm">
                 <TalkTabs
