@@ -63,7 +63,16 @@ function FavoritesPage() {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center justify-between mb-1">
-                                            <span className="text-[10px] font-black text-[#cbb698] tracking-wider uppercase">Starred Message</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] font-black text-[#cbb698] tracking-wider uppercase">
+                                                    {msg.agentName || "Starred Message"}
+                                                </span>
+                                                {msg.ideaName && (
+                                                    <span className="px-2 py-0.5 bg-[#4b9635] text-white text-[9px] font-black rounded-full uppercase tracking-tighter shadow-sm">
+                                                        {msg.ideaName}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                         <p className="text-[#5a4a35] font-black text-base leading-relaxed line-clamp-3">
                                             {msg.text}

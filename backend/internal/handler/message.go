@@ -135,7 +135,7 @@ func (h *MessageHandler) ListFavoriteMessages(
 	ctx context.Context,
 	req *connect.Request[apiv1.ListFavoriteMessagesRequest],
 ) (*connect.Response[apiv1.ListFavoriteMessagesResponse], error) {
-	uid, ok := middleware.GetUID(ctx)
+	_, ok := middleware.GetUID(ctx)
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, fmt.Errorf("user not authenticated"))
 	}
@@ -143,7 +143,6 @@ func (h *MessageHandler) ListFavoriteMessages(
 	// CollectionGroup を使用してお気に入りを全件取得
 	// 注意: インデックス作成が必要な場合がありますが、エミュレータでは自動的に動作することが多いです
 	iter := h.firestore.CollectionGroup("messages").
-		Where("uid", "==", uid).
 		Where("isFavorite", "==", true).
 		Documents(ctx)
 
@@ -159,6 +158,9 @@ func (h *MessageHandler) ListFavoriteMessages(
 		// ドキュメントパス talks/{talkId}/messages/{messageId} から talkId を取得
 		talkId := doc.Ref.Parent.Parent.ID
 
+		agentName, _ := data["agentName"].(string)
+		ideaName, _ := data["ideaName"].(string)
+
 		messages = append(messages, &apiv1.Message{
 			Id:         doc.Ref.ID,
 			Uid:        data["uid"].(string),
@@ -166,6 +168,8 @@ func (h *MessageHandler) ListFavoriteMessages(
 			CreatedAt:  timestamppb.New(createdAt),
 			IsFavorite: true,
 			TalkId:     talkId,
+			AgentName:  agentName,
+			IdeaName:   ideaName,
 		})
 	}
 

@@ -27,9 +27,10 @@ interface IdeaMapProps {
         ideas?: Array<{ name: string; details: string }>;
         embedding?: number[];
     }>;
+    onJumpToChat?: (messageId: string) => void;
 }
 
-const IdeaMap: React.FC<IdeaMapProps> = ({ messages }) => {
+const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat }) => {
     const svgRef = useRef<SVGSVGElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [selectedNode, setSelectedNode] = useState<NodeData | null>(null);
@@ -359,6 +360,18 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages }) => {
                                     ))}
                                 </div>
                             </div>
+
+                            {onJumpToChat && (
+                                <button
+                                    onClick={() => onJumpToChat(selectedNode.id)}
+                                    className="mt-6 w-full flex items-center justify-center gap-2 py-3 px-6 bg-[#7a6446] text-white rounded-2xl font-black text-sm hover:bg-[#5a4a35] transition-all border-b-4 border-[#3a2a15] active:translate-y-[2px] active:border-b-2 shadow-sm"
+                                >
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                    </svg>
+                                    この発言に飛ぶ
+                                </button>
+                            )}
                         </div>
 
                         <div className="mt-auto pt-8 border-t border-[#fcfaf2] text-[10px] font-black text-[#c2baa6] italic uppercase tracking-tighter">

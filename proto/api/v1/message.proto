@@ -12,6 +12,7 @@ message Message {
   bool is_favorite = 5;
   string talk_id = 6;
   string agent_name = 7;
+  string idea_name = 8;
 }
 
 message SendMessageRequest {

@@ -73,12 +73,41 @@ function RouteComponent() {
   >([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // オートスクロール
+  // オートスクロール & ハッシュジャンプ
   useEffect(() => {
+    if (messages.length === 0) return;
+
+    // ハッシュがある場合は、その場所へのジャンプを優先する
+    if (window.location.hash) {
+      const messageId = window.location.hash.replace("#message-", "");
+      const timer = setTimeout(() => {
+        const element = document.getElementById(`message-${messageId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
+          element.classList.add(
+            "ring-8",
+            "ring-[#ffcb05]",
+            "ring-opacity-30",
+            "transition-all",
+            "duration-500",
+          );
+          setTimeout(() => {
+            element.classList.remove(
+              "ring-8",
+              "ring-[#ffcb05]",
+              "ring-opacity-30",
+            );
+          }, 3000);
+        }
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+
+    // ハッシュがない場合のみ最下部へスクロール
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, talkStatus]);
+  }, [messages.length, talkStatus, talkId]);
 
   // パソコン画面判定 (451px以上)
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 451);
@@ -258,6 +287,29 @@ function RouteComponent() {
     } finally {
       setIsUpdatingAgent(false);
     }
+  };
+
+  const handleJumpToChat = (messageId: string) => {
+    setActiveTab("chat");
+    // Wait for tab switch
+    setTimeout(() => {
+      const element = document.getElementById(`message-${messageId}`);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+        // Highlight effect
+        element.classList.add(
+          "ring-8",
+          "ring-[#ffcb05]",
+          "ring-opacity-30",
+          "rounded-2xl",
+          "transition-all",
+          "duration-500",
+        );
+        setTimeout(() => {
+          element.classList.remove("ring-8", "ring-[#ffcb05]", "ring-opacity-30");
+        }, 2000);
+      }
+    }, 100);
   };
 
   return (
@@ -528,7 +580,10 @@ function RouteComponent() {
                     </div>
                   ) : activeTab === "supplies" ? (
                     <div className="h-full w-full overflow-hidden">
-                      <IdeaMap messages={messages} />
+                      <IdeaMap
+                        messages={messages}
+                        onJumpToChat={handleJumpToChat}
+                      />
                     </div>
                   ) : (
                     <div className="flex h-full items-center justify-center p-8 text-center text-[#c2baa6]">

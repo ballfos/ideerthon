@@ -31,6 +31,7 @@ type Message struct {
 	IsFavorite    bool                   `protobuf:"varint,5,opt,name=is_favorite,json=isFavorite,proto3" json:"is_favorite,omitempty"`
 	TalkId        string                 `protobuf:"bytes,6,opt,name=talk_id,json=talkId,proto3" json:"talk_id,omitempty"`
 	AgentName     string                 `protobuf:"bytes,7,opt,name=agent_name,json=agentName,proto3" json:"agent_name,omitempty"`
+	IdeaName      string                 `protobuf:"bytes,8,opt,name=idea_name,json=ideaName,proto3" json:"idea_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -110,6 +111,13 @@ func (x *Message) GetTalkId() string {
 func (x *Message) GetAgentName() string {
 	if x != nil {
 		return x.AgentName
+	}
+	return ""
+}
+
+func (x *Message) GetIdeaName() string {
+	if x != nil {
+		return x.IdeaName
 	}
 	return ""
 }
@@ -390,7 +398,7 @@ var File_proto_api_v1_message_proto protoreflect.FileDescriptor
 
 const file_proto_api_v1_message_proto_rawDesc = "" +
 	"\n" +
-	"\x1aproto/api/v1/message.proto\x12\x06api.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xd3\x01\n" +
+	"\x1aproto/api/v1/message.proto\x12\x06api.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xf0\x01\n" +
 	"\aMessage\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x10\n" +
 	"\x03uid\x18\x02 \x01(\tR\x03uid\x12\x12\n" +
@@ -401,7 +409,8 @@ const file_proto_api_v1_message_proto_rawDesc = "" +
 	"isFavorite\x12\x17\n" +
 	"\atalk_id\x18\x06 \x01(\tR\x06talkId\x12\x1d\n" +
 	"\n" +
-	"agent_name\x18\a \x01(\tR\tagentName\"A\n" +
+	"agent_name\x18\a \x01(\tR\tagentName\x12\x1b\n" +
+	"\tidea_name\x18\b \x01(\tR\bideaName\"A\n" +
 	"\x12SendMessageRequest\x12\x17\n" +
 	"\atalk_id\x18\x01 \x01(\tR\x06talkId\x12\x12\n" +
 	"\x04text\x18\x02 \x01(\tR\x04text\"@\n" +
