@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"fmt"
+	"sort"
 	"time"
 
 	"cloud.google.com/go/firestore"
@@ -193,20 +194,56 @@ func (h *TalkHandler) StartTalkStream(
 		agentName, _ := selectedAgent["name"].(string)
 		agentDesc, _ := selectedAgent["description"].(string)
 
-		// Fetch recent messages for context (last 2)
-		msgIter := docRef.Collection("messages").OrderBy("createdAt", firestore.Desc).Limit(2).Documents(ctx)
+		// Fetch recent messages for context
+		// We want: Recent 2 AI messages + Recent 1 Human message
+		msgIter := docRef.Collection("messages").OrderBy("createdAt", firestore.Desc).Limit(20).Documents(ctx)
 		msgDocs, err := msgIter.GetAll()
-		recentContext := ""
+
+		type Msg struct {
+			Sender string
+			Text   string
+			Time   time.Time
+		}
+		var aiMsgs []Msg
+		var humanMsgs []Msg
+
 		if err == nil {
-			for i := len(msgDocs) - 1; i >= 0; i-- {
-				m := msgDocs[i].Data()
-				u, _ := m["agentName"].(string)
-				if u == "" {
-					u = "ユーザー"
+			for _, doc := range msgDocs {
+				m := doc.Data()
+				uid, _ := m["uid"].(string)
+				sender, _ := m["agentName"].(string)
+				if sender == "" {
+					sender = "ユーザー"
 				}
-				t, _ := m["text"].(string)
-				recentContext += fmt.Sprintf("[%s]: %s\n", u, t)
+				text, _ := m["text"].(string)
+				createdAt, _ := m["createdAt"].(time.Time)
+
+				if uid == "ai" {
+					if len(aiMsgs) < 2 {
+						aiMsgs = append(aiMsgs, Msg{Sender: sender, Text: text, Time: createdAt})
+					}
+				} else {
+					if len(humanMsgs) < 1 {
+						humanMsgs = append(humanMsgs, Msg{Sender: sender, Text: text, Time: createdAt})
+					}
+				}
+				if len(aiMsgs) >= 2 && len(humanMsgs) >= 1 {
+					break
+				}
 			}
+		}
+
+		// Combine and sort chronologically
+		var combined []Msg
+		combined = append(combined, aiMsgs...)
+		combined = append(combined, humanMsgs...)
+		sort.Slice(combined, func(i, j int) bool {
+			return combined[i].Time.Before(combined[j].Time)
+		})
+
+		recentContext := ""
+		for _, m := range combined {
+			recentContext += fmt.Sprintf("[%s]: %s\n", m.Sender, m.Text)
 		}
 
 		// AI Response
@@ -357,6 +394,84 @@ func (h *TalkHandler) AddAgent(
 	}
 
 	return connect.NewResponse(&apiv1.AddAgentResponse{}), nil
+}
+
+func (h *TalkHandler) RemoveAgent(ctx context.Context, req *connect.Request[apiv1.RemoveAgentRequest]) (*connect.Response[apiv1.RemoveAgentResponse], error) {
+	talkID := req.Msg.TalkId
+	idx := int(req.Msg.AgentIndex)
+
+	docRef := h.firestore.Collection("talks").Doc(talkID)
+	docSnap, err := docRef.Get(ctx)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("talk not found"))
+	}
+
+	var agents []interface{}
+	if data, ok := docSnap.Data()["agents"].([]interface{}); ok {
+		agents = data
+	}
+
+	if idx < 0 || idx >= len(agents) {
+		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("invalid agent index"))
+	}
+
+	// Remove at index
+	agents = append(agents[:idx], agents[idx+1:]...)
+
+	_, err = docRef.Update(ctx, []firestore.Update{
+		{
+			Path:  "agents",
+			Value: agents,
+		},
+	})
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to remove agent: %v", err))
+	}
+
+	return connect.NewResponse(&apiv1.RemoveAgentResponse{}), nil
+}
+
+func (h *TalkHandler) UpdateAgent(ctx context.Context, req *connect.Request[apiv1.UpdateAgentRequest]) (*connect.Response[apiv1.UpdateAgentResponse], error) {
+	talkID := req.Msg.TalkId
+	idx := int(req.Msg.AgentIndex)
+	agent := req.Msg.Agent
+
+	if agent == nil || agent.Name == "" {
+		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("agent name is required"))
+	}
+
+	docRef := h.firestore.Collection("talks").Doc(talkID)
+	docSnap, err := docRef.Get(ctx)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("talk not found"))
+	}
+
+	var agents []interface{}
+	if data, ok := docSnap.Data()["agents"].([]interface{}); ok {
+		agents = data
+	}
+
+	if idx < 0 || idx >= len(agents) {
+		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("invalid agent index"))
+	}
+
+	// Update at index
+	agents[idx] = map[string]interface{}{
+		"name":        agent.Name,
+		"description": agent.Description,
+	}
+
+	_, err = docRef.Update(ctx, []firestore.Update{
+		{
+			Path:  "agents",
+			Value: agents,
+		},
+	})
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to update agent: %v", err))
+	}
+
+	return connect.NewResponse(&apiv1.UpdateAgentResponse{}), nil
 }
 
 

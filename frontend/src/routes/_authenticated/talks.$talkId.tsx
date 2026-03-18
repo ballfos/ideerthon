@@ -18,7 +18,7 @@ import { useTalks } from "@/features/talks";
 import { DesktopSidebar } from "#/components/ui/desktop-sidebar";
 import { TalkControlToggle } from "#/features/talks/components/talk-control-toggle";
 import { TalkStatus } from "#/gen/proto/api/v1/talk_pb";
-import { Plus, User, Loader2 } from "lucide-react";
+import { Plus, User, Loader2, Pencil, Trash2, X } from "lucide-react";
 import { AgentCard, type AgentPreset } from "@/features/talks/components/agent-selector";
 import { talkClient } from "#/lib/api";
 
@@ -51,6 +51,12 @@ function RouteComponent() {
   });
   const [isAddingAgent, setIsAddingAgent] = useState(false);
   const [isAddCardOpen, setIsAddCardOpen] = useState(false);
+  const [editingAgent, setEditingAgent] = useState<{
+    index: number;
+    name: string;
+    description: string;
+  } | null>(null);
+  const [isUpdatingAgent, setIsUpdatingAgent] = useState(false);
 
   const [messages, setMessages] = useState<
     Array<{
@@ -220,6 +226,40 @@ function RouteComponent() {
     }
   };
 
+  const handleRemoveAgent = async (index: number) => {
+    if (!window.confirm("このメンバーを村から送り返しますか？")) return;
+    try {
+      await talkClient.removeAgent({
+        talkId,
+        agentIndex: index,
+      });
+    } catch (err) {
+      console.error("Failed to remove agent:", err);
+      alert("削除に失敗しました");
+    }
+  };
+
+  const handleUpdateAgent = async () => {
+    if (!editingAgent || !editingAgent.name.trim()) return;
+    setIsUpdatingAgent(true);
+    try {
+      await talkClient.updateAgent({
+        talkId,
+        agentIndex: editingAgent.index,
+        agent: {
+          name: editingAgent.name,
+          description: editingAgent.description,
+        },
+      });
+      setEditingAgent(null);
+    } catch (err) {
+      console.error("Failed to update agent:", err);
+      alert("更新に失敗しました");
+    } finally {
+      setIsUpdatingAgent(false);
+    }
+  };
+
   return (
     <div className="flex h-screen w-screen bg-[#fcfaf2] overflow-hidden font-yusei relative">
       {/* 1. グローバルサイドバー (デスクトップ) */}
@@ -327,24 +367,124 @@ function RouteComponent() {
                           </div>
                         ) : (
                           <div className="grid grid-cols-1 gap-3">
-                            {agents.map((agent, i) => (
-                              <div
-                                key={i}
-                                className="bg-white rounded-2xl p-4 border-2 border-[#d5cba1] shadow-sm flex items-start gap-3"
-                              >
-                                <div className="h-10 w-10 shrink-0 rounded-full bg-[#f9f1c8] border-2 border-[#d5cba1] flex items-center justify-center text-[#7a6446]">
-                                  <User className="h-6 w-6" />
+                            {agents.map((agent, i) => {
+                              const isEditing = editingAgent?.index === i;
+                              return (
+                                <div
+                                  key={i}
+                                  className={`bg-white rounded-2xl p-4 border-2 transition-all ${
+                                    isEditing
+                                      ? "border-[#ffcb05] shadow-md ring-4 ring-[#ffcb05]/10"
+                                      : "border-[#d5cba1] shadow-sm"
+                                  }`}
+                                >
+                                  {isEditing ? (
+                                    <div className="space-y-4">
+                                      <div className="flex items-center justify-between">
+                                        <h4 className="text-xs font-black text-[#7a6446] uppercase tracking-wider">
+                                          メンバーを編集
+                                        </h4>
+                                        <button
+                                          onClick={() => setEditingAgent(null)}
+                                          className="text-[#a3967d] hover:text-[#7a6446]"
+                                        >
+                                          <X className="h-4 w-4" />
+                                        </button>
+                                      </div>
+                                      <div className="space-y-3">
+                                        <div className="space-y-1">
+                                          <label className="text-[10px] font-black text-[#a3967d] ml-1 uppercase">
+                                            名前
+                                          </label>
+                                          <input
+                                            type="text"
+                                            value={editingAgent.name}
+                                            onChange={(e) =>
+                                              setEditingAgent({
+                                                ...editingAgent,
+                                                name: e.target.value,
+                                              })
+                                            }
+                                            className="w-full bg-[#fcfaf2] rounded-xl px-4 py-2 text-sm font-bold border-2 border-[#d5cba1] focus:outline-none focus:border-[#ffcb05] transition-colors"
+                                          />
+                                        </div>
+                                        <div className="space-y-1">
+                                          <label className="text-[10px] font-black text-[#a3967d] ml-1 uppercase">
+                                            説明 / 役割
+                                          </label>
+                                          <textarea
+                                            value={editingAgent.description}
+                                            onChange={(e) =>
+                                              setEditingAgent({
+                                                ...editingAgent,
+                                                description: e.target.value,
+                                              })
+                                            }
+                                            rows={2}
+                                            className="w-full bg-[#fcfaf2] rounded-xl px-4 py-2 text-sm font-bold border-2 border-[#d5cba1] focus:outline-none focus:border-[#ffcb05] transition-colors resize-none"
+                                          />
+                                        </div>
+                                        <button
+                                          onClick={handleUpdateAgent}
+                                          disabled={
+                                            isUpdatingAgent ||
+                                            !editingAgent.name.trim()
+                                          }
+                                          className="w-full bg-[#ffcb05] text-[#7a6446] font-black py-2 rounded-xl border-b-4 border-[#e6b800] active:translate-y-[2px] active:border-b-2 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                                        >
+                                          {isUpdatingAgent ? (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                          ) : (
+                                            "更新を保存"
+                                          )}
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-start gap-3">
+                                      <div className="h-10 w-10 shrink-0 rounded-full bg-[#f9f1c8] border-2 border-[#d5cba1] flex items-center justify-center text-[#7a6446]">
+                                        <User className="h-6 w-6" />
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center justify-between gap-2">
+                                          <p className="font-black text-[#7a6446] truncate">
+                                            {agent.name}
+                                          </p>
+                                          <div className="flex items-center gap-1 shrink-0">
+                                            <button
+                                              onClick={() =>
+                                                setEditingAgent({
+                                                  index: i,
+                                                  name: agent.name,
+                                                  description:
+                                                    agent.description,
+                                                })
+                                              }
+                                              className="p-1.5 text-[#a3967d] hover:text-[#7a6446] hover:bg-[#f9f1c8] rounded-lg transition-colors"
+                                              title="編集"
+                                            >
+                                              <Pencil className="h-3.5 w-3.5" />
+                                            </button>
+                                            <button
+                                              onClick={() =>
+                                                handleRemoveAgent(i)
+                                              }
+                                              className="p-1.5 text-[#a3967d] hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                              title="削除"
+                                            >
+                                              <Trash2 className="h-3.5 w-3.5" />
+                                            </button>
+                                          </div>
+                                        </div>
+                                        <p className="text-xs text-[#a3967d] line-clamp-2 mt-0.5">
+                                          {agent.description}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="font-black text-[#7a6446] truncate">
-                                    {agent.name}
-                                  </p>
-                                  <p className="text-xs text-[#a3967d] line-clamp-2">
-                                    {agent.description}
-                                  </p>
-                                </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         )}
                       </div>

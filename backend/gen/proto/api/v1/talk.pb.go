@@ -539,6 +539,190 @@ func (*AddAgentResponse) Descriptor() ([]byte, []int) {
 	return file_proto_api_v1_talk_proto_rawDescGZIP(), []int{8}
 }
 
+type RemoveAgentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TalkId        string                 `protobuf:"bytes,1,opt,name=talk_id,json=talkId,proto3" json:"talk_id,omitempty"`
+	AgentIndex    int32                  `protobuf:"varint,2,opt,name=agent_index,json=agentIndex,proto3" json:"agent_index,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveAgentRequest) Reset() {
+	*x = RemoveAgentRequest{}
+	mi := &file_proto_api_v1_talk_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveAgentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveAgentRequest) ProtoMessage() {}
+
+func (x *RemoveAgentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_api_v1_talk_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveAgentRequest.ProtoReflect.Descriptor instead.
+func (*RemoveAgentRequest) Descriptor() ([]byte, []int) {
+	return file_proto_api_v1_talk_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *RemoveAgentRequest) GetTalkId() string {
+	if x != nil {
+		return x.TalkId
+	}
+	return ""
+}
+
+func (x *RemoveAgentRequest) GetAgentIndex() int32 {
+	if x != nil {
+		return x.AgentIndex
+	}
+	return 0
+}
+
+type RemoveAgentResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveAgentResponse) Reset() {
+	*x = RemoveAgentResponse{}
+	mi := &file_proto_api_v1_talk_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveAgentResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveAgentResponse) ProtoMessage() {}
+
+func (x *RemoveAgentResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_api_v1_talk_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveAgentResponse.ProtoReflect.Descriptor instead.
+func (*RemoveAgentResponse) Descriptor() ([]byte, []int) {
+	return file_proto_api_v1_talk_proto_rawDescGZIP(), []int{10}
+}
+
+type UpdateAgentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TalkId        string                 `protobuf:"bytes,1,opt,name=talk_id,json=talkId,proto3" json:"talk_id,omitempty"`
+	AgentIndex    int32                  `protobuf:"varint,2,opt,name=agent_index,json=agentIndex,proto3" json:"agent_index,omitempty"`
+	Agent         *Agent                 `protobuf:"bytes,3,opt,name=agent,proto3" json:"agent,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateAgentRequest) Reset() {
+	*x = UpdateAgentRequest{}
+	mi := &file_proto_api_v1_talk_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateAgentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateAgentRequest) ProtoMessage() {}
+
+func (x *UpdateAgentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_api_v1_talk_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateAgentRequest.ProtoReflect.Descriptor instead.
+func (*UpdateAgentRequest) Descriptor() ([]byte, []int) {
+	return file_proto_api_v1_talk_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *UpdateAgentRequest) GetTalkId() string {
+	if x != nil {
+		return x.TalkId
+	}
+	return ""
+}
+
+func (x *UpdateAgentRequest) GetAgentIndex() int32 {
+	if x != nil {
+		return x.AgentIndex
+	}
+	return 0
+}
+
+func (x *UpdateAgentRequest) GetAgent() *Agent {
+	if x != nil {
+		return x.Agent
+	}
+	return nil
+}
+
+type UpdateAgentResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateAgentResponse) Reset() {
+	*x = UpdateAgentResponse{}
+	mi := &file_proto_api_v1_talk_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateAgentResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateAgentResponse) ProtoMessage() {}
+
+func (x *UpdateAgentResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_api_v1_talk_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateAgentResponse.ProtoReflect.Descriptor instead.
+func (*UpdateAgentResponse) Descriptor() ([]byte, []int) {
+	return file_proto_api_v1_talk_proto_rawDescGZIP(), []int{12}
+}
+
 var File_proto_api_v1_talk_proto protoreflect.FileDescriptor
 
 const file_proto_api_v1_talk_proto_rawDesc = "" +
@@ -572,18 +756,31 @@ const file_proto_api_v1_talk_proto_rawDesc = "" +
 	"\x0fAddAgentRequest\x12\x17\n" +
 	"\atalk_id\x18\x01 \x01(\tR\x06talkId\x12#\n" +
 	"\x05agent\x18\x02 \x01(\v2\r.api.v1.AgentR\x05agent\"\x12\n" +
-	"\x10AddAgentResponse*[\n" +
+	"\x10AddAgentResponse\"N\n" +
+	"\x12RemoveAgentRequest\x12\x17\n" +
+	"\atalk_id\x18\x01 \x01(\tR\x06talkId\x12\x1f\n" +
+	"\vagent_index\x18\x02 \x01(\x05R\n" +
+	"agentIndex\"\x15\n" +
+	"\x13RemoveAgentResponse\"s\n" +
+	"\x12UpdateAgentRequest\x12\x17\n" +
+	"\atalk_id\x18\x01 \x01(\tR\x06talkId\x12\x1f\n" +
+	"\vagent_index\x18\x02 \x01(\x05R\n" +
+	"agentIndex\x12#\n" +
+	"\x05agent\x18\x03 \x01(\v2\r.api.v1.AgentR\x05agent\"\x15\n" +
+	"\x13UpdateAgentResponse*[\n" +
 	"\n" +
 	"TalkStatus\x12\x1b\n" +
 	"\x17TALK_STATUS_UNSPECIFIED\x10\x00\x12\x17\n" +
 	"\x13TALK_STATUS_RUNNING\x10\x01\x12\x17\n" +
-	"\x13TALK_STATUS_STOPPED\x10\x022\xa8\x02\n" +
+	"\x13TALK_STATUS_STOPPED\x10\x022\xb8\x03\n" +
 	"\vTalkService\x12C\n" +
 	"\n" +
 	"CreateTalk\x12\x19.api.v1.CreateTalkRequest\x1a\x1a.api.v1.CreateTalkResponse\x12D\n" +
 	"\x0fStartTalkStream\x12\x1e.api.v1.StartTalkStreamRequest\x1a\x0f.api.v1.Message0\x01\x12O\n" +
 	"\x0eStopTalkStream\x12\x1d.api.v1.StopTalkStreamRequest\x1a\x1e.api.v1.StopTalkStreamResponse\x12=\n" +
-	"\bAddAgent\x12\x17.api.v1.AddAgentRequest\x1a\x18.api.v1.AddAgentResponseB\x85\x01\n" +
+	"\bAddAgent\x12\x17.api.v1.AddAgentRequest\x1a\x18.api.v1.AddAgentResponse\x12F\n" +
+	"\vRemoveAgent\x12\x1a.api.v1.RemoveAgentRequest\x1a\x1b.api.v1.RemoveAgentResponse\x12F\n" +
+	"\vUpdateAgent\x12\x1a.api.v1.UpdateAgentRequest\x1a\x1b.api.v1.UpdateAgentResponseB\x85\x01\n" +
 	"\n" +
 	"com.api.v1B\tTalkProtoP\x01Z3github.com/ballfos/ideerthon/gen/proto/api/v1;apiv1\xa2\x02\x03AXX\xaa\x02\x06Api.V1\xca\x02\x06Api\\V1\xe2\x02\x12Api\\V1\\GPBMetadata\xea\x02\aApi::V1b\x06proto3"
 
@@ -600,7 +797,7 @@ func file_proto_api_v1_talk_proto_rawDescGZIP() []byte {
 }
 
 var file_proto_api_v1_talk_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_proto_api_v1_talk_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_proto_api_v1_talk_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_proto_api_v1_talk_proto_goTypes = []any{
 	(TalkStatus)(0),                // 0: api.v1.TalkStatus
 	(*Talk)(nil),                   // 1: api.v1.Talk
@@ -612,31 +809,40 @@ var file_proto_api_v1_talk_proto_goTypes = []any{
 	(*StopTalkStreamResponse)(nil), // 7: api.v1.StopTalkStreamResponse
 	(*AddAgentRequest)(nil),        // 8: api.v1.AddAgentRequest
 	(*AddAgentResponse)(nil),       // 9: api.v1.AddAgentResponse
-	(*timestamppb.Timestamp)(nil),  // 10: google.protobuf.Timestamp
-	(*Message)(nil),                // 11: api.v1.Message
+	(*RemoveAgentRequest)(nil),     // 10: api.v1.RemoveAgentRequest
+	(*RemoveAgentResponse)(nil),    // 11: api.v1.RemoveAgentResponse
+	(*UpdateAgentRequest)(nil),     // 12: api.v1.UpdateAgentRequest
+	(*UpdateAgentResponse)(nil),    // 13: api.v1.UpdateAgentResponse
+	(*timestamppb.Timestamp)(nil),  // 14: google.protobuf.Timestamp
+	(*Message)(nil),                // 15: api.v1.Message
 }
 var file_proto_api_v1_talk_proto_depIdxs = []int32{
-	10, // 0: api.v1.Talk.created_at:type_name -> google.protobuf.Timestamp
-	10, // 1: api.v1.Talk.updated_at:type_name -> google.protobuf.Timestamp
+	14, // 0: api.v1.Talk.created_at:type_name -> google.protobuf.Timestamp
+	14, // 1: api.v1.Talk.updated_at:type_name -> google.protobuf.Timestamp
 	0,  // 2: api.v1.Talk.status:type_name -> api.v1.TalkStatus
-	10, // 3: api.v1.Talk.last_heartbeat:type_name -> google.protobuf.Timestamp
+	14, // 3: api.v1.Talk.last_heartbeat:type_name -> google.protobuf.Timestamp
 	2,  // 4: api.v1.Talk.agents:type_name -> api.v1.Agent
 	2,  // 5: api.v1.CreateTalkRequest.agents:type_name -> api.v1.Agent
 	1,  // 6: api.v1.CreateTalkResponse.talk:type_name -> api.v1.Talk
 	2,  // 7: api.v1.AddAgentRequest.agent:type_name -> api.v1.Agent
-	3,  // 8: api.v1.TalkService.CreateTalk:input_type -> api.v1.CreateTalkRequest
-	5,  // 9: api.v1.TalkService.StartTalkStream:input_type -> api.v1.StartTalkStreamRequest
-	6,  // 10: api.v1.TalkService.StopTalkStream:input_type -> api.v1.StopTalkStreamRequest
-	8,  // 11: api.v1.TalkService.AddAgent:input_type -> api.v1.AddAgentRequest
-	4,  // 12: api.v1.TalkService.CreateTalk:output_type -> api.v1.CreateTalkResponse
-	11, // 13: api.v1.TalkService.StartTalkStream:output_type -> api.v1.Message
-	7,  // 14: api.v1.TalkService.StopTalkStream:output_type -> api.v1.StopTalkStreamResponse
-	9,  // 15: api.v1.TalkService.AddAgent:output_type -> api.v1.AddAgentResponse
-	12, // [12:16] is the sub-list for method output_type
-	8,  // [8:12] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	2,  // 8: api.v1.UpdateAgentRequest.agent:type_name -> api.v1.Agent
+	3,  // 9: api.v1.TalkService.CreateTalk:input_type -> api.v1.CreateTalkRequest
+	5,  // 10: api.v1.TalkService.StartTalkStream:input_type -> api.v1.StartTalkStreamRequest
+	6,  // 11: api.v1.TalkService.StopTalkStream:input_type -> api.v1.StopTalkStreamRequest
+	8,  // 12: api.v1.TalkService.AddAgent:input_type -> api.v1.AddAgentRequest
+	10, // 13: api.v1.TalkService.RemoveAgent:input_type -> api.v1.RemoveAgentRequest
+	12, // 14: api.v1.TalkService.UpdateAgent:input_type -> api.v1.UpdateAgentRequest
+	4,  // 15: api.v1.TalkService.CreateTalk:output_type -> api.v1.CreateTalkResponse
+	15, // 16: api.v1.TalkService.StartTalkStream:output_type -> api.v1.Message
+	7,  // 17: api.v1.TalkService.StopTalkStream:output_type -> api.v1.StopTalkStreamResponse
+	9,  // 18: api.v1.TalkService.AddAgent:output_type -> api.v1.AddAgentResponse
+	11, // 19: api.v1.TalkService.RemoveAgent:output_type -> api.v1.RemoveAgentResponse
+	13, // 20: api.v1.TalkService.UpdateAgent:output_type -> api.v1.UpdateAgentResponse
+	15, // [15:21] is the sub-list for method output_type
+	9,  // [9:15] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_proto_api_v1_talk_proto_init() }
@@ -651,7 +857,7 @@ func file_proto_api_v1_talk_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_api_v1_talk_proto_rawDesc), len(file_proto_api_v1_talk_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   9,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

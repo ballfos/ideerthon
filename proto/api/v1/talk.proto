@@ -54,9 +54,26 @@ message AddAgentRequest {
 
 message AddAgentResponse {}
 
+message RemoveAgentRequest {
+  string talk_id = 1;
+  int32 agent_index = 2;
+}
+
+message RemoveAgentResponse {}
+
+message UpdateAgentRequest {
+  string talk_id = 1;
+  int32 agent_index = 2;
+  Agent agent = 3;
+}
+
+message UpdateAgentResponse {}
+
 service TalkService {
   rpc CreateTalk(CreateTalkRequest) returns (CreateTalkResponse);
   rpc StartTalkStream(StartTalkStreamRequest) returns (stream Message);
   rpc StopTalkStream(StopTalkStreamRequest) returns (StopTalkStreamResponse);
   rpc AddAgent(AddAgentRequest) returns (AddAgentResponse);
+  rpc RemoveAgent(RemoveAgentRequest) returns (RemoveAgentResponse);
+  rpc UpdateAgent(UpdateAgentRequest) returns (UpdateAgentResponse);
 }
