@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { ListFavoriteMessagesRequest, ListFavoriteMessagesResponse, SendMessageRequest, SendMessageResponse, ToggleFavoriteRequest, ToggleFavoriteResponse } from "./message_pb.js";
+import { DiscardIdeaRequest, DiscardIdeaResponse, ListFavoriteMessagesRequest, ListFavoriteMessagesResponse, ListRecycledIdeasRequest, ListRecycledIdeasResponse, RecycleIdeaRequest, RecycleIdeaResponse, SendMessageRequest, SendMessageResponse, ToggleFavoriteRequest, ToggleFavoriteResponse } from "./message_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -37,6 +37,33 @@ export const MessageService = {
       name: "ListFavoriteMessages",
       I: ListFavoriteMessagesRequest,
       O: ListFavoriteMessagesResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc api.v1.MessageService.DiscardIdea
+     */
+    discardIdea: {
+      name: "DiscardIdea",
+      I: DiscardIdeaRequest,
+      O: DiscardIdeaResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc api.v1.MessageService.RecycleIdea
+     */
+    recycleIdea: {
+      name: "RecycleIdea",
+      I: RecycleIdeaRequest,
+      O: RecycleIdeaResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc api.v1.MessageService.ListRecycledIdeas
+     */
+    listRecycledIdeas: {
+      name: "ListRecycledIdeas",
+      I: ListRecycledIdeasRequest,
+      O: ListRecycledIdeasResponse,
       kind: MethodKind.Unary,
     },
   }

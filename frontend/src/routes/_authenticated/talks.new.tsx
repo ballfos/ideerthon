@@ -17,7 +17,7 @@ function RouteComponent() {
 
   // Initialize with 3 agents
   const [selectedAgents, setSelectedAgents] = useState<AgentPreset[]>(
-    AGENT_PRESETS.slice(0, 3).map(p => ({ ...p, id: Math.random().toString(36).substr(2, 9) }))
+    AGENT_PRESETS.slice(0, 3).map(p => ({ ...p, id: Math.random().toString(36).slice(2, 11) }))
   )
   const [openAccordion, setOpenAccordion] = useState<string | null>(null)
 
@@ -48,7 +48,7 @@ function RouteComponent() {
   }
 
   const addAgent = () => {
-    const newAgent = { id: Math.random().toString(36).substr(2, 9), name: "新しいエージェント", description: "役割を教えてね" }
+    const newAgent = { id: Math.random().toString(36).slice(2, 11), name: "新しいエージェント", description: "役割を教えてね" }
     setSelectedAgents([...selectedAgents, newAgent])
     setOpenAccordion(newAgent.id)
   }
@@ -66,30 +66,30 @@ function RouteComponent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fcfaf2] p-4 md:p-8 font-yusei">
-      <div className="max-w-2xl mx-auto bg-white rounded-[32px] shadow-sm border-2 border-[#d5cba1] overflow-hidden">
+    <div className="max-w-2xl mx-auto font-yusei overflow-hidden">
+      <div className="bg-white rounded-[40px] shadow-sm border-2 border-[#d5cba1] overflow-hidden">
         {/* Header */}
-        <header className="bg-[#f9f1c8] p-8 border-b-2 border-[#d5cba1] text-center">
-          <h1 className="text-3xl font-black text-[#7a6446] tracking-widest">
+        <header className="bg-[#f9f1c8]/50 p-6 md:p-10 border-b-2 border-[#d5cba1] text-center">
+          <h1 className="text-2xl md:text-3xl font-black text-[#7a6446] tracking-widest leading-tight">
             新しいトークを始める
           </h1>
-          <p className="text-[#a3967d] mt-2 font-bold opacity-80 uppercase tracking-tighter text-sm">
+          <p className="text-[#a3967d] mt-2 font-black opacity-80 uppercase tracking-tighter text-[10px] md:text-xs">
             What theme shall we explore in Idea Village today?
           </p>
         </header>
 
-        <form onSubmit={handleSubmit} className="p-8 space-y-12">
+        <form onSubmit={handleSubmit} className="p-6 md:p-10 space-y-8 md:space-y-12">
           {/* STEP 1: Topic */}
           <section className="space-y-4">
-            <h2 className="text-lg font-black text-[#7a6446] flex items-center gap-2">
-              <span className="w-8 h-8 rounded-full bg-[#ffcb05] text-[#7a6446] flex items-center justify-center text-sm shadow-sm ring-4 ring-[#ffcb05]/10">1</span>
+            <h2 className="text-base md:text-lg font-black text-[#7a6446] flex items-center gap-3">
+              <span className="w-8 h-8 rounded-full bg-[#ffcb05] text-[#7a6446] flex items-center justify-center text-sm shadow-sm ring-4 ring-[#ffcb05]/10 flex-shrink-0">1</span>
               テーマを決める
             </h2>
-            <div className="pl-10">
+            <div className="md:pl-11">
               <input
                 type="text"
                 placeholder="例) 新しいキャンプ用品のアイデア"
-                className="w-full bg-white rounded-2xl px-6 py-4 text-lg font-black text-[#5a4a35] border-4 border-[#e8eed2] focus:outline-none focus:border-[#ffcb05] transition-all placeholder:text-[#c2baa6]/50 shadow-inner"
+                className="w-full bg-white rounded-2xl px-5 py-3 md:px-6 md:py-4 text-base md:text-lg font-black text-[#5a4a35] border-4 border-[#e8eed2] focus:outline-none focus:border-[#ffcb05] transition-all placeholder:text-[#c2baa6]/50 shadow-inner"
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 required
@@ -100,21 +100,21 @@ function RouteComponent() {
           {/* STEP 2: Members */}
           <section className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-black text-[#7a6446] flex items-center gap-2">
-                <span className="w-8 h-8 rounded-full bg-[#ffcb05] text-[#7a6446] flex items-center justify-center text-sm shadow-sm ring-4 ring-[#ffcb05]/10">2</span>
+              <h2 className="text-base md:text-lg font-black text-[#7a6446] flex items-center gap-3">
+                <span className="w-8 h-8 rounded-full bg-[#ffcb05] text-[#7a6446] flex items-center justify-center text-sm shadow-sm ring-4 ring-[#ffcb05]/10 flex-shrink-0">2</span>
                 メンバーを招待する
               </h2>
               <button
                 type="button"
                 onClick={addAgent}
-                className="group p-2 rounded-full hover:bg-[#f9f1c8] border-2 border-transparent hover:border-[#d5cba1] transition-all flex items-center gap-2 text-[#a3967d] hover:text-[#7a6446]"
+                className="group p-2 rounded-xl hover:bg-[#f9f1c8] border-2 border-transparent hover:border-[#d5cba1] transition-all flex items-center gap-2 text-[#a3967d] hover:text-[#7a6446]"
               >
-                <Plus className="h-5 w-5" />
-                <span className="text-xs font-black">追加</span>
+                <Plus className="h-4 w-4 md:h-5 md:w-5" />
+                <span className="text-[10px] md:text-xs font-black">追加</span>
               </button>
             </div>
 
-            <div className="pl-10 space-y-4">
+            <div className="md:pl-11 space-y-4">
               {selectedAgents.map((agent) => (
                 <AgentCard
                   key={agent.id}
@@ -131,30 +131,30 @@ function RouteComponent() {
           </section>
 
           {/* Submission */}
-          <div className="pt-6 flex flex-col items-center">
+          <div className="pt-4 flex flex-col items-center">
             <button
               type="submit"
               disabled={isSubmitting || !topic.trim() || selectedAgents.length === 0}
-              className="group relative px-16 py-6 bg-[#ffcb05] text-[#7a6446] text-xl font-black rounded-[24px] border-b-8 border-[#e6b800] hover:translate-y-[-2px] hover:border-b-[10px] active:translate-y-[4px] active:border-b-[2px] transition-all disabled:opacity-50 disabled:grayscale disabled:translate-y-0 disabled:border-b-8 shadow-[0_10px_30px_-10px_rgba(255,203,5,0.5)] overflow-hidden"
+              className="w-full md:w-auto md:px-16 py-5 md:py-6 bg-[#ffcb05] text-[#7a6446] text-lg md:text-xl font-black rounded-2xl md:rounded-[24px] border-b-8 border-[#e6b800] hover:translate-y-[-2px] hover:border-b-[10px] active:translate-y-[4px] active:border-b-[2px] transition-all disabled:opacity-50 disabled:grayscale disabled:translate-y-0 disabled:border-b-8 shadow-[0_10px_30px_-10px_rgba(255,203,5,0.5)] overflow-hidden"
             >
               <div className="absolute inset-x-0 h-1 top-0 bg-white/20" />
-              <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center gap-3">
                 {isSubmitting ? (
                   <Loader2 className="h-6 w-6 animate-spin" />
                 ) : (
                   <>
                     村へ向かう!!
-                    <span className="text-2xl group-hover:translate-x-1 transition-transform">→</span>
+                    <span className="text-xl md:text-2xl group-hover:translate-x-1 transition-transform">→</span>
                   </>
                 )}
               </div>
             </button>
-            <p className="mt-4 text-[#c2baa6] text-[10px] font-black tracking-widest uppercase opacity-60">
+            <p className="mt-4 text-[#c2baa6] text-[9px] md:text-[10px] font-black tracking-widest uppercase opacity-60">
               Start your journey into the Idea Village
             </p>
           </div>
         </form>
       </div>
     </div>
-  )
+  );
 }

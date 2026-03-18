@@ -177,3 +177,104 @@ func (h *MessageHandler) ListFavoriteMessages(
 		Messages: messages,
 	}), nil
 }
+
+func (h *MessageHandler) DiscardIdea(
+	ctx context.Context,
+	req *connect.Request[apiv1.DiscardIdeaRequest],
+) (*connect.Response[apiv1.DiscardIdeaResponse], error) {
+	docRef := h.firestore.Collection("talks").Doc(req.Msg.TalkId).Collection("messages").Doc(req.Msg.MessageId)
+
+	_, err := docRef.Update(ctx, []firestore.Update{
+		{Path: "isDiscarded", Value: true},
+	})
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to discard idea: %v", err))
+	}
+
+	return connect.NewResponse(&apiv1.DiscardIdeaResponse{}), nil
+}
+
+func (h *MessageHandler) RecycleIdea(
+	ctx context.Context,
+	req *connect.Request[apiv1.RecycleIdeaRequest],
+) (*connect.Response[apiv1.RecycleIdeaResponse], error) {
+	docRef := h.firestore.Collection("talks").Doc(req.Msg.TalkId).Collection("messages").Doc(req.Msg.MessageId)
+
+	var ideaName, ideaDetails string
+	err := h.firestore.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
+		doc, err := tx.Get(docRef)
+		if err != nil {
+			return err
+		}
+		data := doc.Data()
+		ideaName, _ = data["ideaName"].(string)
+		
+		// Extract from ideas list if present
+		if ideas, ok := data["ideas"].([]interface{}); ok && len(ideas) > 0 {
+			if firstIdea, ok := ideas[0].(map[string]interface{}); ok {
+				ideaDetails, _ = firstIdea["details"].(string)
+			}
+		}
+		// Fallback to text
+		if ideaDetails == "" {
+			ideaDetails, _ = data["text"].(string)
+		}
+
+		return tx.Update(docRef, []firestore.Update{
+			{Path: "isRecycled", Value: true},
+		})
+	})
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to recycle idea: %v", err))
+	}
+
+	// Add to global recycle box
+	if ideaName != "" {
+		_, _, _ = h.firestore.Collection("recycled_ideas").Add(ctx, map[string]interface{}{
+			"name":        ideaName,
+			"details":     ideaDetails,
+			"createdAt":   time.Now(),
+			"randomValue": time.Now().UnixNano() % 1000000, // For simple random shuffle
+		})
+	}
+
+	return connect.NewResponse(&apiv1.RecycleIdeaResponse{}), nil
+}
+
+func (h *MessageHandler) ListRecycledIdeas(
+	ctx context.Context,
+	req *connect.Request[apiv1.ListRecycledIdeasRequest],
+) (*connect.Response[apiv1.ListRecycledIdeasResponse], error) {
+	limit := int(req.Msg.Limit)
+	if limit <= 0 {
+		limit = 10
+	}
+
+	// Simple random: use current time to skip some or start at different point
+	// Firestore random is hard without specific tricks, but we'll just Grab newest for now or shuffle in app
+	iter := h.firestore.Collection("recycled_ideas").
+		OrderBy("createdAt", firestore.Desc).
+		Limit(limit).
+		Documents(ctx)
+
+	docs, err := iter.GetAll()
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to fetch recycled ideas: %v", err))
+	}
+
+	var ideas []*apiv1.RecycledIdea
+	for _, doc := range docs {
+		data := doc.Data()
+		created, _ := data["createdAt"].(time.Time)
+		ideas = append(ideas, &apiv1.RecycledIdea{
+			Id:        doc.Ref.ID,
+			Name:      data["name"].(string),
+			Details:   data["details"].(string),
+			CreatedAt: timestamppb.New(created),
+		})
+	}
+
+	return connect.NewResponse(&apiv1.ListRecycledIdeasResponse{
+		Ideas: ideas,
+	}), nil
+}

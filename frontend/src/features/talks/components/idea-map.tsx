@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import * as d3 from 'd3';
+import { Trash2, RefreshCcw } from 'lucide-react';
+import { cn } from '#/utils/ui/cn';
 
 interface NodeData {
     id: string;
@@ -26,20 +28,40 @@ interface IdeaMapProps {
         ideaName?: string;
         ideas?: Array<{ name: string; details: string }>;
         embedding?: number[];
+        isDiscarded?: boolean;
+        isRecycled?: boolean;
     }>;
     onJumpToChat?: (messageId: string) => void;
+    onDiscardIdea?: (messageId: string) => void;
+    onRecycleIdea?: (messageId: string) => void;
 }
 
-const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat }) => {
+const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat, onDiscardIdea, onRecycleIdea }) => {
     const svgRef = useRef<SVGSVGElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [selectedNode, setSelectedNode] = useState<NodeData | null>(null);
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+    const [isOverTrash, setIsOverTrash] = useState(false);
+    const [isOverRecycle, setIsOverRecycle] = useState(false);
+
+    const checkTrashHit = (x: number, y: number) => {
+        const bin = document.getElementById('trash-bin');
+        if (!bin) return false;
+        const rect = bin.getBoundingClientRect();
+        return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+    };
+
+    const checkRecycleHit = (x: number, y: number) => {
+        const bin = document.getElementById('recycle-bin');
+        if (!bin) return false;
+        const rect = bin.getBoundingClientRect();
+        return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+    };
 
     // Filter messages with embeddings
     const nodes: NodeData[] = useMemo(() => {
         return messages
-            .filter(m => m.embedding && m.embedding.length > 0)
+            .filter(m => m.embedding && m.embedding.length > 0 && !m.isDiscarded && !m.isRecycled)
             .map(m => ({
                 id: m.id,
                 label: m.ideaName || m.agentName || "アイデア",
@@ -182,9 +204,9 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat }) => {
             .velocityDecay(0.6)
             .force('cluster', d3.forceX<NodeData>(d => clusterCenters[clusters[nodes.indexOf(d)]]?.x || width / 2).strength(0.3))
             .force('clusterY', d3.forceY<NodeData>(d => clusterCenters[clusters[nodes.indexOf(d)]]?.y || height / 2).strength(0.3))
-            .force('charge', d3.forceManyBody().strength(-150))
+            .force('charge', d3.forceManyBody().strength(width < 768 ? -200 : -150))
             .force('center', d3.forceCenter(width / 2, height / 2).strength(0.05))
-            .force('collision', d3.forceCollide<NodeData>().radius(65));
+            .force('collision', d3.forceCollide<NodeData>().radius(width < 768 ? 50 : 65));
 
         const link = g.append('g')
             .selectAll<SVGLineElement, LinkData>('line')
@@ -219,23 +241,27 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat }) => {
             const colors = getClusterParams(clusterId);
             const group = d3.select(this);
 
+            const isMobile = width < 768;
+            const nodeW = isMobile ? 84 : 110;
+            const nodeH = isMobile ? 32 : 44;
+
             group.append('rect')
-                .attr('width', 110)
-                .attr('height', 44)
-                .attr('x', -55)
-                .attr('y', -22)
-                .attr('rx', 12)
+                .attr('width', nodeW)
+                .attr('height', nodeH)
+                .attr('x', -nodeW / 2)
+                .attr('y', -nodeH / 2)
+                .attr('rx', isMobile ? 8 : 12)
                 .attr('fill', '#ffffff')
                 .attr('stroke', colors.border)
-                .attr('stroke-width', 2)
+                .attr('stroke-width', isMobile ? 1.5 : 2)
                 .attr('class', 'drop-shadow-sm transition-all duration-300 hover:drop-shadow-md');
 
             group.append('text')
                 .attr('text-anchor', 'middle')
                 .attr('dominant-baseline', 'middle')
                 .attr('fill', colors.text)
-                .attr('class', 'text-[11px] font-bold pointer-events-none select-none')
-                .text(d.label.length > 10 ? d.label.substring(0, 8) + '...' : d.label);
+                .attr('class', isMobile ? 'text-[9px] font-bold pointer-events-none select-none' : 'text-[11px] font-bold pointer-events-none select-none')
+                .text(d.label.length > (isMobile ? 8 : 10) ? d.label.substring(0, isMobile ? 6 : 8) + '...' : d.label);
         });
 
         node.on('mouseover', (_event, d) => {
@@ -283,11 +309,27 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat }) => {
             function dragged(event: d3.D3DragEvent<SVGGElement, NodeData, NodeData>) {
                 event.subject.fx = event.x;
                 event.subject.fy = event.y;
+                setIsOverTrash(checkTrashHit(event.sourceEvent.clientX, event.sourceEvent.clientY));
+                setIsOverRecycle(checkRecycleHit(event.sourceEvent.clientX, event.sourceEvent.clientY));
             }
             function dragended(event: d3.D3DragEvent<SVGGElement, NodeData, NodeData>) {
                 if (!event.active) sim.alphaTarget(0);
+                
+                const overTrash = checkTrashHit(event.sourceEvent.clientX, event.sourceEvent.clientY);
+                const overRecycle = checkRecycleHit(event.sourceEvent.clientX, event.sourceEvent.clientY);
+
+                if (overTrash && onDiscardIdea) {
+                    onDiscardIdea(event.subject.id);
+                    setSelectedNode(null);
+                } else if (overRecycle && onRecycleIdea) {
+                    onRecycleIdea(event.subject.id);
+                    setSelectedNode(null);
+                }
+
                 event.subject.fx = null;
                 event.subject.fy = null;
+                setIsOverTrash(false);
+                setIsOverRecycle(false);
             }
             return d3.drag<SVGGElement, NodeData>()
                 .on('start', dragstarted)
@@ -304,11 +346,67 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat }) => {
         <div ref={containerRef} className="w-full h-full relative flex flex-row overflow-hidden font-sans bg-[#fcfaf2]/50">
             {/* Main Village Area */}
             <div className="flex-1 relative">
-                <div className="absolute top-6 left-6 z-10 pointer-events-none">
-                    <h1 className="text-4xl font-black text-[#7a6446] tracking-tight">
+                <div className="absolute top-4 left-4 md:top-6 md:left-6 z-10 pointer-events-none">
+                    <h1 className="text-2xl md:text-4xl font-black text-[#7a6446] tracking-tight">
                         あいでぃあ村
                     </h1>
-                    <p className="text-[#a3967d] text-[10px] font-black uppercase tracking-widest mt-1 italic">Knowledge Community & Innovation Map</p>
+                    <p className="hidden md:block text-[#a3967d] text-[10px] font-black uppercase tracking-widest mt-1 italic">Knowledge Community & Innovation Map</p>
+                </div>
+
+                <div className="absolute top-3 right-3 md:top-6 md:right-6 z-20 flex flex-row items-start gap-2 md:gap-4 pointer-events-none">
+                    {/* リサイクルボックス */}
+                    <div className="flex flex-col items-center gap-2">
+                        <div 
+                            id="recycle-bin"
+                            className={cn(
+                                "w-16 h-16 md:w-24 md:h-24 rounded-[20px] md:rounded-[32px] border-2 md:border-4 border-dashed flex items-center justify-center transition-all duration-300",
+                                isOverRecycle 
+                                    ? "bg-green-50 border-green-400 scale-110 shadow-2xl opacity-100" 
+                                    : "bg-white/40 border-[#d5cba1] opacity-40 shadow-sm"
+                            )}
+                        >
+                            <RefreshCcw 
+                                size={24} 
+                                className={cn(
+                                    "md:w-8 md:h-8 transition-all duration-300",
+                                    isOverRecycle ? "text-green-500 animate-spin" : "text-[#a3967d]"
+                                )} 
+                            />
+                        </div>
+                        <span className={cn(
+                            "text-[10px] font-black uppercase tracking-tighter transition-opacity duration-300",
+                            isOverRecycle ? "text-green-500 opacity-100" : "text-[#a3967d] opacity-60"
+                        )}>
+                            {isOverRecycle ? "リサイクル!!" : "リサイクル"}
+                        </span>
+                    </div>
+
+                    {/* ゴミ箱 */}
+                    <div className="flex flex-col items-center gap-2">
+                        <div 
+                            id="trash-bin"
+                            className={cn(
+                                "w-16 h-16 md:w-24 md:h-24 rounded-[20px] md:rounded-[32px] border-2 md:border-4 border-dashed flex items-center justify-center transition-all duration-300",
+                                isOverTrash 
+                                    ? "bg-red-50 border-red-400 scale-110 shadow-2xl opacity-100" 
+                                    : "bg-white/40 border-[#d5cba1] opacity-40 shadow-sm"
+                            )}
+                        >
+                            <Trash2 
+                                size={24} 
+                                className={cn(
+                                    "md:w-8 md:h-8 transition-all duration-300",
+                                    isOverTrash ? "text-red-500 animate-bounce" : "text-[#a3967d]"
+                                )} 
+                            />
+                        </div>
+                        <span className={cn(
+                            "text-[10px] font-black uppercase tracking-tighter transition-opacity duration-300",
+                            isOverTrash ? "text-red-500 opacity-100" : "text-[#a3967d] opacity-60"
+                        )}>
+                            {isOverTrash ? "捨てる!!" : "捨てる"}
+                        </span>
+                    </div>
                 </div>
                 {nodes.length === 0 ? (
                     <div className="flex items-center justify-center h-full text-[#c2baa6] font-bold">
@@ -319,12 +417,16 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat }) => {
                 )}
             </div>
 
-            {/* Sidebar */}
+            {/* Sidebar / Bottom Sheet */}
             {selectedNode && (
-                <div className={`
-                    fixed md:relative top-0 right-0 h-full bg-white/90 backdrop-blur-xl border-l-4 border-[#d5cba1] shadow-2xl transition-all duration-500 ease-in-out z-30 w-80 md:w-96
-                `}>
-                    <div className="p-8 h-full flex flex-col">
+                <div className={cn(
+                    "fixed bottom-0 left-0 w-full rounded-t-[40px] border-t-8 h-[75vh] bg-white/95 backdrop-blur-xl border-[#d5cba1] shadow-[0_-20px_50px_-12px_rgba(0,0,0,0.3)] z-50 transition-all duration-500 ease-in-out",
+                    "md:relative md:bottom-auto md:left-auto md:w-96 md:h-full md:rounded-none md:border-t-0 md:border-l-4 md:shadow-2xl"
+                )}>
+                    <div className="p-8 h-full flex flex-col relative">
+                        {/* Mobile handle */}
+                        <div className="md:hidden absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-[#e8eed2] rounded-full" />
+                        
                         <button
                             onClick={() => setSelectedNode(null)}
                             className="self-end p-2 hover:bg-[#fcfaf2] rounded-full transition-colors mb-4 border-2 border-transparent hover:border-[#d5cba1]"
@@ -372,6 +474,41 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat }) => {
                                     この発言に飛ぶ
                                 </button>
                             )}
+
+                            <div className="mt-4 grid grid-cols-2 gap-3">
+                                {onDiscardIdea && (
+                                    <button
+                                        onClick={() => {
+                                            if (window.confirm("このアイデアをゴミ箱に捨てますか？")) {
+                                                onDiscardIdea(selectedNode.id);
+                                                setSelectedNode(null);
+                                            }
+                                        }}
+                                        className="flex items-center justify-center gap-2 py-2.5 px-4 bg-white text-[#f87171] rounded-xl font-black text-xs border-2 border-[#fee2e2] hover:bg-red-50 transition-all shadow-sm"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                        捨てる
+                                    </button>
+                                )}
+                                {onRecycleIdea && (
+                                    <button
+                                        onClick={() => {
+                                            if (window.confirm("このアイデアをリサイクルボックスに入れますか？（他の人にも見えるようになります）")) {
+                                                onRecycleIdea(selectedNode.id);
+                                                setSelectedNode(null);
+                                            }
+                                        }}
+                                        className="flex items-center justify-center gap-2 py-2.5 px-4 bg-white text-[#4ade80] rounded-xl font-black text-xs border-2 border-[#dcfce7] hover:bg-green-50 transition-all shadow-sm"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        リサイクル
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
                         <div className="mt-auto pt-8 border-t border-[#fcfaf2] text-[10px] font-black text-[#c2baa6] italic uppercase tracking-tighter">

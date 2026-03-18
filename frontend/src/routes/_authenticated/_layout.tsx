@@ -5,7 +5,7 @@ import {
   BottomActionBarItem,
   BottomActionFAB,
 } from "#/components/ui/bottom-action-bar";
-import { Home, List, MessagesSquare, Star } from "lucide-react";
+import { Home, List, MessagesSquare, Star, RefreshCcw } from "lucide-react";
 import { DesktopSidebar } from "#/components/ui/desktop-sidebar";
 import { UserMenu } from "@/features/auth";
 
@@ -68,6 +68,11 @@ function RouteComponent() {
               to="/favorites"
               icon={<Star size={24} strokeWidth={2.5} />}
               label="お気に入り"
+            />
+            <BottomActionBarItem
+              to="/recycle"
+              icon={<RefreshCcw size={24} strokeWidth={2.5} />}
+              label="リサイクル"
             />
           </BottomActionBar>
         </div>

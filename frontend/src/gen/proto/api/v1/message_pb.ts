@@ -12,7 +12,7 @@ import type { Message as Message$1 } from "@bufbuild/protobuf";
  * Describes the file proto/api/v1/message.proto.
  */
 export const file_proto_api_v1_message: GenFile = /*@__PURE__*/
-  fileDesc("Chpwcm90by9hcGkvdjEvbWVzc2FnZS5wcm90bxIGYXBpLnYxIq0BCgdNZXNzYWdlEgoKAmlkGAEgASgJEgsKA3VpZBgCIAEoCRIMCgR0ZXh0GAMgASgJEi4KCmNyZWF0ZWRfYXQYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhMKC2lzX2Zhdm9yaXRlGAUgASgIEg8KB3RhbGtfaWQYBiABKAkSEgoKYWdlbnRfbmFtZRgHIAEoCRIRCglpZGVhX25hbWUYCCABKAkiMwoSU2VuZE1lc3NhZ2VSZXF1ZXN0Eg8KB3RhbGtfaWQYASABKAkSDAoEdGV4dBgCIAEoCSI3ChNTZW5kTWVzc2FnZVJlc3BvbnNlEiAKB21lc3NhZ2UYASABKAsyDy5hcGkudjEuTWVzc2FnZSI8ChVUb2dnbGVGYXZvcml0ZVJlcXVlc3QSDwoHdGFsa19pZBgBIAEoCRISCgptZXNzYWdlX2lkGAIgASgJIi0KFlRvZ2dsZUZhdm9yaXRlUmVzcG9uc2USEwoLaXNfZmF2b3JpdGUYASABKAgiHQobTGlzdEZhdm9yaXRlTWVzc2FnZXNSZXF1ZXN0IkEKHExpc3RGYXZvcml0ZU1lc3NhZ2VzUmVzcG9uc2USIQoIbWVzc2FnZXMYASADKAsyDy5hcGkudjEuTWVzc2FnZTKMAgoOTWVzc2FnZVNlcnZpY2USRgoLU2VuZE1lc3NhZ2USGi5hcGkudjEuU2VuZE1lc3NhZ2VSZXF1ZXN0GhsuYXBpLnYxLlNlbmRNZXNzYWdlUmVzcG9uc2USTwoOVG9nZ2xlRmF2b3JpdGUSHS5hcGkudjEuVG9nZ2xlRmF2b3JpdGVSZXF1ZXN0Gh4uYXBpLnYxLlRvZ2dsZUZhdm9yaXRlUmVzcG9uc2USYQoUTGlzdEZhdm9yaXRlTWVzc2FnZXMSIy5hcGkudjEuTGlzdEZhdm9yaXRlTWVzc2FnZXNSZXF1ZXN0GiQuYXBpLnYxLkxpc3RGYXZvcml0ZU1lc3NhZ2VzUmVzcG9uc2VCiAEKCmNvbS5hcGkudjFCDE1lc3NhZ2VQcm90b1ABWjNnaXRodWIuY29tL2JhbGxmb3MvaWRlZXJ0aG9uL2dlbi9wcm90by9hcGkvdjE7YXBpdjGiAgNBWFiqAgZBcGkuVjHKAgZBcGlcVjHiAhJBcGlcVjFcR1BCTWV0YWRhdGHqAgdBcGk6OlYxYgZwcm90bzM", [file_google_protobuf_timestamp]);
+  fileDesc("Chpwcm90by9hcGkvdjEvbWVzc2FnZS5wcm90bxIGYXBpLnYxItgBCgdNZXNzYWdlEgoKAmlkGAEgASgJEgsKA3VpZBgCIAEoCRIMCgR0ZXh0GAMgASgJEi4KCmNyZWF0ZWRfYXQYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhMKC2lzX2Zhdm9yaXRlGAUgASgIEg8KB3RhbGtfaWQYBiABKAkSEgoKYWdlbnRfbmFtZRgHIAEoCRIRCglpZGVhX25hbWUYCCABKAkSFAoMaXNfZGlzY2FyZGVkGAkgASgIEhMKC2lzX3JlY3ljbGVkGAogASgIIjMKElNlbmRNZXNzYWdlUmVxdWVzdBIPCgd0YWxrX2lkGAEgASgJEgwKBHRleHQYAiABKAkiNwoTU2VuZE1lc3NhZ2VSZXNwb25zZRIgCgdtZXNzYWdlGAEgASgLMg8uYXBpLnYxLk1lc3NhZ2UiPAoVVG9nZ2xlRmF2b3JpdGVSZXF1ZXN0Eg8KB3RhbGtfaWQYASABKAkSEgoKbWVzc2FnZV9pZBgCIAEoCSItChZUb2dnbGVGYXZvcml0ZVJlc3BvbnNlEhMKC2lzX2Zhdm9yaXRlGAEgASgIIh0KG0xpc3RGYXZvcml0ZU1lc3NhZ2VzUmVxdWVzdCJBChxMaXN0RmF2b3JpdGVNZXNzYWdlc1Jlc3BvbnNlEiEKCG1lc3NhZ2VzGAEgAygLMg8uYXBpLnYxLk1lc3NhZ2UiOQoSRGlzY2FyZElkZWFSZXF1ZXN0Eg8KB3RhbGtfaWQYASABKAkSEgoKbWVzc2FnZV9pZBgCIAEoCSIVChNEaXNjYXJkSWRlYVJlc3BvbnNlIjkKElJlY3ljbGVJZGVhUmVxdWVzdBIPCgd0YWxrX2lkGAEgASgJEhIKCm1lc3NhZ2VfaWQYAiABKAkiFQoTUmVjeWNsZUlkZWFSZXNwb25zZSIpChhMaXN0UmVjeWNsZWRJZGVhc1JlcXVlc3QSDQoFbGltaXQYASABKAUiaQoMUmVjeWNsZWRJZGVhEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSDwoHZGV0YWlscxgDIAEoCRIuCgpjcmVhdGVkX2F0GAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCJAChlMaXN0UmVjeWNsZWRJZGVhc1Jlc3BvbnNlEiMKBWlkZWFzGAEgAygLMhQuYXBpLnYxLlJlY3ljbGVkSWRlYTL2AwoOTWVzc2FnZVNlcnZpY2USRgoLU2VuZE1lc3NhZ2USGi5hcGkudjEuU2VuZE1lc3NhZ2VSZXF1ZXN0GhsuYXBpLnYxLlNlbmRNZXNzYWdlUmVzcG9uc2USTwoOVG9nZ2xlRmF2b3JpdGUSHS5hcGkudjEuVG9nZ2xlRmF2b3JpdGVSZXF1ZXN0Gh4uYXBpLnYxLlRvZ2dsZUZhdm9yaXRlUmVzcG9uc2USYQoUTGlzdEZhdm9yaXRlTWVzc2FnZXMSIy5hcGkudjEuTGlzdEZhdm9yaXRlTWVzc2FnZXNSZXF1ZXN0GiQuYXBpLnYxLkxpc3RGYXZvcml0ZU1lc3NhZ2VzUmVzcG9uc2USRgoLRGlzY2FyZElkZWESGi5hcGkudjEuRGlzY2FyZElkZWFSZXF1ZXN0GhsuYXBpLnYxLkRpc2NhcmRJZGVhUmVzcG9uc2USRgoLUmVjeWNsZUlkZWESGi5hcGkudjEuUmVjeWNsZUlkZWFSZXF1ZXN0GhsuYXBpLnYxLlJlY3ljbGVJZGVhUmVzcG9uc2USWAoRTGlzdFJlY3ljbGVkSWRlYXMSIC5hcGkudjEuTGlzdFJlY3ljbGVkSWRlYXNSZXF1ZXN0GiEuYXBpLnYxLkxpc3RSZWN5Y2xlZElkZWFzUmVzcG9uc2VCiAEKCmNvbS5hcGkudjFCDE1lc3NhZ2VQcm90b1ABWjNnaXRodWIuY29tL2JhbGxmb3MvaWRlZXJ0aG9uL2dlbi9wcm90by9hcGkvdjE7YXBpdjGiAgNBWFiqAgZBcGkuVjHKAgZBcGlcVjHiAhJBcGlcVjFcR1BCTWV0YWRhdGHqAgdBcGk6OlYxYgZwcm90bzM", [file_google_protobuf_timestamp]);
 
 /**
  * @generated from message api.v1.Message
@@ -57,6 +57,16 @@ export type Message = Message$1<"api.v1.Message"> & {
    * @generated from field: string idea_name = 8;
    */
   ideaName: string;
+
+  /**
+   * @generated from field: bool is_discarded = 9;
+   */
+  isDiscarded: boolean;
+
+  /**
+   * @generated from field: bool is_recycled = 10;
+   */
+  isRecycled: boolean;
 };
 
 /**
@@ -175,6 +185,142 @@ export const ListFavoriteMessagesResponseSchema: GenMessage<ListFavoriteMessages
   messageDesc(file_proto_api_v1_message, 6);
 
 /**
+ * @generated from message api.v1.DiscardIdeaRequest
+ */
+export type DiscardIdeaRequest = Message$1<"api.v1.DiscardIdeaRequest"> & {
+  /**
+   * @generated from field: string talk_id = 1;
+   */
+  talkId: string;
+
+  /**
+   * @generated from field: string message_id = 2;
+   */
+  messageId: string;
+};
+
+/**
+ * Describes the message api.v1.DiscardIdeaRequest.
+ * Use `create(DiscardIdeaRequestSchema)` to create a new message.
+ */
+export const DiscardIdeaRequestSchema: GenMessage<DiscardIdeaRequest> = /*@__PURE__*/
+  messageDesc(file_proto_api_v1_message, 7);
+
+/**
+ * @generated from message api.v1.DiscardIdeaResponse
+ */
+export type DiscardIdeaResponse = Message$1<"api.v1.DiscardIdeaResponse"> & {
+};
+
+/**
+ * Describes the message api.v1.DiscardIdeaResponse.
+ * Use `create(DiscardIdeaResponseSchema)` to create a new message.
+ */
+export const DiscardIdeaResponseSchema: GenMessage<DiscardIdeaResponse> = /*@__PURE__*/
+  messageDesc(file_proto_api_v1_message, 8);
+
+/**
+ * @generated from message api.v1.RecycleIdeaRequest
+ */
+export type RecycleIdeaRequest = Message$1<"api.v1.RecycleIdeaRequest"> & {
+  /**
+   * @generated from field: string talk_id = 1;
+   */
+  talkId: string;
+
+  /**
+   * @generated from field: string message_id = 2;
+   */
+  messageId: string;
+};
+
+/**
+ * Describes the message api.v1.RecycleIdeaRequest.
+ * Use `create(RecycleIdeaRequestSchema)` to create a new message.
+ */
+export const RecycleIdeaRequestSchema: GenMessage<RecycleIdeaRequest> = /*@__PURE__*/
+  messageDesc(file_proto_api_v1_message, 9);
+
+/**
+ * @generated from message api.v1.RecycleIdeaResponse
+ */
+export type RecycleIdeaResponse = Message$1<"api.v1.RecycleIdeaResponse"> & {
+};
+
+/**
+ * Describes the message api.v1.RecycleIdeaResponse.
+ * Use `create(RecycleIdeaResponseSchema)` to create a new message.
+ */
+export const RecycleIdeaResponseSchema: GenMessage<RecycleIdeaResponse> = /*@__PURE__*/
+  messageDesc(file_proto_api_v1_message, 10);
+
+/**
+ * @generated from message api.v1.ListRecycledIdeasRequest
+ */
+export type ListRecycledIdeasRequest = Message$1<"api.v1.ListRecycledIdeasRequest"> & {
+  /**
+   * @generated from field: int32 limit = 1;
+   */
+  limit: number;
+};
+
+/**
+ * Describes the message api.v1.ListRecycledIdeasRequest.
+ * Use `create(ListRecycledIdeasRequestSchema)` to create a new message.
+ */
+export const ListRecycledIdeasRequestSchema: GenMessage<ListRecycledIdeasRequest> = /*@__PURE__*/
+  messageDesc(file_proto_api_v1_message, 11);
+
+/**
+ * @generated from message api.v1.RecycledIdea
+ */
+export type RecycledIdea = Message$1<"api.v1.RecycledIdea"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name: string;
+
+  /**
+   * @generated from field: string details = 3;
+   */
+  details: string;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp created_at = 4;
+   */
+  createdAt?: Timestamp;
+};
+
+/**
+ * Describes the message api.v1.RecycledIdea.
+ * Use `create(RecycledIdeaSchema)` to create a new message.
+ */
+export const RecycledIdeaSchema: GenMessage<RecycledIdea> = /*@__PURE__*/
+  messageDesc(file_proto_api_v1_message, 12);
+
+/**
+ * @generated from message api.v1.ListRecycledIdeasResponse
+ */
+export type ListRecycledIdeasResponse = Message$1<"api.v1.ListRecycledIdeasResponse"> & {
+  /**
+   * @generated from field: repeated api.v1.RecycledIdea ideas = 1;
+   */
+  ideas: RecycledIdea[];
+};
+
+/**
+ * Describes the message api.v1.ListRecycledIdeasResponse.
+ * Use `create(ListRecycledIdeasResponseSchema)` to create a new message.
+ */
+export const ListRecycledIdeasResponseSchema: GenMessage<ListRecycledIdeasResponse> = /*@__PURE__*/
+  messageDesc(file_proto_api_v1_message, 13);
+
+/**
  * @generated from service api.v1.MessageService
  */
 export const MessageService: GenService<{
@@ -201,6 +347,30 @@ export const MessageService: GenService<{
     methodKind: "unary";
     input: typeof ListFavoriteMessagesRequestSchema;
     output: typeof ListFavoriteMessagesResponseSchema;
+  },
+  /**
+   * @generated from rpc api.v1.MessageService.DiscardIdea
+   */
+  discardIdea: {
+    methodKind: "unary";
+    input: typeof DiscardIdeaRequestSchema;
+    output: typeof DiscardIdeaResponseSchema;
+  },
+  /**
+   * @generated from rpc api.v1.MessageService.RecycleIdea
+   */
+  recycleIdea: {
+    methodKind: "unary";
+    input: typeof RecycleIdeaRequestSchema;
+    output: typeof RecycleIdeaResponseSchema;
+  },
+  /**
+   * @generated from rpc api.v1.MessageService.ListRecycledIdeas
+   */
+  listRecycledIdeas: {
+    methodKind: "unary";
+    input: typeof ListRecycledIdeasRequestSchema;
+    output: typeof ListRecycledIdeasResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_proto_api_v1_message, 0);

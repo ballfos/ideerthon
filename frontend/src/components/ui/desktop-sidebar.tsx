@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Home, List, Star, MessagesSquare } from "lucide-react";
+import { Home, List, Star, MessagesSquare, RefreshCcw } from "lucide-react";
 import { cn } from "#/utils/ui/cn";
 
 export function DesktopSidebar() {
@@ -16,6 +16,7 @@ export function DesktopSidebar() {
             label="トーク履歴" 
           />
           <SidebarItem to="/favorites" icon={<Star size={28} />} label="お気に入り" />
+          <SidebarItem to="/recycle" icon={<RefreshCcw size={28} />} label="リサイクル" />
 
           {/* FAB代わりのボタン: コンパクトな円形/角丸ボタン */}
           <Link

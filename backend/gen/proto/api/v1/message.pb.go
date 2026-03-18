@@ -32,6 +32,8 @@ type Message struct {
 	TalkId        string                 `protobuf:"bytes,6,opt,name=talk_id,json=talkId,proto3" json:"talk_id,omitempty"`
 	AgentName     string                 `protobuf:"bytes,7,opt,name=agent_name,json=agentName,proto3" json:"agent_name,omitempty"`
 	IdeaName      string                 `protobuf:"bytes,8,opt,name=idea_name,json=ideaName,proto3" json:"idea_name,omitempty"`
+	IsDiscarded   bool                   `protobuf:"varint,9,opt,name=is_discarded,json=isDiscarded,proto3" json:"is_discarded,omitempty"`
+	IsRecycled    bool                   `protobuf:"varint,10,opt,name=is_recycled,json=isRecycled,proto3" json:"is_recycled,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -120,6 +122,20 @@ func (x *Message) GetIdeaName() string {
 		return x.IdeaName
 	}
 	return ""
+}
+
+func (x *Message) GetIsDiscarded() bool {
+	if x != nil {
+		return x.IsDiscarded
+	}
+	return false
+}
+
+func (x *Message) GetIsRecycled() bool {
+	if x != nil {
+		return x.IsRecycled
+	}
+	return false
 }
 
 type SendMessageRequest struct {
@@ -394,11 +410,343 @@ func (x *ListFavoriteMessagesResponse) GetMessages() []*Message {
 	return nil
 }
 
+type DiscardIdeaRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TalkId        string                 `protobuf:"bytes,1,opt,name=talk_id,json=talkId,proto3" json:"talk_id,omitempty"`
+	MessageId     string                 `protobuf:"bytes,2,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DiscardIdeaRequest) Reset() {
+	*x = DiscardIdeaRequest{}
+	mi := &file_proto_api_v1_message_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DiscardIdeaRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DiscardIdeaRequest) ProtoMessage() {}
+
+func (x *DiscardIdeaRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_api_v1_message_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DiscardIdeaRequest.ProtoReflect.Descriptor instead.
+func (*DiscardIdeaRequest) Descriptor() ([]byte, []int) {
+	return file_proto_api_v1_message_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *DiscardIdeaRequest) GetTalkId() string {
+	if x != nil {
+		return x.TalkId
+	}
+	return ""
+}
+
+func (x *DiscardIdeaRequest) GetMessageId() string {
+	if x != nil {
+		return x.MessageId
+	}
+	return ""
+}
+
+type DiscardIdeaResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DiscardIdeaResponse) Reset() {
+	*x = DiscardIdeaResponse{}
+	mi := &file_proto_api_v1_message_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DiscardIdeaResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DiscardIdeaResponse) ProtoMessage() {}
+
+func (x *DiscardIdeaResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_api_v1_message_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DiscardIdeaResponse.ProtoReflect.Descriptor instead.
+func (*DiscardIdeaResponse) Descriptor() ([]byte, []int) {
+	return file_proto_api_v1_message_proto_rawDescGZIP(), []int{8}
+}
+
+type RecycleIdeaRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TalkId        string                 `protobuf:"bytes,1,opt,name=talk_id,json=talkId,proto3" json:"talk_id,omitempty"`
+	MessageId     string                 `protobuf:"bytes,2,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RecycleIdeaRequest) Reset() {
+	*x = RecycleIdeaRequest{}
+	mi := &file_proto_api_v1_message_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RecycleIdeaRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RecycleIdeaRequest) ProtoMessage() {}
+
+func (x *RecycleIdeaRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_api_v1_message_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RecycleIdeaRequest.ProtoReflect.Descriptor instead.
+func (*RecycleIdeaRequest) Descriptor() ([]byte, []int) {
+	return file_proto_api_v1_message_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *RecycleIdeaRequest) GetTalkId() string {
+	if x != nil {
+		return x.TalkId
+	}
+	return ""
+}
+
+func (x *RecycleIdeaRequest) GetMessageId() string {
+	if x != nil {
+		return x.MessageId
+	}
+	return ""
+}
+
+type RecycleIdeaResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RecycleIdeaResponse) Reset() {
+	*x = RecycleIdeaResponse{}
+	mi := &file_proto_api_v1_message_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RecycleIdeaResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RecycleIdeaResponse) ProtoMessage() {}
+
+func (x *RecycleIdeaResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_api_v1_message_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RecycleIdeaResponse.ProtoReflect.Descriptor instead.
+func (*RecycleIdeaResponse) Descriptor() ([]byte, []int) {
+	return file_proto_api_v1_message_proto_rawDescGZIP(), []int{10}
+}
+
+type ListRecycledIdeasRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Limit         int32                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListRecycledIdeasRequest) Reset() {
+	*x = ListRecycledIdeasRequest{}
+	mi := &file_proto_api_v1_message_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListRecycledIdeasRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListRecycledIdeasRequest) ProtoMessage() {}
+
+func (x *ListRecycledIdeasRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_api_v1_message_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListRecycledIdeasRequest.ProtoReflect.Descriptor instead.
+func (*ListRecycledIdeasRequest) Descriptor() ([]byte, []int) {
+	return file_proto_api_v1_message_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *ListRecycledIdeasRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+type RecycledIdea struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Details       string                 `protobuf:"bytes,3,opt,name=details,proto3" json:"details,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RecycledIdea) Reset() {
+	*x = RecycledIdea{}
+	mi := &file_proto_api_v1_message_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RecycledIdea) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RecycledIdea) ProtoMessage() {}
+
+func (x *RecycledIdea) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_api_v1_message_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RecycledIdea.ProtoReflect.Descriptor instead.
+func (*RecycledIdea) Descriptor() ([]byte, []int) {
+	return file_proto_api_v1_message_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *RecycledIdea) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *RecycledIdea) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *RecycledIdea) GetDetails() string {
+	if x != nil {
+		return x.Details
+	}
+	return ""
+}
+
+func (x *RecycledIdea) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+type ListRecycledIdeasResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Ideas         []*RecycledIdea        `protobuf:"bytes,1,rep,name=ideas,proto3" json:"ideas,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListRecycledIdeasResponse) Reset() {
+	*x = ListRecycledIdeasResponse{}
+	mi := &file_proto_api_v1_message_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListRecycledIdeasResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListRecycledIdeasResponse) ProtoMessage() {}
+
+func (x *ListRecycledIdeasResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_api_v1_message_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListRecycledIdeasResponse.ProtoReflect.Descriptor instead.
+func (*ListRecycledIdeasResponse) Descriptor() ([]byte, []int) {
+	return file_proto_api_v1_message_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *ListRecycledIdeasResponse) GetIdeas() []*RecycledIdea {
+	if x != nil {
+		return x.Ideas
+	}
+	return nil
+}
+
 var File_proto_api_v1_message_proto protoreflect.FileDescriptor
 
 const file_proto_api_v1_message_proto_rawDesc = "" +
 	"\n" +
-	"\x1aproto/api/v1/message.proto\x12\x06api.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xf0\x01\n" +
+	"\x1aproto/api/v1/message.proto\x12\x06api.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xb4\x02\n" +
 	"\aMessage\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x10\n" +
 	"\x03uid\x18\x02 \x01(\tR\x03uid\x12\x12\n" +
@@ -410,7 +758,11 @@ const file_proto_api_v1_message_proto_rawDesc = "" +
 	"\atalk_id\x18\x06 \x01(\tR\x06talkId\x12\x1d\n" +
 	"\n" +
 	"agent_name\x18\a \x01(\tR\tagentName\x12\x1b\n" +
-	"\tidea_name\x18\b \x01(\tR\bideaName\"A\n" +
+	"\tidea_name\x18\b \x01(\tR\bideaName\x12!\n" +
+	"\fis_discarded\x18\t \x01(\bR\visDiscarded\x12\x1f\n" +
+	"\vis_recycled\x18\n" +
+	" \x01(\bR\n" +
+	"isRecycled\"A\n" +
 	"\x12SendMessageRequest\x12\x17\n" +
 	"\atalk_id\x18\x01 \x01(\tR\x06talkId\x12\x12\n" +
 	"\x04text\x18\x02 \x01(\tR\x04text\"@\n" +
@@ -425,11 +777,34 @@ const file_proto_api_v1_message_proto_rawDesc = "" +
 	"isFavorite\"\x1d\n" +
 	"\x1bListFavoriteMessagesRequest\"K\n" +
 	"\x1cListFavoriteMessagesResponse\x12+\n" +
-	"\bmessages\x18\x01 \x03(\v2\x0f.api.v1.MessageR\bmessages2\x8c\x02\n" +
+	"\bmessages\x18\x01 \x03(\v2\x0f.api.v1.MessageR\bmessages\"L\n" +
+	"\x12DiscardIdeaRequest\x12\x17\n" +
+	"\atalk_id\x18\x01 \x01(\tR\x06talkId\x12\x1d\n" +
+	"\n" +
+	"message_id\x18\x02 \x01(\tR\tmessageId\"\x15\n" +
+	"\x13DiscardIdeaResponse\"L\n" +
+	"\x12RecycleIdeaRequest\x12\x17\n" +
+	"\atalk_id\x18\x01 \x01(\tR\x06talkId\x12\x1d\n" +
+	"\n" +
+	"message_id\x18\x02 \x01(\tR\tmessageId\"\x15\n" +
+	"\x13RecycleIdeaResponse\"0\n" +
+	"\x18ListRecycledIdeasRequest\x12\x14\n" +
+	"\x05limit\x18\x01 \x01(\x05R\x05limit\"\x87\x01\n" +
+	"\fRecycledIdea\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n" +
+	"\adetails\x18\x03 \x01(\tR\adetails\x129\n" +
+	"\n" +
+	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"G\n" +
+	"\x19ListRecycledIdeasResponse\x12*\n" +
+	"\x05ideas\x18\x01 \x03(\v2\x14.api.v1.RecycledIdeaR\x05ideas2\xf6\x03\n" +
 	"\x0eMessageService\x12F\n" +
 	"\vSendMessage\x12\x1a.api.v1.SendMessageRequest\x1a\x1b.api.v1.SendMessageResponse\x12O\n" +
 	"\x0eToggleFavorite\x12\x1d.api.v1.ToggleFavoriteRequest\x1a\x1e.api.v1.ToggleFavoriteResponse\x12a\n" +
-	"\x14ListFavoriteMessages\x12#.api.v1.ListFavoriteMessagesRequest\x1a$.api.v1.ListFavoriteMessagesResponseB\x88\x01\n" +
+	"\x14ListFavoriteMessages\x12#.api.v1.ListFavoriteMessagesRequest\x1a$.api.v1.ListFavoriteMessagesResponse\x12F\n" +
+	"\vDiscardIdea\x12\x1a.api.v1.DiscardIdeaRequest\x1a\x1b.api.v1.DiscardIdeaResponse\x12F\n" +
+	"\vRecycleIdea\x12\x1a.api.v1.RecycleIdeaRequest\x1a\x1b.api.v1.RecycleIdeaResponse\x12X\n" +
+	"\x11ListRecycledIdeas\x12 .api.v1.ListRecycledIdeasRequest\x1a!.api.v1.ListRecycledIdeasResponseB\x88\x01\n" +
 	"\n" +
 	"com.api.v1B\fMessageProtoP\x01Z3github.com/ballfos/ideerthon/gen/proto/api/v1;apiv1\xa2\x02\x03AXX\xaa\x02\x06Api.V1\xca\x02\x06Api\\V1\xe2\x02\x12Api\\V1\\GPBMetadata\xea\x02\aApi::V1b\x06proto3"
 
@@ -445,7 +820,7 @@ func file_proto_api_v1_message_proto_rawDescGZIP() []byte {
 	return file_proto_api_v1_message_proto_rawDescData
 }
 
-var file_proto_api_v1_message_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_proto_api_v1_message_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_proto_api_v1_message_proto_goTypes = []any{
 	(*Message)(nil),                      // 0: api.v1.Message
 	(*SendMessageRequest)(nil),           // 1: api.v1.SendMessageRequest
@@ -454,23 +829,38 @@ var file_proto_api_v1_message_proto_goTypes = []any{
 	(*ToggleFavoriteResponse)(nil),       // 4: api.v1.ToggleFavoriteResponse
 	(*ListFavoriteMessagesRequest)(nil),  // 5: api.v1.ListFavoriteMessagesRequest
 	(*ListFavoriteMessagesResponse)(nil), // 6: api.v1.ListFavoriteMessagesResponse
-	(*timestamppb.Timestamp)(nil),        // 7: google.protobuf.Timestamp
+	(*DiscardIdeaRequest)(nil),           // 7: api.v1.DiscardIdeaRequest
+	(*DiscardIdeaResponse)(nil),          // 8: api.v1.DiscardIdeaResponse
+	(*RecycleIdeaRequest)(nil),           // 9: api.v1.RecycleIdeaRequest
+	(*RecycleIdeaResponse)(nil),          // 10: api.v1.RecycleIdeaResponse
+	(*ListRecycledIdeasRequest)(nil),     // 11: api.v1.ListRecycledIdeasRequest
+	(*RecycledIdea)(nil),                 // 12: api.v1.RecycledIdea
+	(*ListRecycledIdeasResponse)(nil),    // 13: api.v1.ListRecycledIdeasResponse
+	(*timestamppb.Timestamp)(nil),        // 14: google.protobuf.Timestamp
 }
 var file_proto_api_v1_message_proto_depIdxs = []int32{
-	7, // 0: api.v1.Message.created_at:type_name -> google.protobuf.Timestamp
-	0, // 1: api.v1.SendMessageResponse.message:type_name -> api.v1.Message
-	0, // 2: api.v1.ListFavoriteMessagesResponse.messages:type_name -> api.v1.Message
-	1, // 3: api.v1.MessageService.SendMessage:input_type -> api.v1.SendMessageRequest
-	3, // 4: api.v1.MessageService.ToggleFavorite:input_type -> api.v1.ToggleFavoriteRequest
-	5, // 5: api.v1.MessageService.ListFavoriteMessages:input_type -> api.v1.ListFavoriteMessagesRequest
-	2, // 6: api.v1.MessageService.SendMessage:output_type -> api.v1.SendMessageResponse
-	4, // 7: api.v1.MessageService.ToggleFavorite:output_type -> api.v1.ToggleFavoriteResponse
-	6, // 8: api.v1.MessageService.ListFavoriteMessages:output_type -> api.v1.ListFavoriteMessagesResponse
-	6, // [6:9] is the sub-list for method output_type
-	3, // [3:6] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	14, // 0: api.v1.Message.created_at:type_name -> google.protobuf.Timestamp
+	0,  // 1: api.v1.SendMessageResponse.message:type_name -> api.v1.Message
+	0,  // 2: api.v1.ListFavoriteMessagesResponse.messages:type_name -> api.v1.Message
+	14, // 3: api.v1.RecycledIdea.created_at:type_name -> google.protobuf.Timestamp
+	12, // 4: api.v1.ListRecycledIdeasResponse.ideas:type_name -> api.v1.RecycledIdea
+	1,  // 5: api.v1.MessageService.SendMessage:input_type -> api.v1.SendMessageRequest
+	3,  // 6: api.v1.MessageService.ToggleFavorite:input_type -> api.v1.ToggleFavoriteRequest
+	5,  // 7: api.v1.MessageService.ListFavoriteMessages:input_type -> api.v1.ListFavoriteMessagesRequest
+	7,  // 8: api.v1.MessageService.DiscardIdea:input_type -> api.v1.DiscardIdeaRequest
+	9,  // 9: api.v1.MessageService.RecycleIdea:input_type -> api.v1.RecycleIdeaRequest
+	11, // 10: api.v1.MessageService.ListRecycledIdeas:input_type -> api.v1.ListRecycledIdeasRequest
+	2,  // 11: api.v1.MessageService.SendMessage:output_type -> api.v1.SendMessageResponse
+	4,  // 12: api.v1.MessageService.ToggleFavorite:output_type -> api.v1.ToggleFavoriteResponse
+	6,  // 13: api.v1.MessageService.ListFavoriteMessages:output_type -> api.v1.ListFavoriteMessagesResponse
+	8,  // 14: api.v1.MessageService.DiscardIdea:output_type -> api.v1.DiscardIdeaResponse
+	10, // 15: api.v1.MessageService.RecycleIdea:output_type -> api.v1.RecycleIdeaResponse
+	13, // 16: api.v1.MessageService.ListRecycledIdeas:output_type -> api.v1.ListRecycledIdeasResponse
+	11, // [11:17] is the sub-list for method output_type
+	5,  // [5:11] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_proto_api_v1_message_proto_init() }
@@ -484,7 +874,7 @@ func file_proto_api_v1_message_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_api_v1_message_proto_rawDesc), len(file_proto_api_v1_message_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

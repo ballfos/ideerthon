@@ -65,6 +65,8 @@ function RouteComponent() {
       uid: string;
       createdAt: { seconds: number; nanoseconds: number };
       isFavorite: boolean;
+      isDiscarded?: boolean;
+      isRecycled?: boolean;
       agentName?: string;
       ideaName?: string;
       ideas?: Array<{ name: string; details: string }>;
@@ -180,6 +182,8 @@ function RouteComponent() {
               nanoseconds: createdAt?.nanoseconds || 0,
             },
             isFavorite: !!data.isFavorite,
+            isDiscarded: !!data.isDiscarded,
+            isRecycled: !!data.isRecycled,
             agentName: data.agentName,
             ideaName: data.ideaName,
             ideas: data.ideas as Array<{ name: string; details: string }>,
@@ -286,6 +290,22 @@ function RouteComponent() {
       alert("更新に失敗しました");
     } finally {
       setIsUpdatingAgent(false);
+    }
+  };
+
+  const handleDiscardIdea = async (messageId: string) => {
+    try {
+      await messageClient.discardIdea({ talkId, messageId });
+    } catch (err) {
+      console.error("Failed to discard idea:", err);
+    }
+  };
+
+  const handleRecycleIdea = async (messageId: string) => {
+    try {
+      await messageClient.recycleIdea({ talkId, messageId });
+    } catch (err) {
+      console.error("Failed to recycle idea:", err);
     }
   };
 
@@ -583,6 +603,8 @@ function RouteComponent() {
                       <IdeaMap
                         messages={messages}
                         onJumpToChat={handleJumpToChat}
+                        onDiscardIdea={handleDiscardIdea}
+                        onRecycleIdea={handleRecycleIdea}
                       />
                     </div>
                   ) : (
