@@ -1,0 +1,8 @@
+version: v1
+name: buf.build/ballfos/ideerthon
+build:
+  excludes:
+    - frontend/node_modules
+lint:
+  use:
+    - DEFAULT

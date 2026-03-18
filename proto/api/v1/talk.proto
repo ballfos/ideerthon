@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package api.v1;
+
+import "google/protobuf/timestamp.proto";
+import "proto/api/v1/message.proto";
+
+enum TalkStatus {
+  TALK_STATUS_UNSPECIFIED = 0;
+  TALK_STATUS_RUNNING = 1;
+  TALK_STATUS_STOPPED = 2;
+}
+
+message Talk {
+  string id = 1;
+  string owner_id = 2;
+  string topic = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
+  TalkStatus status = 6;
+  int32 remaining_count = 7;
+  google.protobuf.Timestamp last_heartbeat = 8;
+  repeated Agent agents = 9;
+}
+
+message Agent {
+  string name = 1;
+  string description = 2;
+}
+
+message CreateTalkRequest {
+  string topic = 1;
+}
+
+message CreateTalkResponse {
+  Talk talk = 1;
+}
+
+message StartTalkStreamRequest {
+  string talk_id = 1;
+}
+
+message StopTalkStreamRequest {
+  string talk_id = 1;
+}
+
+message StopTalkStreamResponse {}
+
+message AddAgentRequest {
+  string talk_id = 1;
+  Agent agent = 2;
+}
+
+message AddAgentResponse {}
+
+service TalkService {
+  rpc CreateTalk(CreateTalkRequest) returns (CreateTalkResponse);
+  rpc StartTalkStream(StartTalkStreamRequest) returns (stream Message);
+  rpc StopTalkStream(StopTalkStreamRequest) returns (StopTalkStreamResponse);
+  rpc AddAgent(AddAgentRequest) returns (AddAgentResponse);
+}

@@ -1,0 +1,18 @@
+version: v1
+managed:
+  enabled: true
+  go_package_prefix:
+    default: github.com/ballfos/ideerthon/gen
+plugins:
+  - plugin: buf.build/protocolbuffers/go
+    out: backend/gen
+    opt: paths=source_relative
+  - plugin: buf.build/connectrpc/go
+    out: backend/gen
+    opt: paths=source_relative
+  - plugin: buf.build/bufbuild/es
+    out: frontend/src/gen
+    opt: target=ts
+  - plugin: buf.build/connectrpc/es
+    out: frontend/src/gen
+    opt: target=ts

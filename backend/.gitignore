@@ -1,0 +1,13 @@
+backend/server
+backend/ideerthon
+backend/backend
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+tmp/
+
+ideerthon
+server

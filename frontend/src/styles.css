@@ -1,0 +1,10 @@
+@import url("https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&family=M+PLUS+Rounded+1c:wght@400;700;900&family=Yomogi&family=Yusei+Magic&display=swap");
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --font-cherry: "Cherry Bomb One";
+  --font-yomogi: "Yomogi";
+  --font-yusei: "Yusei Magic";
+  --font-mplus: "M PLUS Rounded 1c";
+}
