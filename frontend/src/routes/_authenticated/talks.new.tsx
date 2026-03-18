@@ -14,6 +14,7 @@ function RouteComponent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
     if (!topic || !user) return
 
     try {
@@ -27,8 +28,11 @@ function RouteComponent() {
         })
       }
       setTopic("")
-    } catch (err) {
-      console.error("Failed to create talk:", err)
+    } catch (err: any) {
+      console.error("Failed to create talk:")
+      console.error("  Message:", err.message)
+      console.error("  Code:", err.code)
+      console.error("  Full Error Object:", err)
     }
   }
 

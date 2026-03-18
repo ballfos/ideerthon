@@ -9,7 +9,12 @@ export function DesktopSidebar() {
         {/* ナビゲーション */}
         <nav className="flex flex-col gap-4 w-full px-1">
           <SidebarItem to="/home" icon={<Home size={28} />} label="ホーム" />
-          <SidebarItem to="/talks" icon={<List size={28} />} label="トーク履歴" />
+          <SidebarItem 
+            to="/talks/$talkId" 
+            params={{ talkId: "none" }}
+            icon={<List size={28} />} 
+            label="トーク履歴" 
+          />
           <SidebarItem to="/favorites" icon={<Star size={28} />} label="お気に入り" />
 
           {/* FAB代わりのボタン: コンパクトな円形/角丸ボタン */}
@@ -27,10 +32,21 @@ export function DesktopSidebar() {
   );
 }
 
-function SidebarItem({ to, icon, label }: { to: string; icon: React.ReactNode; label: string }) {
+function SidebarItem({ 
+  to, 
+  params, 
+  icon, 
+  label 
+}: { 
+  to: string; 
+  params?: any;
+  icon: React.ReactNode; 
+  label: string 
+}) {
   return (
     <Link
       to={to}
+      params={params}
       className={cn(
         "flex flex-col items-center gap-1 rounded-xl px-2 py-3 text-[#c2baa6] transition-all hover:bg-[#fcfaf2] hover:text-[#5a4a35]",
         "data-[active=true]:bg-[#e8eed2]/50 data-[active=true]:text-[#5a4a35] data-[active=true]:shadow-inner"

@@ -79,7 +79,7 @@ function TopicZone({ title, topics, zoneBg, borderColor, zoneBorder }: TopicZone
             key={topic.id}
             to="/talks/$talkId"
             params={{ talkId: topic.id }}
-            className="group relative flex w-full items-center gap-3 rounded-2xl bg-white p-3 border-t-[2px] border-b-[8px] border-x-[3px] transition-all duration-100 hover:brightness-[1.02] hover:bg-[color-mix(in_srgb,var(--theme-color),white_85%)] active:brightness-95 active:translate-y-[10px] active:shadow-none active:border-b-[2px] active:bg-[var(--theme-color)] active:mb-[6px]"
+            className="group relative flex w-full max-w-full items-center gap-3 rounded-2xl bg-white p-3 border-t-[2px] border-b-[8px] border-x-[3px] transition-all duration-100 hover:brightness-[1.02] hover:bg-[color-mix(in_srgb,var(--theme-color),white_85%)] active:brightness-95 active:translate-y-[10px] active:shadow-none active:border-b-[2px] active:bg-[var(--theme-color)] active:mb-[6px] overflow-hidden"
             style={{
               borderColor: borderColor,
               boxShadow: `0 4px 0 0 ${borderColor}`,
@@ -95,7 +95,7 @@ function TopicZone({ title, topics, zoneBg, borderColor, zoneBorder }: TopicZone
             </div>
 
             {/* テキスト部分 */}
-            <div className="flex flex-col overflow-hidden">
+            <div className="flex flex-col overflow-hidden flex-1 min-w-0">
                 <span className="text-lg font-black tracking-wider text-[#5a4a35] truncate leading-tight group-active:text-white">
                     {topic.title}
                 </span>

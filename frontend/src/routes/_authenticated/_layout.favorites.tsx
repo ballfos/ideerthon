@@ -2,8 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { messageClient } from '#/lib/api'
 import { type Message } from '#/gen/proto/api/v1/message_pb'
-import { Star, ChevronRight } from 'lucide-react'
-import { TalkTopBar } from '#/features/talks/components/talk-top-bar'
+import { Star } from 'lucide-react'
 
 export const Route = createFileRoute('/_authenticated/_layout/favorites')({
     component: FavoritesPage,
@@ -28,39 +27,61 @@ function FavoritesPage() {
     }, [])
 
     return (
-        <div className="flex flex-col h-screen bg-[#fcfaf2]">
-            <TalkTopBar title="お気に入りメッセージ" />
+        <div className="p-4 max-w-4xl mx-auto min-h-screen font-yusei">
+            <div className="mb-8 font-yusei">
+                <h1 className="text-2xl font-black tracking-widest text-[#5a4a35]">
+                    お気に入りメッセージ
+                </h1>
+            </div>
 
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="w-full font-yusei">
                 {loading ? (
-                    <div className="flex h-full items-center justify-center text-[#c2baa6]">
+                    <div className="flex h-40 items-center justify-center text-[#c2baa6] font-black">
                         読み込み中...
                     </div>
                 ) : favorites.length === 0 ? (
-                    <div className="flex h-full items-center justify-center text-[#c2baa6] text-center">
-                        <p>お気に入り登録された<br />メッセージはありません</p>
+                    <div className="flex flex-col items-center justify-center py-12 text-[#c2baa6] text-center border-2 border-dashed border-[#e8eed2] rounded-[32px] bg-[#fcfaf2]/30">
+                        <Star className="h-12 w-12 mb-4 opacity-20" />
+                        <p className="font-black text-lg">お気に入り登録された<br />メッセージはありません</p>
                     </div>
                 ) : (
-                    <div className="space-y-3">
+                    <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
                         {favorites.map((msg) => (
                             <Link
                                 key={msg.id}
                                 to="/talks/$talkId"
                                 params={{ talkId: msg.talkId }}
                                 hash={`message-${msg.id}`}
-                                className="block bg-white border-2 border-[#d5cba1] rounded-2xl p-4 shadow-sm hover:border-[#b8e6a0] transition-colors active:scale-[0.98]"
+                                className="group relative flex flex-col bg-white border-t-[2px] border-b-[8px] border-x-[3px] border-[#d5cba1] rounded-[24px] p-5 shadow-sm transition-all duration-100 hover:brightness-[1.02] active:translate-y-[6px] active:border-b-[2px] active:mb-[6px]"
+                                style={{
+                                    boxShadow: '0 4px 0 0 #d5cba1'
+                                }}
                             >
-                                <div className="flex items-start gap-3">
-                                    <Star className="h-5 w-5 text-[#ffcb05] fill-current shrink-0 mt-1" />
+                                <div className="flex items-start gap-4 mb-3">
+                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-yellow-50 border-2 border-white shadow-sm">
+                                        <Star className="h-5 w-5 text-[#ffcb05] fill-current" />
+                                    </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-[#7a6446] font-bold text-sm line-clamp-2">
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className="text-[10px] font-black text-[#cbb698] tracking-wider uppercase">Starred Message</span>
+                                        </div>
+                                        <p className="text-[#5a4a35] font-black text-base leading-relaxed line-clamp-3">
                                             {msg.text}
                                         </p>
-                                        <p className="text-[#c2baa6] text-[10px] mt-1">
-                                            {new Date(Number(msg.createdAt?.seconds) * 1000).toLocaleString()}
-                                        </p>
                                     </div>
-                                    <ChevronRight className="h-5 w-5 text-[#c2baa6] shrink-0 self-center" />
+                                </div>
+                                <div className="mt-auto pt-3 border-t border-[#fcfaf2] flex items-center justify-between">
+                                    <span className="text-[#c2baa6] text-[10px] font-black">
+                                        {new Date(Number(msg.createdAt?.seconds) * 1000).toLocaleString('ja-JP')}
+                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[#8c662d] text-[10px] font-black tracking-tighter hover:underline">
+                                            VIEW TALK
+                                        </span>
+                                        <span className="font-black text-xl text-[#d5cba1] group-hover:translate-x-1 transition-transform">
+                                            {'>'}
+                                        </span>
+                                    </div>
                                 </div>
                             </Link>
                         ))}

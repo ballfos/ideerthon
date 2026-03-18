@@ -12,26 +12,40 @@ function RouteComponent() {
   if (error) return <div className="p-4 text-red-500">エラーが発生しました: {error.message}</div>
 
   return (
-    <div className="p-4 max-w-4xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">トーク履歴</h1>
+    <div className="p-4 max-w-4xl mx-auto min-h-screen font-yusei">
+      <div className="mb-8 font-yusei">
+        <h1 className="text-2xl font-black tracking-widest text-[#5a4a35]">
+          トーク履歴
+        </h1>
       </div>
 
       {talks.length === 0 ? (
-        <p className="text-gray-500 text-center py-8">トークがありません。<br />「始める!!」を押してみましょう!!</p>
+        <div className="flex flex-col items-center justify-center py-12 text-[#c2baa6] text-center border-2 border-dashed border-[#e8eed2] rounded-[32px] bg-[#fcfaf2]/30">
+          <p className="font-bold text-lg">トークがありません。<br />「始める!!」を押してみましょう!!</p>
+        </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {talks.map((talk) => (
             <Link
               key={talk.id}
               // @ts-ignore
               to={`/talks/${talk.id}`}
-              className="block bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition"
+              className="group relative flex w-full max-w-full items-center justify-between bg-white border-t-[2px] border-b-[8px] border-x-[3px] border-[#5C3A21] rounded-[24px] py-[1.2rem] px-4 shadow-sm transition-all duration-100 hover:brightness-[1.02] active:translate-y-[6px] active:border-b-[2px] active:mb-[6px] overflow-hidden"
+              style={{
+                boxShadow: '0 4px 0 0 #5C3A21'
+              }}
             >
-              <h2 className="text-lg font-semibold text-gray-800 mb-2 truncate">{talk.topic}</h2>
-              <div className="text-xs text-gray-500">
-                更新日: {talk.updatedAt ? new Date(talk.updatedAt.toMillis()).toLocaleString('ja-JP') : '未設定'}
+              <div className="flex flex-col overflow-hidden min-w-0 flex-1">
+                <h2 className="text-xl font-black tracking-wider text-[#5a4a35] font-yusei truncate">
+                  {talk.topic}
+                </h2>
+                <span className="text-[#8B5E3C] text-[10px] font-black mt-1 truncate">
+                  {talk.updatedAt ? new Date(talk.updatedAt.toMillis()).toLocaleString('ja-JP') : '未設定'}
+                </span>
               </div>
+              <span className="font-black text-2xl text-[#5C3A21] group-hover:translate-x-1 transition-transform ml-4">
+                {'>'}
+              </span>
             </Link>
           ))}
         </div>

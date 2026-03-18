@@ -5,6 +5,7 @@ export interface HeaderProps extends React.HTMLAttributes<HTMLHeadingElement> {
   title?: string;
   titleClassName?: string;
   userAction?: React.ReactNode;
+  leftAction?: React.ReactNode;
 }
 
 export function Header({
@@ -12,6 +13,7 @@ export function Header({
   title = "あいでぃあ村",
   titleClassName,
   userAction,
+  leftAction,
   ...props
 }: HeaderProps) {
   return (
@@ -72,12 +74,14 @@ export function Header({
         </svg>
       </div>
 
-      {/* 左側の余白（中央揃えのバランスを取るため） */}
-      <div className="w-10"></div>
+      {/* 左側のアクション（戻るボタンなど） */}
+      <div className="flex h-10 w-10 items-center justify-center">
+        {leftAction}
+      </div>
 
       {/* メインタイトル */}
       <h1 className={cn(
-        "text-xl font-black tracking-widest text-[#ffffff] drop-shadow-[0_2px_0_rgba(75,150,53,0.8)]",
+        "text-xl font-black tracking-widest text-[#ffffff] drop-shadow-[0_2px_0_rgba(75,150,53,0.8)] truncate px-2 flex-1 text-center",
         titleClassName
       )}>
         {title}
