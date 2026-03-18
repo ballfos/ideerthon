@@ -7,7 +7,6 @@ import {
   onSnapshot,
   Timestamp,
   doc,
-  getDoc,
 } from "firebase/firestore";
 import { db } from "#/lib/firebase";
 import { TalkTopBar } from "#/features/talks/components/talk-top-bar";
@@ -18,7 +17,7 @@ import { MessageInput } from "#/features/talks/components/message-input";
 import { Link } from "@tanstack/react-router";
 import { useTalks } from "@/features/talks";
 import { DesktopSidebar } from "#/components/ui/desktop-sidebar";
-import { TalkControlToggle } from '#/features/talks/components/talk-control-toggle'
+import { TalkControlToggle } from "#/features/talks/components/talk-control-toggle";
 import { TalkStatus } from "#/gen/proto/api/v1/talk_pb";
 import { Plus, User, Loader2 } from "lucide-react";
 import { talkClient } from "#/lib/api";
@@ -80,24 +79,30 @@ function RouteComponent() {
   useEffect(() => {
     if (!talkId || talkId === "none") {
       setTopic("トークを選択してください");
+      setTalkStatus(TalkStatus.UNSPECIFIED);
+      setAgents([]);
       return;
     }
 
-    const fetchTalk = async () => {
-      try {
-        const talkRef = doc(db, "talks", talkId);
-        const talkSnap = await getDoc(talkRef);
-        if (talkSnap.exists()) {
-          setTopic(talkSnap.data().topic);
+    const unsubscribe = onSnapshot(
+      doc(db, "talks", talkId),
+      (snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.data();
+          setTopic(data.topic || "");
+          setTalkStatus((data.status as TalkStatus) || TalkStatus.STOPPED);
+          setAgents(data.agents || []);
         } else {
           setTopic("トークが見つかりません");
         }
-      } catch (err) {
-        console.error("Failed to fetch talk:", err);
+      },
+      (error) => {
+        console.error("Failed to subscribe talk:", error);
         setTopic("エラー");
-      }
-    };
-    fetchTalk();
+      },
+    );
+
+    return () => unsubscribe();
   }, [talkId]);
 
   useEffect(() => {
@@ -224,10 +229,11 @@ function RouteComponent() {
                   key={rawTalk.id}
                   to="/talks/$talkId"
                   params={{ talkId: rawTalk.id }}
-                  className={`flex w-full max-w-full items-center justify-between p-3 rounded-xl transition-all text-sm group overflow-hidden ${rawTalk.id === talkId
-                    ? "bg-[#e8eed2]/50 text-[#5a4a35] shadow-inner"
-                    : "text-[#c2baa6] hover:bg-[#fcfaf2] hover:text-[#5a4a35]"
-                    }`}
+                  className={`flex w-full max-w-full items-center justify-between p-3 rounded-xl transition-all text-sm group overflow-hidden ${
+                    rawTalk.id === talkId
+                      ? "bg-[#e8eed2]/50 text-[#5a4a35] shadow-inner"
+                      : "text-[#c2baa6] hover:bg-[#fcfaf2] hover:text-[#5a4a35]"
+                  }`}
                 >
                   <span className="truncate font-black tracking-tight flex-1 min-w-0 mr-2">
                     {rawTalk.topic}
@@ -252,10 +258,7 @@ function RouteComponent() {
               />
 
               <div className="px-4 py-2 flex justify-center bg-[#fcfaf2]">
-                <TalkControlToggle
-                  talkId={talkId}
-                  status={talkStatus}
-                />
+                <TalkControlToggle talkId={talkId} status={talkStatus} />
               </div>
 
               <div className="flex-1 flex flex-col overflow-hidden bg-white/30 backdrop-blur-sm">
@@ -283,6 +286,7 @@ function RouteComponent() {
                           avatar=""
                           isFavorite={msg.isFavorite}
                           onToggleFavorite={() => handleToggleFavorite(msg.id)}
+                          agentName={msg.agentName}
                         />
                       ))}
                     </div>
