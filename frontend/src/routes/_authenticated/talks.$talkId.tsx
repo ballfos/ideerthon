@@ -20,6 +20,7 @@ import { DesktopSidebar } from "#/components/ui/desktop-sidebar";
 import { TalkControlToggle } from "#/features/talks/components/talk-control-toggle";
 import { TalkStatus } from "#/gen/proto/api/v1/talk_pb";
 import { Plus, User, Loader2 } from "lucide-react";
+import { AgentCard, type AgentPreset } from "@/features/talks/components/agent-selector";
 import { talkClient } from "#/lib/api";
 
 import { messageClient } from "#/lib/api";
@@ -44,11 +45,13 @@ function RouteComponent() {
   const [agents, setAgents] = useState<
     Array<{ name: string; description: string }>
   >([]);
-
-  // エージェント追加用フォーム
-  const [newAgentName, setNewAgentName] = useState("");
-  const [newAgentDesc, setNewAgentDesc] = useState("");
+  const [newAgent, setNewAgent] = useState<AgentPreset>({
+    id: "new",
+    name: "",
+    description: "",
+  });
   const [isAddingAgent, setIsAddingAgent] = useState(false);
+  const [isAddCardOpen, setIsAddCardOpen] = useState(false);
 
   const [messages, setMessages] = useState<
     Array<{
@@ -59,6 +62,7 @@ function RouteComponent() {
       isFavorite: boolean;
       agentName?: string;
       ideaName?: string;
+      ideas?: Array<{ name: string; details: string }>;
       embedding?: number[];
     }>
   >([]);
@@ -136,6 +140,7 @@ function RouteComponent() {
             isFavorite: !!data.isFavorite,
             agentName: data.agentName,
             ideaName: data.ideaName,
+            ideas: data.ideas as Array<{ name: string; details: string }>,
             embedding: data.embedding,
           };
         });
@@ -188,18 +193,18 @@ function RouteComponent() {
   };
 
   const handleAddAgent = async () => {
-    if (!newAgentName.trim()) return;
+    if (!newAgent.name.trim()) return;
     setIsAddingAgent(true);
     try {
       await talkClient.addAgent({
         talkId,
         agent: {
-          name: newAgentName,
-          description: newAgentDesc,
+          name: newAgent.name,
+          description: newAgent.description,
         },
       });
-      setNewAgentName("");
-      setNewAgentDesc("");
+      setNewAgent({ id: "new", name: "", description: "" });
+      setIsAddCardOpen(false);
     } catch (err) {
       console.error("Failed to add agent:", err);
       alert("エージェントの追加に失敗しました");
@@ -332,47 +337,39 @@ function RouteComponent() {
                       </div>
 
                       {/* エージェント追加フォーム */}
-                      <div className="bg-[#f9f1c8] rounded-[24px] p-6 border-4 border-[#d5cba1] shadow-sm space-y-4">
+                      <div className="space-y-4">
                         <h3 className="text-sm font-black text-[#7a6446] flex items-center gap-2">
-                          <Plus className="h-4 w-4" /> メンバーを追加
+                          <Plus className="h-4 w-4" /> メンバーを新しく呼ぶ
                         </h3>
-                        <div className="space-y-3">
-                          <div className="space-y-1">
-                            <label className="text-[10px] font-black text-[#a3967d] ml-1 uppercase">
-                              名前
-                            </label>
-                            <input
-                              type="text"
-                              value={newAgentName}
-                              onChange={(e) => setNewAgentName(e.target.value)}
-                              placeholder="エージェントの名前"
-                              className="w-full bg-white rounded-xl px-4 py-2 text-sm font-bold border-2 border-[#d5cba1] focus:outline-none focus:border-[#ffcb05] transition-colors"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-[10px] font-black text-[#a3967d] ml-1 uppercase">
-                              説明/役割
-                            </label>
-                            <textarea
-                              value={newAgentDesc}
-                              onChange={(e) => setNewAgentDesc(e.target.value)}
-                              placeholder="この子の性格や役割など..."
-                              rows={2}
-                              className="w-full bg-white rounded-xl px-4 py-2 text-sm font-bold border-2 border-[#d5cba1] focus:outline-none focus:border-[#ffcb05] transition-colors resize-none"
-                            />
-                          </div>
-                          <button
-                            onClick={handleAddAgent}
-                            disabled={isAddingAgent || !newAgentName.trim()}
-                            className="w-full bg-[#ffcb05] text-[#7a6446] font-black py-2 rounded-xl border-b-4 border-[#e6b800] active:translate-y-[2px] active:border-b-2 transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-2"
-                          >
-                            {isAddingAgent ? (
-                              <Loader2 className="h-5 w-5 animate-spin" />
-                            ) : (
-                              <Plus className="h-5 w-5" />
-                            )}
-                            追加する
-                          </button>
+                        <div className="space-y-4">
+                          <AgentCard
+                            agent={newAgent}
+                            isOpen={isAddCardOpen}
+                            onToggle={() => setIsAddCardOpen(!isAddCardOpen)}
+                            onRemove={() => {}}
+                            onUpdate={(field: keyof AgentPreset, value: string) =>
+                              setNewAgent({ ...newAgent, [field]: value })
+                            }
+                            onApplyPreset={(preset: AgentPreset) =>
+                              setNewAgent({ ...preset, id: "new" })
+                            }
+                            showRemove={false}
+                          />
+
+                          {isAddCardOpen && (
+                            <button
+                              onClick={handleAddAgent}
+                              disabled={isAddingAgent || !newAgent.name.trim()}
+                              className="w-full bg-[#ffcb05] text-[#7a6446] font-black py-3 rounded-2xl border-b-4 border-[#e6b800] active:translate-y-[2px] active:border-b-2 transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-2 shadow-sm"
+                            >
+                              {isAddingAgent ? (
+                                <Loader2 className="h-5 w-5 animate-spin" />
+                              ) : (
+                                <Plus className="h-5 w-5" />
+                              )}
+                              村へ招待する
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>

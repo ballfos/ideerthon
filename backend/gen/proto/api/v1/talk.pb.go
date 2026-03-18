@@ -234,6 +234,7 @@ func (x *Agent) GetDescription() string {
 type CreateTalkRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Topic         string                 `protobuf:"bytes,1,opt,name=topic,proto3" json:"topic,omitempty"`
+	Agents        []*Agent               `protobuf:"bytes,2,rep,name=agents,proto3" json:"agents,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -273,6 +274,13 @@ func (x *CreateTalkRequest) GetTopic() string {
 		return x.Topic
 	}
 	return ""
+}
+
+func (x *CreateTalkRequest) GetAgents() []*Agent {
+	if x != nil {
+		return x.Agents
+	}
+	return nil
 }
 
 type CreateTalkResponse struct {
@@ -550,9 +558,10 @@ const file_proto_api_v1_talk_proto_rawDesc = "" +
 	"\x06agents\x18\t \x03(\v2\r.api.v1.AgentR\x06agents\"=\n" +
 	"\x05Agent\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\")\n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\"P\n" +
 	"\x11CreateTalkRequest\x12\x14\n" +
-	"\x05topic\x18\x01 \x01(\tR\x05topic\"6\n" +
+	"\x05topic\x18\x01 \x01(\tR\x05topic\x12%\n" +
+	"\x06agents\x18\x02 \x03(\v2\r.api.v1.AgentR\x06agents\"6\n" +
 	"\x12CreateTalkResponse\x12 \n" +
 	"\x04talk\x18\x01 \x01(\v2\f.api.v1.TalkR\x04talk\"1\n" +
 	"\x16StartTalkStreamRequest\x12\x17\n" +
@@ -612,21 +621,22 @@ var file_proto_api_v1_talk_proto_depIdxs = []int32{
 	0,  // 2: api.v1.Talk.status:type_name -> api.v1.TalkStatus
 	10, // 3: api.v1.Talk.last_heartbeat:type_name -> google.protobuf.Timestamp
 	2,  // 4: api.v1.Talk.agents:type_name -> api.v1.Agent
-	1,  // 5: api.v1.CreateTalkResponse.talk:type_name -> api.v1.Talk
-	2,  // 6: api.v1.AddAgentRequest.agent:type_name -> api.v1.Agent
-	3,  // 7: api.v1.TalkService.CreateTalk:input_type -> api.v1.CreateTalkRequest
-	5,  // 8: api.v1.TalkService.StartTalkStream:input_type -> api.v1.StartTalkStreamRequest
-	6,  // 9: api.v1.TalkService.StopTalkStream:input_type -> api.v1.StopTalkStreamRequest
-	8,  // 10: api.v1.TalkService.AddAgent:input_type -> api.v1.AddAgentRequest
-	4,  // 11: api.v1.TalkService.CreateTalk:output_type -> api.v1.CreateTalkResponse
-	11, // 12: api.v1.TalkService.StartTalkStream:output_type -> api.v1.Message
-	7,  // 13: api.v1.TalkService.StopTalkStream:output_type -> api.v1.StopTalkStreamResponse
-	9,  // 14: api.v1.TalkService.AddAgent:output_type -> api.v1.AddAgentResponse
-	11, // [11:15] is the sub-list for method output_type
-	7,  // [7:11] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	2,  // 5: api.v1.CreateTalkRequest.agents:type_name -> api.v1.Agent
+	1,  // 6: api.v1.CreateTalkResponse.talk:type_name -> api.v1.Talk
+	2,  // 7: api.v1.AddAgentRequest.agent:type_name -> api.v1.Agent
+	3,  // 8: api.v1.TalkService.CreateTalk:input_type -> api.v1.CreateTalkRequest
+	5,  // 9: api.v1.TalkService.StartTalkStream:input_type -> api.v1.StartTalkStreamRequest
+	6,  // 10: api.v1.TalkService.StopTalkStream:input_type -> api.v1.StopTalkStreamRequest
+	8,  // 11: api.v1.TalkService.AddAgent:input_type -> api.v1.AddAgentRequest
+	4,  // 12: api.v1.TalkService.CreateTalk:output_type -> api.v1.CreateTalkResponse
+	11, // 13: api.v1.TalkService.StartTalkStream:output_type -> api.v1.Message
+	7,  // 14: api.v1.TalkService.StopTalkStream:output_type -> api.v1.StopTalkStreamResponse
+	9,  // 15: api.v1.TalkService.AddAgent:output_type -> api.v1.AddAgentResponse
+	12, // [12:16] is the sub-list for method output_type
+	8,  // [8:12] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_proto_api_v1_talk_proto_init() }

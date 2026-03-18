@@ -24,6 +24,7 @@ interface IdeaMapProps {
         text: string;
         agentName?: string;
         ideaName?: string;
+        ideas?: Array<{ name: string; details: string }>;
         embedding?: number[];
     }>;
 }
@@ -41,7 +42,7 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages }) => {
             .map(m => ({
                 id: m.id,
                 label: m.ideaName || m.agentName || "アイデア",
-                description: m.text,
+                description: (m.ideas && m.ideas.length > 0) ? m.ideas[0].details : m.text,
                 embedding: m.embedding!,
             }));
     }, [messages]);

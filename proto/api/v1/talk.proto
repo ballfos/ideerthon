@@ -30,6 +30,7 @@ message Agent {
 
 message CreateTalkRequest {
   string topic = 1;
+  repeated Agent agents = 2;
 }
 
 message CreateTalkResponse {

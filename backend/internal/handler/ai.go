@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
+	"time"
 
 	"cloud.google.com/go/firestore"
 	"google.golang.org/genai"
@@ -44,16 +46,52 @@ func (a *AIClient) GenerateResponse(ctx context.Context, name, role, topic strin
   "message": "150文字程度の簡潔な新しいアイデアを含む発言内容",
   "summary": "これまでの議論の全体的な要約（150文字程度）",
   "ideas": [
-    {"name": "アイデア名", "details": "具体的な内容"}
+    {"name": "アイデア名", "details": "今回の発言に含まれる具体的なアイデアの内容を50文字くらいで"}
   ]
 }
 
-【厳守事項：アイデアの抽出・更新】
-・既存のアイデアがブラッシュアップされた場合は、新しいアイデアとして追加せず、既存の項目の「details」を上書きしてください。
-・全く新しいアイデアが出た場合のみ、リストに新規追加してください。
-・似たようなアイデアの重複は絶対に避けてください。`, name, role)
+【厳守事項】
+・「ideas」には、今回のあなたの発言（message）に含まれる新しいアイデアの名前と詳細のみを記述してください。
+`, name, role)
 
-	prompt := fmt.Sprintf("【お題】%s\n\n【現在の共有ホワイトボード（Talk内）】\n%s\n\n【直近の会話】\n%s\n\n上記の文脈を踏まえて、あなたの役割として発言し、ボードを最新の状態（message, summary, ideas）に更新したJSONを出力してください。", topic, whiteboardText, recentContext)
+	// Extract existing idea names for duplication check
+	var existingIdeaNames []string
+	if ideas, ok := whiteboard["ideas"].([]interface{}); ok {
+		for _, idea := range ideas {
+			if ideaMap, ok := idea.(map[string]interface{}); ok {
+				if name, ok := ideaMap["name"].(string); ok {
+					existingIdeaNames = append(existingIdeaNames, name)
+				}
+			}
+		}
+	}
+
+	existingIdeasText := "なし"
+	if len(existingIdeaNames) > 0 {
+		existingIdeasText = strings.Join(existingIdeaNames, ", ")
+	}
+
+	lastIdeaText := "なし"
+	if len(existingIdeaNames) > 0 {
+		lastIdeaText = existingIdeaNames[len(existingIdeaNames)-1]
+	}
+
+	prompt := fmt.Sprintf(`【お題】%s
+
+【現在の共有ホワイトボード（Talk内）】
+%s
+
+【既存のアイデア名（※これらと被らないようにしてください）】
+%s
+
+【直近に出たアイデア】
+%s
+
+【直近の会話】
+%s
+
+上記の文脈を踏まえて、あなたの役割として発言し、今回の発言内容に基づいたJSON（message, summary, ideas）を出力してください。
+既存のアイデアと重複しない、全く新しい切り口のアイデアを提案してください。`, topic, whiteboardText, existingIdeasText, lastIdeaText, recentContext)
 
 	config := &genai.GenerateContentConfig{
 		Temperature:       genai.Ptr(float32(0.7)),
@@ -61,9 +99,22 @@ func (a *AIClient) GenerateResponse(ctx context.Context, name, role, topic strin
 		SystemInstruction: &genai.Content{Parts: []*genai.Part{{Text: systemInstruction}}},
 	}
 
-	resp, err := a.client.Models.GenerateContent(ctx, modelName, []*genai.Content{{Parts: []*genai.Part{{Text: prompt}}, Role: "user"}}, config)
+	var resp *genai.GenerateContentResponse
+	var err error
+
+	// Try primary model first
+	resp, err = a.client.Models.GenerateContent(ctx, modelName, []*genai.Content{{Parts: []*genai.Part{{Text: prompt}}, Role: "user"}}, config)
 	if err != nil {
-		return nil, err
+		// If 429, try the lite fallback model
+		if strings.Contains(err.Error(), "429") || strings.Contains(err.Error(), "RESOURCE_EXHAUSTED") {
+			fmt.Printf("Rate limit reached for %s. Falling back to gemini-2.5-flash-lite... 🛡️\n", modelName)
+			resp, err = a.client.Models.GenerateContent(ctx, "gemini-2.5-flash-lite", []*genai.Content{{Parts: []*genai.Part{{Text: prompt}}, Role: "user"}}, config)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			return nil, err
+		}
 	}
 
 	if len(resp.Candidates) == 0 || len(resp.Candidates[0].Content.Parts) == 0 {
@@ -90,12 +141,25 @@ func (a *AIClient) EmbedText(ctx context.Context, text string) ([]float32, error
 	if text == "" {
 		return nil, fmt.Errorf("text is empty")
 	}
-	res, err := a.client.Models.EmbedContent(ctx, "text-multilingual-embedding-002", []*genai.Content{{Parts: []*genai.Part{{Text: text}}, Role: "user"}}, &genai.EmbedContentConfig{TaskType: "SEMANTIC_SIMILARITY"})
-	if err != nil {
-		return nil, err
+
+	for {
+		res, err := a.client.Models.EmbedContent(ctx, "text-multilingual-embedding-002", []*genai.Content{{Parts: []*genai.Part{{Text: text}}, Role: "user"}}, &genai.EmbedContentConfig{TaskType: "SEMANTIC_SIMILARITY"})
+		if err != nil {
+			if strings.Contains(err.Error(), "429") || strings.Contains(err.Error(), "RESOURCE_EXHAUSTED") {
+				fmt.Printf("Embedding rate limit reached (429). Waiting 60 seconds... ☕\n")
+				select {
+				case <-time.After(60 * time.Second):
+					continue
+				case <-ctx.Done():
+					return nil, ctx.Err()
+				}
+			}
+			return nil, err
+		}
+
+		if len(res.Embeddings) == 0 {
+			return nil, fmt.Errorf("no embedding returned")
+		}
+		return res.Embeddings[0].Values, nil
 	}
-	if len(res.Embeddings) == 0 {
-		return nil, fmt.Errorf("no embedding returned")
-	}
-	return res.Embeddings[0].Values, nil
 }

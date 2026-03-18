@@ -40,6 +40,15 @@ func (h *TalkHandler) CreateTalk(
 	now := time.Now()
 	id := uuid.New().String()
 
+	// Extract agents from request
+	agents := make([]map[string]interface{}, 0, len(req.Msg.Agents))
+	for _, agent := range req.Msg.Agents {
+		agents = append(agents, map[string]interface{}{
+			"name":        agent.Name,
+			"description": agent.Description,
+		})
+	}
+
 	// Firestore data
 	data := map[string]interface{}{
 		"ownerId":   uid,
@@ -47,7 +56,7 @@ func (h *TalkHandler) CreateTalk(
 		"status":    int64(apiv1.TalkStatus_TALK_STATUS_STOPPED),
 		"createdAt": now,
 		"updatedAt": now,
-		"agents":    []map[string]interface{}{},
+		"agents":    agents,
 	}
 
 	// Save to Firestore
@@ -184,8 +193,8 @@ func (h *TalkHandler) StartTalkStream(
 		agentName, _ := selectedAgent["name"].(string)
 		agentDesc, _ := selectedAgent["description"].(string)
 
-		// Fetch recent messages for context (last 10)
-		msgIter := docRef.Collection("messages").OrderBy("createdAt", firestore.Desc).Limit(10).Documents(ctx)
+		// Fetch recent messages for context (last 2)
+		msgIter := docRef.Collection("messages").OrderBy("createdAt", firestore.Desc).Limit(2).Documents(ctx)
 		msgDocs, err := msgIter.GetAll()
 		recentContext := ""
 		if err == nil {
@@ -259,23 +268,32 @@ func (h *TalkHandler) StartTalkStream(
 			h.ai.UpdateTalkWhiteboard(ctx, docRef, summaryText, ideas)
 		}
 
-		// Async Embedding
-		if summaryText != "" {
-			go func(text string, mID string) {
-				// Use Background context for async update
+		// Asynchronously generate and save embedding for the first idea's name (or summary)
+		textToEmbed := summaryText
+		if len(ideas) > 0 {
+			if firstIdea, ok := ideas[0].(map[string]interface{}); ok {
+				if name, ok := firstIdea["name"].(string); ok && name != "" {
+					textToEmbed = name
+				}
+			}
+		}
+
+		if textToEmbed != "" {
+			go func(mID string, text string) {
 				bgCtx := context.Background()
 				emb, err := h.ai.EmbedText(bgCtx, text)
 				if err != nil {
-					fmt.Printf("Embedding error: %v\n", err)
+					fmt.Printf("failed to embed summary: %v\n", err)
 					return
 				}
+
 				_, err = docRef.Collection("messages").Doc(mID).Update(bgCtx, []firestore.Update{
 					{Path: "embedding", Value: emb},
 				})
 				if err != nil {
-					fmt.Printf("Failed to update message with embedding: %v\n", err)
+					fmt.Printf("failed to update message with embedding: %v\n", err)
 				}
-			}(summaryText, msgID)
+			}(msgID, textToEmbed)
 		}
 
 		_, _ = docRef.Update(ctx, []firestore.Update{
