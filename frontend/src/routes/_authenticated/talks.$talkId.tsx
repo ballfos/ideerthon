@@ -1,5 +1,5 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useEffect, useState, useRef } from "react";
 import {
   collection,
   query,
@@ -14,7 +14,6 @@ import { MessageBubble } from "#/features/talks/components/message-bubble";
 import { TalkTabs } from "#/features/talks/components/talk-tabs";
 import type { TabValue } from "#/features/talks/components/talk-tabs";
 import { MessageInput } from "#/features/talks/components/message-input";
-import { Link } from "@tanstack/react-router";
 import { useTalks } from "@/features/talks";
 import { DesktopSidebar } from "#/components/ui/desktop-sidebar";
 import { TalkControlToggle } from "#/features/talks/components/talk-control-toggle";
@@ -66,6 +65,14 @@ function RouteComponent() {
       embedding?: number[];
     }>
   >([]);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // オートスクロール
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, talkStatus]);
 
   // パソコン画面判定 (451px以上)
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 451);
@@ -278,7 +285,7 @@ function RouteComponent() {
                   className="mt-2 shrink-0 px-4"
                 />
 
-                <div className="flex-1 overflow-y-auto pb-4 scroll-smooth">
+                <div ref={scrollRef} className="flex-1 overflow-y-auto pb-4 scroll-smooth">
                   {activeTab === "chat" ? (
                     <div className="flex flex-col py-2 max-w-4xl mx-auto w-full">
                       {messages.map((msg) => (
@@ -299,6 +306,12 @@ function RouteComponent() {
                           agentName={msg.agentName}
                         />
                       ))}
+                      {talkStatus === TalkStatus.RUNNING && (
+                        <div className="flex items-center gap-2 p-4 text-[#a3967d] animate-pulse">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span className="text-xs font-black italic">誰かが考えています...🦌</span>
+                        </div>
+                      )}
                     </div>
                   ) : activeTab === "members" ? (
                     <div className="flex flex-col p-4 gap-6">

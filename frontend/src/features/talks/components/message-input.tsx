@@ -18,8 +18,14 @@ export function MessageInput({
     placeholder = "メッセージを入力...",
     className,
 }: MessageInputProps) {
+    const [isComposing, setIsComposing] = React.useState(false);
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === "Enter" && !e.shiftKey) {
+            // Safari workaround: keyCode 229 is the standard for IME processing
+            if (isComposing || e.nativeEvent.keyCode === 229) {
+                return;
+            }
             e.preventDefault();
             onSend();
         }
@@ -33,6 +39,8 @@ export function MessageInput({
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     onKeyDown={handleKeyDown}
+                    onCompositionStart={() => setIsComposing(true)}
+                    onCompositionEnd={() => setIsComposing(false)}
                     placeholder={placeholder}
                     className="w-full resize-none rounded-2xl border-2 border-[#d5cba1] bg-white px-4 py-2.5 text-sm font-bold text-[#7a6446] placeholder-[#c2baa6] focus:border-[#4b9635] focus:outline-none transition-colors"
                     style={{ minHeight: "44px", maxHeight: "120px" }}
@@ -40,7 +48,7 @@ export function MessageInput({
             </div>
             <Button
                 size="icon"
-                variant="primary"
+                variant="yellow"
                 onClick={onSend}
                 disabled={!value.trim()}
                 className="h-11 w-11 shrink-0 rounded-full"
