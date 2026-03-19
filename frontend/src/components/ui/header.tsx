@@ -20,15 +20,15 @@ export function Header({
     <header
       className={cn(
         "sticky top-0 z-50 flex h-16 w-full items-center justify-between rounded-b-2xl border-b-4 border-[#4b9635] bg-gradient-to-b from-[#87e968] to-[#6bc950] px-4 shadow-[0_4px_12px_rgba(0,0,0,0.1)]",
-        "min-[451px]:border-b-0", // パソコン版では既存のボーダーを消す
+        "border-b-0", // パソコン版では既存のボーダーを消す
         className,
       )}
       {...props}
     >
       {/* 草原と村の装飾（パソコン版のみ） */}
-      <div className="absolute bottom-0 left-0 hidden h-5 w-full overflow-hidden min-[451px]:block pointer-events-none">
+      <div className="absolute bottom-0 left-0 h-5 w-full overflow-hidden pointer-events-none">
         <svg
-          className="h-full w-full"
+          className="block h-full w-full"
           xmlns="http://www.w3.org/2000/svg"
         >
           <defs>
@@ -70,7 +70,7 @@ export function Header({
             </pattern>
           </defs>
           {/* 画面端までパターンを繰り返す */}
-          <rect width="100%" height="20" fill="url(#village-pattern)" />
+          <rect width="100%" height="100%" fill="url(#village-pattern)" />
         </svg>
       </div>
 

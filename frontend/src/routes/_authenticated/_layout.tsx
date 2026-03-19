@@ -29,8 +29,8 @@ function RouteComponent() {
 
       <div className="flex flex-1 flex-col min-[451px]:pl-24">
         <Header
-          className="min-[451px]:rounded-none min-[451px]:border-b-2 min-[451px]:bg-white min-[451px]:from-transparent min-[451px]:to-transparent min-[451px]:shadow-none"
-          titleClassName="min-[451px]:text-[#5a4a35] min-[451px]:drop-shadow-none"
+          className="rounded-none border-b-2 bg-white from-transparent to-transparent shadow-none"
+          titleClassName="text-[#5a4a35] drop-shadow-none"
           userAction={<UserMenu />}
         />
 
