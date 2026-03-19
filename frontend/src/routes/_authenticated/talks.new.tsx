@@ -61,7 +61,13 @@ export function RouteComponent() {
     // This effectively removes the initial custom agent if a custom one was previously specified
     // but we now want to start fresh with the grandma preset.
     if (searchCustom) {
-      thirdAgent = { id: 'custom-init', name: '', description: '' }
+      try {
+        const parsed = JSON.parse(searchCustom) as { name: string; description: string }
+        thirdAgent = { ...parsed, id: 'custom-init' }
+      } catch (e) {
+        console.error("Failed to parse search custom agent:", e)
+        thirdAgent = { id: 'custom-init', name: '', description: '' }
+      }
     }
 
     return [...baseAgents, thirdAgent]
