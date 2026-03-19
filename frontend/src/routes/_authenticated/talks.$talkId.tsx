@@ -37,6 +37,11 @@ function RouteComponent() {
   const { talks, loading: talksLoading } = useTalks();
   const [activeTab, setActiveTab] = useState<TabValue>("chat");
   const [inputText, setInputText] = useState("");
+  const [replyTo, setReplyTo] = useState<{
+    id: string;
+    text: string;
+    sender: string;
+  } | null>(null);
   const [topic, setTopic] = useState<string>("読み込み中...");
   const [talkStatus, setTalkStatus] = useState<TalkStatus>(
     TalkStatus.UNSPECIFIED,
@@ -69,6 +74,7 @@ function RouteComponent() {
       isRecycled?: boolean;
       agentName?: string;
       ideaName?: string;
+      replyToMessageId?: string;
       ideas?: Array<{ name: string; details: string }>;
       embedding?: number[];
     }>
@@ -189,6 +195,7 @@ function RouteComponent() {
             isRecycled: !!data.isRecycled,
             agentName: data.agentName,
             ideaName: data.ideaName,
+            replyToMessageId: data.replyToMessageId,
             ideas: data.ideas as Array<{ name: string; details: string }>,
             embedding: data.embedding,
           };
@@ -215,14 +222,38 @@ function RouteComponent() {
     }
   }, [messages]);
 
+  const handleStartTalk = async () => {
+    if (talkStatus === TalkStatus.RUNNING || talkId === "none") return;
+    try {
+      const stream = talkClient.startTalkStream({ talkId });
+      // Consume the stream. Backend writes to Firestore; snapshots will update our UI.
+      (async () => {
+        try {
+          for await (const _ of stream) {
+            // Stream provides data used internally by the backend
+          }
+        } catch (err) {
+          console.error("Stream error in handleStartTalk:", err);
+        }
+      })();
+    } catch (err) {
+      console.error("Failed to start talk from handleStartTalk:", err);
+    }
+  };
+
   const handleSend = async () => {
     if (!inputText.trim() || talkId === "none") return;
     try {
       await messageClient.sendMessage({
         talkId,
         text: inputText,
+        replyToMessageId: replyTo?.id || "",
       });
       setInputText("");
+      setReplyTo(null);
+
+      // 自動で返信開始
+      handleStartTalk();
     } catch (err) {
       console.error("Failed to send message:", err);
       alert("メッセージの送信に失敗しました");
@@ -403,24 +434,45 @@ function RouteComponent() {
                 <div ref={scrollRef} className="flex-1 overflow-y-auto pb-4 scroll-smooth">
                   {activeTab === "chat" ? (
                     <div className="flex flex-col py-2 max-w-4xl mx-auto w-full">
-                      {messages.map((msg) => (
-                        <MessageBubble
-                          key={msg.id}
-                          id={msg.id}
-                          content={msg.text}
-                          isOwn={msg.uid === user?.uid}
-                          timestamp={new Date(
-                            msg.createdAt.seconds * 1000,
-                          ).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                          avatar=""
-                          isFavorite={msg.isFavorite}
-                          onToggleFavorite={() => handleToggleFavorite(msg.id)}
-                          agentName={msg.agentName}
-                        />
-                      ))}
+                      {messages.map((msg) => {
+                        const replyTarget = msg.replyToMessageId
+                          ? messages.find((m) => m.id === msg.replyToMessageId)
+                          : null;
+                        return (
+                          <MessageBubble
+                            key={msg.id}
+                            id={msg.id}
+                            content={msg.text}
+                            isOwn={msg.uid === user?.uid}
+                            timestamp={new Date(
+                              msg.createdAt.seconds * 1000,
+                            ).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                            avatar=""
+                            isFavorite={msg.isFavorite}
+                            onToggleFavorite={() => handleToggleFavorite(msg.id)}
+                            agentName={msg.agentName}
+                            replyTo={
+                              replyTarget
+                                ? {
+                                    id: replyTarget.id,
+                                    text: replyTarget.text,
+                                    sender: replyTarget.agentName || "ユーザー",
+                                  }
+                                : null
+                            }
+                            onReply={() =>
+                              setReplyTo({
+                                id: msg.id,
+                                text: msg.text,
+                                sender: msg.agentName || "ユーザー",
+                              })
+                            }
+                          />
+                        );
+                      })}
                       {talkStatus === TalkStatus.RUNNING && (
                         <div className="flex items-center gap-2 p-4 text-[#a3967d] animate-pulse">
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -626,6 +678,8 @@ function RouteComponent() {
                         value={inputText}
                         onChange={setInputText}
                         onSend={handleSend}
+                        replyInfo={replyTo}
+                        onCancelReply={() => setReplyTo(null)}
                       />
                     </div>
                   </div>

@@ -15,6 +15,13 @@ type AIClient struct {
 	client *genai.Client
 }
 
+type ReplyContext struct {
+	ReplyTargetText   string
+	ReplyTargetSender string
+	ReplyText         string
+	PreviousContext   string
+}
+
 func NewAIClient(ctx context.Context, projectID, location string) (*AIClient, error) {
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
 		Project:  projectID,
@@ -32,7 +39,7 @@ func (a *AIClient) Close() error {
 	return nil
 }
 
-func (a *AIClient) GenerateResponse(ctx context.Context, name, role, topic string, whiteboard map[string]interface{}, recentContext string) (map[string]interface{}, error) {
+func (a *AIClient) GenerateResponse(ctx context.Context, name, role, topic string, whiteboard map[string]interface{}, recentContext string, reply *ReplyContext) (map[string]interface{}, error) {
 	modelName := "gemini-2.5-flash"
 
 	whiteboardJSON, _ := json.MarshalIndent(whiteboard, "", "  ")
@@ -53,6 +60,10 @@ func (a *AIClient) GenerateResponse(ctx context.Context, name, role, topic strin
 【厳守事項】
 ・「ideas」には、今回のあなたの発言（message）に含まれる新しいアイデアの名前と詳細のみを記述してください。
 `, name, role)
+
+	if reply != nil {
+		systemInstruction += fmt.Sprintf("\n【リプライ】\nユーザーは「%s」の「%s」という発言に「%s」というリプライをしています。\nこの文脈を最大限に尊重し、その発言に沿って回答してください。", reply.ReplyTargetSender, reply.ReplyTargetText, reply.ReplyText)
+	}
 
 	// Extract existing idea names for duplication check
 	var existingIdeaNames []string
@@ -78,7 +89,7 @@ func (a *AIClient) GenerateResponse(ctx context.Context, name, role, topic strin
 
 	prompt := fmt.Sprintf(`【お題】%s
 
-【現在の共有ホワイトボード（Talk内）】
+【現在の要約】
 %s
 
 【既存のアイデア名（※これらと被らないようにしてください）】
@@ -89,9 +100,13 @@ func (a *AIClient) GenerateResponse(ctx context.Context, name, role, topic strin
 
 【直近の会話】
 %s
+`, topic, whiteboardText, existingIdeasText, lastIdeaText, recentContext)
 
-上記の文脈を踏まえて、あなたの役割として発言し、今回の発言内容に基づいたJSON（message, summary, ideas）を出力してください。
-既存のアイデアと重複しない、全く新しい切り口のアイデアを提案してください。`, topic, whiteboardText, existingIdeasText, lastIdeaText, recentContext)
+	if reply != nil {
+		prompt += fmt.Sprintf("\n【特定のリプライ先】\n対象発言: %s (%s)\nさらに遡った文脈: %s\n", reply.ReplyTargetText, reply.ReplyTargetSender, reply.PreviousContext)
+	}
+
+	prompt += "\n上記の文脈を踏まえて、あなたの役割として発言し、今回の発言内容に基づいたJSON（message, summary, ideas）を出力してください。\n既存のアイデアと重複しない、全く新しい切り口のアイデアを提案してください。"
 
 	config := &genai.GenerateContentConfig{
 		Temperature:       genai.Ptr(float32(0.7)),
