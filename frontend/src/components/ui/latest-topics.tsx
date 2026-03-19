@@ -115,6 +115,7 @@ interface TopicZoneProps {
   zoneBg: string
   borderColor: string
   zoneBorder: string
+  headerAction?: ReactNode
 }
 
 function TopicZone({ title, topics, zoneBg, borderColor, zoneBorder }: TopicZoneProps) {
