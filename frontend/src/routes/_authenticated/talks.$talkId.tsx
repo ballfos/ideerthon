@@ -69,7 +69,7 @@ function RouteComponent() {
   // タブごとのヘルプステップ設定
   useEffect(() => {
     let newSteps: any[] = [];
-    
+
     if (activeTab === 'chat') {
       newSteps = [
         {
@@ -96,7 +96,7 @@ function RouteComponent() {
           description: '現在のAIメンバーの役割を確認したり、新しい役割（エンジニア、詩人など）を村に招待したりできます。'
         }
       ];
-    } else if (activeTab === 'supplies') {
+    } else if (activeTab === 'map') {
       newSteps = [
         {
           targetId: 'whiteboard-container',
@@ -439,11 +439,10 @@ function RouteComponent() {
                   key={rawTalk.id}
                   to="/talks/$talkId"
                   params={{ talkId: rawTalk.id }}
-                  className={`flex w-full max-w-full items-center justify-between p-3 rounded-xl transition-all text-sm group overflow-hidden ${
-                    rawTalk.id === talkId
-                      ? "bg-[#e8eed2]/50 text-[#5a4a35] shadow-inner"
-                      : "text-[#c2baa6] hover:bg-[#fcfaf2] hover:text-[#5a4a35]"
-                  }`}
+                  className={`flex w-full max-w-full items-center justify-between p-3 rounded-xl transition-all text-sm group overflow-hidden ${rawTalk.id === talkId
+                    ? "bg-[#e8eed2]/50 text-[#5a4a35] shadow-inner"
+                    : "text-[#c2baa6] hover:bg-[#fcfaf2] hover:text-[#5a4a35]"
+                    }`}
                 >
                   <span className="truncate font-black tracking-tight flex-1 min-w-0 mr-2">
                     {rawTalk.topic}
@@ -463,8 +462,8 @@ function RouteComponent() {
             <>
               <TalkTopBar
                 title={topic}
-                className="min-[451px]:h-20 min-[451px]:rounded-none min-[451px]:bg-transparent min-[451px]:from-transparent min-[451px]:to-transparent min-[451px]:shadow-none min-[451px]:border-b-0 shrink-0"
-                titleClassName="min-[451px]:text-[#7a6446] min-[451px]:drop-shadow-none"
+                className="min-[451px]:h-20 min-[451px]:rounded-none bg-transparent from-transparent min-[451px]:to-transparent shadow-none border-b-0 shrink-0"
+                titleClassName="text-[#7a6446] drop-shadow-none"
                 helpGuide={<PageGuide steps={useGuide().steps} />}
               />
 
@@ -474,11 +473,11 @@ function RouteComponent() {
 
               <div className="flex-1 flex flex-col overflow-hidden bg-white/30 backdrop-blur-sm">
                 <div id="talk-tabs">
-                <TalkTabs
-                  activeTab={activeTab}
-                  onTabChange={setActiveTab}
-                  className="mt-2 shrink-0 px-4"
-                />
+                  <TalkTabs
+                    activeTab={activeTab}
+                    onTabChange={setActiveTab}
+                    className="mt-2 shrink-0 px-4"
+                  />
                 </div>
 
                 <div id="chat-scroll-area" ref={scrollRef} className="flex-1 overflow-y-auto pb-4 scroll-smooth">
@@ -507,10 +506,10 @@ function RouteComponent() {
                             replyTo={
                               replyTarget
                                 ? {
-                                    id: replyTarget.id,
-                                    text: replyTarget.text,
-                                    sender: replyTarget.agentName || "ユーザー",
-                                  }
+                                  id: replyTarget.id,
+                                  text: replyTarget.text,
+                                  sender: replyTarget.agentName || "ユーザー",
+                                }
                                 : null
                             }
                             onReply={() =>
@@ -549,11 +548,10 @@ function RouteComponent() {
                               return (
                                 <div
                                   key={i}
-                                  className={`bg-white rounded-2xl p-4 border-2 transition-all ${
-                                    isEditing
-                                      ? "border-[#ffcb05] shadow-md ring-4 ring-[#ffcb05]/10"
-                                      : "border-[#d5cba1] shadow-sm"
-                                  }`}
+                                  className={`bg-white rounded-2xl p-4 border-2 transition-all ${isEditing
+                                    ? "border-[#ffcb05] shadow-md ring-4 ring-[#ffcb05]/10"
+                                    : "border-[#d5cba1] shadow-sm"
+                                    }`}
                                 >
                                   {isEditing ? (
                                     <div className="space-y-4">
@@ -680,7 +678,7 @@ function RouteComponent() {
                             agent={newAgent}
                             isOpen={isAddCardOpen}
                             onToggle={() => setIsAddCardOpen(!isAddCardOpen)}
-                            onRemove={() => {}}
+                            onRemove={() => { }}
                             onUpdate={(field: keyof AgentPreset, value: string) =>
                               setNewAgent({ ...newAgent, [field]: value })
                             }
@@ -707,7 +705,7 @@ function RouteComponent() {
                         </div>
                       </div>
                     </div>
-                  ) : activeTab === "supplies" ? (
+                  ) : activeTab === "map" ? (
                     <div id="whiteboard-container" className="h-full w-full overflow-hidden">
                       <IdeaMap
                         messages={messages}

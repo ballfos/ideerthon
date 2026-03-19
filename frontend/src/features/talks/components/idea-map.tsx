@@ -298,7 +298,7 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat, onDiscardIdea
                 .attr('x2', d => (d.target as any).x)
                 .attr('y2', d => (d.target as any).y);
 
-        node.attr('transform', d => `translate(${d.x!},${d.y!})`);
+            node.attr('transform', d => `translate(${d.x!},${d.y!})`);
         });
 
         const getClientXY = (sourceEvent: any) => {
@@ -329,7 +329,7 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat, onDiscardIdea
             }
             function dragended(event: d3.D3DragEvent<SVGGElement, NodeData, NodeData>) {
                 if (!event.active) sim.alphaTarget(0);
-                
+
                 const { x, y } = getClientXY(event.sourceEvent);
                 const overTrash = checkTrashHit(x, y);
                 const overRecycle = checkRecycleHit(x, y);
@@ -362,18 +362,18 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat, onDiscardIdea
         <div ref={containerRef} className="w-full h-full relative flex flex-row overflow-hidden font-sans bg-[#fcfaf2]/50">
             {/* Main Village Area */}
             <div className="flex-1 relative">
-                <div className="absolute top-4 left-4 md:top-6 md:left-6 z-10 pointer-events-none">
+                {/* <div className="absolute top-4 left-4 md:top-6 md:left-6 z-10 pointer-events-none">
                     <h1 className="text-2xl md:text-4xl font-black text-[#7a6446] tracking-tight">
                         あいでぃあ村
                     </h1>
                     <p className="hidden md:block text-[#a3967d] text-[10px] font-black uppercase tracking-widest mt-1 italic">Knowledge Community & Innovation Map</p>
-                </div>
+                </div> */}
 
                 <div className="absolute top-3 right-3 md:top-6 md:right-6 z-20 flex flex-row items-start gap-2 md:gap-4 pointer-events-none">
                     {/* リサイクルボックス */}
                     <div className="flex flex-col items-center gap-2 relative">
                         {/* Help Button */}
-                        <button 
+                        <button
                             className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-md border border-[#d5cba1] text-[#a3967d] hover:text-[#7a6446] transition-colors pointer-events-auto z-40 opacity-60 hover:opacity-100"
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -396,21 +396,21 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat, onDiscardIdea
                             </div>
                         )}
 
-                        <div 
+                        <div
                             id="recycle-bin"
                             className={cn(
                                 "w-16 h-16 md:w-24 md:h-24 rounded-[20px] md:rounded-[32px] border-2 md:border-4 border-dashed flex items-center justify-center transition-all duration-300",
-                                isOverRecycle 
-                                    ? "bg-green-50 border-green-400 scale-110 shadow-2xl opacity-100" 
+                                isOverRecycle
+                                    ? "bg-green-50 border-green-400 scale-110 shadow-2xl opacity-100"
                                     : "bg-white/40 border-[#d5cba1] opacity-40 shadow-sm"
                             )}
                         >
-                            <RefreshCcw 
-                                size={24} 
+                            <RefreshCcw
+                                size={24}
                                 className={cn(
                                     "md:w-8 md:h-8 transition-all duration-300",
                                     isOverRecycle ? "text-green-500 animate-spin" : "text-[#a3967d]"
-                                )} 
+                                )}
                             />
                         </div>
                         <span className={cn(
@@ -423,21 +423,21 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat, onDiscardIdea
 
                     {/* ゴミ箱 */}
                     <div className="flex flex-col items-center gap-2">
-                        <div 
+                        <div
                             id="trash-bin"
                             className={cn(
                                 "w-16 h-16 md:w-24 md:h-24 rounded-[20px] md:rounded-[32px] border-2 md:border-4 border-dashed flex items-center justify-center transition-all duration-300",
-                                isOverTrash 
-                                    ? "bg-red-50 border-red-400 scale-110 shadow-2xl opacity-100" 
+                                isOverTrash
+                                    ? "bg-red-50 border-red-400 scale-110 shadow-2xl opacity-100"
                                     : "bg-white/40 border-[#d5cba1] opacity-40 shadow-sm"
                             )}
                         >
-                            <Trash2 
-                                size={24} 
+                            <Trash2
+                                size={24}
                                 className={cn(
                                     "md:w-8 md:h-8 transition-all duration-300",
                                     isOverTrash ? "text-red-500 animate-bounce" : "text-[#a3967d]"
-                                )} 
+                                )}
                             />
                         </div>
                         <span className={cn(
@@ -466,7 +466,7 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat, onDiscardIdea
                     <div className="p-8 h-full flex flex-col relative">
                         {/* Mobile handle */}
                         <div className="md:hidden absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-[#e8eed2] rounded-full" />
-                        
+
                         <button
                             onClick={() => setSelectedNode(null)}
                             className="self-end p-2 hover:bg-[#fcfaf2] rounded-full transition-colors mb-4 border-2 border-transparent hover:border-[#d5cba1]"

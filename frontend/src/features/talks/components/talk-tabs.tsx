@@ -1,7 +1,7 @@
 import { cn } from "#/utils/ui/cn";
-import { MessageCircle, Package, Users } from "lucide-react";
+import { MessageCircle, Network, Users } from "lucide-react";
 
-export type TabValue = "chat" | "supplies" | "members";
+export type TabValue = "chat" | "map" | "members";
 
 export interface TalkTabsProps {
     activeTab: TabValue;
@@ -12,7 +12,7 @@ export interface TalkTabsProps {
 export function TalkTabs({ activeTab, onTabChange, className }: TalkTabsProps) {
     const tabs = [
         { value: "chat" as const, label: "チャット", icon: <MessageCircle className="h-5 w-5" /> },
-        { value: "supplies" as const, label: "もちもの", icon: <Package className="h-5 w-5" /> },
+        { value: "map" as const, label: "あいでぃあ村", icon: <Network className="h-5 w-5" /> },
         { value: "members" as const, label: "メンバー", icon: <Users className="h-5 w-5" /> },
     ];
 

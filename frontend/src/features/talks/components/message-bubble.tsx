@@ -170,10 +170,10 @@ export function MessageBubble({
                         {/* 吹き出しのしっぽ（簡易版） */}
                         <div
                             className={cn(
-                                "absolute bottom-[-2px] h-3 w-3 border-b-2 border-r-2",
+                                "absolute bottom-[1px] h-3 w-3 border-b-2 border-r-2",
                                 isOwn
-                                    ? "right-[-7px] rotate-45 border-[#b8e6a0] bg-[#e2f7d5]"
-                                    : "left-[-7px] rotate-[225deg] border-[#d5cba1] bg-white"
+                                    ? "right-[-7.5px] rotate-[-45deg] border-[#b8e6a0] bg-[#e2f7d5]"
+                                    : "left-[-7.5px] rotate-[135deg] border-[#d5cba1] bg-white"
                             )}
                         />
                     </div>
