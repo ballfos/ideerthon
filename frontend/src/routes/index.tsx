@@ -11,9 +11,9 @@ function App() {
 
       <div className="z-10 flex flex-col items-center space-y-12">
         {/* Texts */}
-        <div className="flex flex-col items-center text-center">
+        <div className="flex flex-col itesms-center text-center">
           {/* <p className="mb-6 rounded-full border-2 border-white bg-white/70 px-6 py-2 text-xl font-bold tracking-widest text-[#a48862] shadow-[0_2px_4px_rgba(0,0,0,0.05)] backdrop-blur-sm">
-            ようこそ
+            ようこそs
           </p> */}
           <h1
             className="text-5xl font-black tracking-widest text-[#7a6446] md:text-7xl"
