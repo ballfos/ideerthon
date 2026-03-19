@@ -1,8 +1,9 @@
 import { createClient } from "@connectrpc/connect";
 import { createConnectTransport } from "@connectrpc/connect-web";
-import { TalkService } from "../gen/proto/api/v1/talk_pb";
-import { MessageService } from "../gen/proto/api/v1/message_pb";
 import { getAuth } from "firebase/auth";
+
+import { MessageService } from "../gen/proto/api/v1/message_pb";
+import { TalkService } from "../gen/proto/api/v1/talk_pb";
 
 const transport = createConnectTransport({
     baseUrl: import.meta.env.VITE_API_BASE_URL,

@@ -1,34 +1,36 @@
 // @vitest-environment happy-dom
-import { render, screen, fireEvent } from "@testing-library/react"
+import { render, screen } from "@testing-library/react"
 import { describe, it, expect, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
+
 import { AgentCard } from "@/features/talks/components/agent-selector"
 
 // 最小限のモック
 vi.mock("lucide-react", () => ({
-  User: () => <span />,
-  Trash2: () => <span />,
   ChevronDown: () => <span />,
   ChevronUp: () => <span />,
+  Trash2: () => <span />,
+  User: () => <span />,
 }))
 
 describe("AgentCard バリデーションテスト", () => {
   const mockAgent = {
+    description: 'テスト用の役割説明です。',
     id: 'test-agent',
-    name: 'テストエージェント',
-    description: 'テスト用の役割説明です。'
+    name: 'テストエージェント'
   }
 
   it("名前と役割に正しい maxLength が設定されていること", () => {
     // isOpen=true でレンダリングして入力を表示させる
     render(
-      <AgentCard 
-        agent={mockAgent} 
-        isOpen={true} 
-        onToggle={vi.fn()} 
-        onUpdate={vi.fn()} 
-        onApplyPreset={vi.fn()} 
-        onRemove={vi.fn()} 
+      <AgentCard
+        agent={mockAgent}
+        isOpen={true}
+        onToggle={vi.fn()}
+        onUpdate={vi.fn()}
+        onApplyPreset={vi.fn()}
+        onRemove={vi.fn()}
+        showRemove={true}
       />
     )
 
@@ -41,13 +43,14 @@ describe("AgentCard バリデーションテスト", () => {
 
   it("名前と役割の文字数カウントが正しく表示されること", () => {
     render(
-      <AgentCard 
-        agent={mockAgent} 
-        isOpen={true} 
-        onToggle={vi.fn()} 
-        onUpdate={vi.fn()} 
-        onApplyPreset={vi.fn()} 
-        onRemove={vi.fn()} 
+      <AgentCard
+        agent={mockAgent}
+        isOpen={true}
+        onToggle={vi.fn()}
+        onUpdate={vi.fn()}
+        onApplyPreset={vi.fn()}
+        onRemove={vi.fn()}
+        showRemove={true}
       />
     )
 

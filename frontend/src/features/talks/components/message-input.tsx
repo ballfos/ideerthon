@@ -1,7 +1,7 @@
-import * as React from "react";
+import { Button } from "#/components/ui/button";
 import { cn } from "#/utils/ui/cn";
 import { SendHorizontal, X, Reply } from "lucide-react";
-import { Button } from "#/components/ui/button";
+import * as React from "react";
 
 export interface MessageInputProps {
     value: string;
@@ -14,20 +14,20 @@ export interface MessageInputProps {
 }
 
 export function MessageInput({
-    value,
+    className,
+    onCancelReply,
     onChange,
     onSend,
     placeholder = "メッセージを入力...",
-    className,
     replyInfo,
-    onCancelReply,
+    value,
 }: MessageInputProps) {
     const [isComposing, setIsComposing] = React.useState(false);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === "Enter" && !e.shiftKey) {
             // Safari workaround: keyCode 229 is the standard for IME processing
-            if (isComposing || e.nativeEvent.keyCode === 229) {
+            if (isComposing) {
                 return;
             }
             e.preventDefault();
@@ -51,7 +51,7 @@ export function MessageInput({
                             </p>
                         </div>
                     </div>
-                    <button 
+                    <button
                         onClick={onCancelReply}
                         className="p-1 hover:bg-[#d5cba1]/30 rounded-full transition-colors"
                     >
@@ -62,31 +62,31 @@ export function MessageInput({
 
             <div className="flex w-full items-end gap-2 p-4">
                 <div className="relative flex-1">
-                <textarea
-                    rows={1}
-                    value={value}
-                    onChange={(e) => onChange(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    onCompositionStart={() => setIsComposing(true)}
-                    onCompositionEnd={() => setIsComposing(false)}
-                    placeholder={placeholder}
-                    maxLength={100}
-                    className="w-full resize-none rounded-2xl border-2 border-[#d5cba1] bg-white px-4 py-2.5 text-sm font-bold text-[#7a6446] placeholder-[#c2baa6] focus:border-[#4b9635] focus:outline-none transition-colors"
-                    style={{ minHeight: "44px", maxHeight: "120px" }}
-                />
-                <div className="absolute bottom-[-14px] right-2 text-[9px] font-black text-[#a3967d] opacity-50">
-                    {value.length}/100
+                    <textarea
+                        rows={1}
+                        value={value}
+                        onChange={(e) => { onChange(e.target.value); }}
+                        onKeyDown={handleKeyDown}
+                        onCompositionStart={() => { setIsComposing(true); }}
+                        onCompositionEnd={() => { setIsComposing(false); }}
+                        placeholder={placeholder}
+                        maxLength={100}
+                        className="w-full resize-none rounded-2xl border-2 border-[#d5cba1] bg-white px-4 py-2.5 text-sm font-bold text-[#7a6446] placeholder-[#c2baa6] focus:border-[#4b9635] focus:outline-none transition-colors"
+                        style={{ maxHeight: "120px", minHeight: "44px" }}
+                    />
+                    <div className="absolute bottom-[-14px] right-2 text-[9px] font-black text-[#a3967d] opacity-50">
+                        {value.length}/100
+                    </div>
                 </div>
-            </div>
-            <Button
-                size="icon"
-                variant="yellow"
-                onClick={onSend}
-                disabled={!value.trim()}
-                className="h-11 w-11 shrink-0 rounded-full"
-            >
-                <SendHorizontal className="h-5 w-5" />
-            </Button>
+                <Button
+                    size="icon"
+                    variant="yellow"
+                    onClick={onSend}
+                    disabled={!value.trim()}
+                    className="h-11 w-11 shrink-0 rounded-full"
+                >
+                    <SendHorizontal className="h-5 w-5" />
+                </Button>
             </div>
         </div>
     );

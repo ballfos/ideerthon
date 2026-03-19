@@ -1,27 +1,29 @@
 import { useNavigate, createFileRoute, Link } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
-import { useGuide } from '@/features/guide/GuideContext'
-import { talkClient } from '../../lib/api'
-import { useAuth } from '@/features/auth/useAuth'
-import { Plus, Loader2, ArrowLeft } from 'lucide-react'
-import { AgentCard, AGENT_PRESETS, type AgentPreset } from '@/features/talks/components/agent-selector'
 import { PageGuide } from '#/components/ui/page-guide'
+import { useAuth } from '#/features/auth/use-auth'
+import { useGuide } from '#/features/guide/guide-context'
 import { cn } from '#/utils/ui/cn'
+import { Plus, Loader2, ArrowLeft } from 'lucide-react'
+import { useState, useEffect } from 'react'
+
+import { AgentCard, AGENT_PRESETS, type AgentPreset } from '@/features/talks/components/agent-selector'
+
+import { talkClient } from '../../lib/api'
 
 export const Route = createFileRoute('/_authenticated/talks/new')({
   component: RouteComponent,
   validateSearch: (search: Record<string, unknown>) => {
     return {
-      topic: search.topic as string | undefined,
-      presets: search.presets as string | undefined,
       custom: search.custom as string | undefined,
+      presets: search.presets as string | undefined,
+      topic: search.topic as string | undefined,
     }
   }
 })
 
 export function RouteComponent() {
-  const { topic: searchTopic, presets: searchPresets, custom: searchCustom } = Route.useSearch()
-  const [topic, setTopic] = useState(searchTopic || "")
+  const { custom: searchCustom, presets: searchPresets, topic: searchTopic } = Route.useSearch()
+  const [topic, setTopic] = useState(searchTopic ?? "")
   const { user } = useAuth()
   const navigate = useNavigate()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -33,9 +35,8 @@ export function RouteComponent() {
 
   // Initialize with 3 agents (2 from presets + 1 custom/specific)
   const [selectedAgents, setSelectedAgents] = useState<AgentPreset[]>(() => {
-    let baseAgents: AgentPreset[] = []
-    
     // 1. Load Presets if IDs provided
+    const baseAgents: AgentPreset[] = [];
     if (searchPresets) {
       const ids = searchPresets.split(',')
       ids.forEach(id => {
@@ -47,30 +48,33 @@ export function RouteComponent() {
     }
 
     // 2. Default to first 2 presets if none specified or found
-    if (baseAgents.length === 0) {
-      baseAgents = AGENT_PRESETS.slice(0, 2).map(p => ({ ...p, id: Math.random().toString(36).slice(2, 11) }))
-    }
+    const finalBaseAgents = baseAgents.length === 0
+      ? AGENT_PRESETS.slice(0, 2).map(p => ({ ...p, id: Math.random().toString(36).slice(2, 11) }))
+      : baseAgents;
 
     // 3. Add Grandma agent as 3rd default
     const grandma = AGENT_PRESETS.find(p => p.id === 'grandma')
-    let thirdAgent: AgentPreset = grandma 
-      ? { ...grandma, id: 'grandma-init' } 
-      : { id: 'custom-init', name: '', description: '' }
+    const initialThirdAgent: AgentPreset = grandma
+      ? { ...grandma, id: 'grandma-init' }
+      : { description: '', id: 'custom-init', name: '' }
 
     // If searchCustom is provided, it overrides the default third agent with a blank custom one.
     // This effectively removes the initial custom agent if a custom one was previously specified
     // but we now want to start fresh with the grandma preset.
-    if (searchCustom) {
-      try {
-        const parsed = JSON.parse(searchCustom) as { name: string; description: string }
-        thirdAgent = { ...parsed, id: 'custom-init' }
-      } catch (e) {
-        console.error("Failed to parse search custom agent:", e)
-        thirdAgent = { id: 'custom-init', name: '', description: '' }
+    const thirdAgent: AgentPreset = (() => {
+      if (searchCustom) {
+        try {
+          const parsed = JSON.parse(searchCustom) as { name: string; description: string }
+          return { ...parsed, id: 'custom-init' }
+        } catch (e) {
+          console.error("Failed to parse search custom agent:", e)
+          return { description: '', id: 'custom-init', name: '' }
+        }
       }
-    }
+      return initialThirdAgent
+    })()
 
-    return [...baseAgents, thirdAgent]
+    return [...finalBaseAgents, thirdAgent]
   })
   const [openAccordion, setOpenAccordion] = useState<string | null>(null)
   const { setSteps } = useGuide()
@@ -78,25 +82,25 @@ export function RouteComponent() {
   useEffect(() => {
     setSteps([
       {
+        description: 'これから話し合いたいアイデアの題名を50文字以内で入力しましょう。',
         targetId: 'step-topic',
-        title: 'テーマを決める',
-        description: 'これから話し合いたいアイデアの題名を50文字以内で入力しましょう。'
+        title: 'テーマを決める'
       },
       {
+        description: '議論に参加してほしいAIメンバーを選びます。プリセットから選ぶことも、自分で役割を作ることもできます。',
         targetId: 'step-members',
-        title: 'メンバーを招待する',
-        description: '議論に参加してほしいAIメンバーを選びます。プリセットから選ぶことも、自分で役割を作ることもできます。'
+        title: 'メンバーを招待する'
       },
       {
+        description: '準備ができたらボタンを押して、アイデアの村へ出発しましょう！',
         targetId: 'start-button-zone',
-        title: 'トークを開始！',
-        description: '準備ができたらボタンを押して、アイデアの村へ出発しましょう！'
+        title: 'トークを開始！'
       }
     ])
-    return () => setSteps([])
+    return () => { setSteps([]); }
   }, [setSteps])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault()
 
     if (!topic || !user || selectedAgents.length === 0) return
@@ -104,17 +108,17 @@ export function RouteComponent() {
     setIsSubmitting(true)
     try {
       const response = await talkClient.createTalk({
-        topic,
-        agents: selectedAgents.map(a => ({ name: a.name, description: a.description }))
+        agents: selectedAgents.map(a => ({ description: a.description, name: a.name })),
+        topic
       })
 
       if (response.talk?.id) {
-        navigate({
-          to: '/talks/$talkId',
-          params: { talkId: response.talk.id }
+        void navigate({
+          params: { talkId: response.talk.id },
+          to: '/talks/$talkId'
         })
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to create talk:", err)
       alert("トークの作成に失敗しました")
     } finally {
@@ -123,7 +127,7 @@ export function RouteComponent() {
   }
 
   const addAgent = () => {
-    const newAgent = { id: Math.random().toString(36).slice(2, 11), name: "", description: "" }
+    const newAgent = { description: "", id: Math.random().toString(36).slice(2, 11), name: "" }
     setSelectedAgents([...selectedAgents, newAgent])
     setOpenAccordion(newAgent.id)
   }
@@ -146,8 +150,8 @@ export function RouteComponent() {
         {/* Header */}
         <header className="relative bg-[#f9f1c8]/50 p-6 md:p-10 border-b-2 border-[#d5cba1] text-center">
           {/* Back Button */}
-          <Link 
-            to="/home" 
+          <Link
+            to="/home"
             className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/50 text-[#7a6446] hover:bg-white transition-all shadow-sm md:left-8"
           >
             <ArrowLeft size={24} />
@@ -166,7 +170,7 @@ export function RouteComponent() {
           </p>
         </header>
 
-        <form onSubmit={handleSubmit} className="p-6 md:p-10 space-y-8 md:space-y-12">
+        <form onSubmit={(e) => { void handleSubmit(e); }} className="p-6 md:p-10 space-y-8 md:space-y-12">
           {/* STEP 1: Topic */}
           <section id="step-topic" className="space-y-4">
             <h2 className="text-base md:text-lg font-black text-[#7a6446] flex items-center gap-3">
@@ -188,7 +192,7 @@ export function RouteComponent() {
                     setTopic(e.target.value)
                     if (!isTouched) setIsTouched(true)
                   }}
-                  onBlur={() => setIsTouched(true)}
+                  onBlur={() => { setIsTouched(true); }}
                   maxLength={100} // Allow typing a bit over 50 for the error effect
                   required
                 />
@@ -234,10 +238,10 @@ export function RouteComponent() {
                   key={agent.id}
                   agent={agent}
                   isOpen={openAccordion === agent.id}
-                  onToggle={() => setOpenAccordion(openAccordion === agent.id ? null : agent.id)}
-                  onRemove={() => removeAgent(agent.id)}
-                  onUpdate={(field, value) => updateAgent(agent.id, field, value)}
-                  onApplyPreset={(preset) => applyPreset(agent.id, preset)}
+                  onToggle={() => { setOpenAccordion(openAccordion === agent.id ? null : agent.id); }}
+                  onRemove={() => { removeAgent(agent.id); }}
+                  onUpdate={(field, value) => { updateAgent(agent.id, field, value); }}
+                  onApplyPreset={(preset) => { applyPreset(agent.id, preset); }}
                   showRemove={selectedAgents.length > 1}
                 />
               ))}
@@ -261,10 +265,10 @@ export function RouteComponent() {
             <button
               type="submit"
               disabled={
-                isSubmitting || 
-                isTopicEmpty || 
-                isTopicTooLong || 
-                selectedAgents.length === 0 || 
+                isSubmitting ||
+                isTopicEmpty ||
+                isTopicTooLong ||
+                selectedAgents.length === 0 ||
                 selectedAgents.some(a => a.name.trim() === "" || a.description.trim() === "")
               }
               className="w-full md:w-auto md:px-16 py-5 md:py-6 bg-[#ffcb05] text-[#7a6446] text-lg md:text-xl font-black rounded-2xl md:rounded-[24px] border-b-8 border-[#e6b800] hover:translate-y-[-2px] hover:border-b-[10px] active:translate-y-[4px] active:border-b-[2px] transition-all disabled:opacity-50 disabled:grayscale disabled:translate-y-0 disabled:border-b-8 shadow-[0_10px_30px_-10px_rgba(255,203,5,0.5)] overflow-hidden"

@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Button } from '#/components/ui/button'
+
 import { TriangleBackground } from '@/components/ui/triangle-background'
 
 export const Route = createFileRoute('/')({ component: App })

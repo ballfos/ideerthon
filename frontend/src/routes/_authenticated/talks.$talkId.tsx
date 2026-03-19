@@ -1,5 +1,20 @@
+import type { TabValue } from "#/features/talks/components/talk-tabs";
+
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState, useRef } from "react";
+import { DesktopSidebar } from "#/components/ui/desktop-sidebar";
+import { PageGuide } from "#/components/ui/page-guide";
+import { useAuth } from "#/features/auth/use-auth";
+import { useGuide } from "#/features/guide/guide-context";
+import IdeaMap from "#/features/talks/components/idea-map";
+import { MessageBubble } from "#/features/talks/components/message-bubble";
+import { MessageInput } from "#/features/talks/components/message-input";
+import { TalkControlToggle } from "#/features/talks/components/talk-control-toggle";
+import { TalkTabs } from "#/features/talks/components/talk-tabs";
+import { TalkTopBar } from "#/features/talks/components/talk-top-bar";
+import { TalkStatus } from "#/gen/proto/api/v1/talk_pb";
+import { talkClient } from "#/lib/api";
+import { messageClient } from "#/lib/api";
+import { db } from "#/lib/firebase";
 import {
   collection,
   query,
@@ -8,25 +23,11 @@ import {
   Timestamp,
   doc,
 } from "firebase/firestore";
-import { db } from "#/lib/firebase";
-import { TalkTopBar } from "#/features/talks/components/talk-top-bar";
-import { MessageBubble } from "#/features/talks/components/message-bubble";
-import { TalkTabs } from "#/features/talks/components/talk-tabs";
-import type { TabValue } from "#/features/talks/components/talk-tabs";
-import { MessageInput } from "#/features/talks/components/message-input";
-import { useTalks } from "@/features/talks";
-import { DesktopSidebar } from "#/components/ui/desktop-sidebar";
-import { TalkControlToggle } from "#/features/talks/components/talk-control-toggle";
-import { TalkStatus } from "#/gen/proto/api/v1/talk_pb";
 import { Plus, User, Loader2, Pencil, Trash2, X } from "lucide-react";
-import { AgentCard, type AgentPreset } from "@/features/talks/components/agent-selector";
-import { talkClient } from "#/lib/api";
+import { useEffect, useState, useRef } from "react";
 
-import { messageClient } from "#/lib/api";
-import { useAuth } from "#/features/auth/useAuth";
-import IdeaMap from "#/features/talks/components/idea-map";
-import { useGuide } from "@/features/guide/GuideContext";
-import { PageGuide } from "#/components/ui/page-guide";
+import { useTalks } from "@/features/talks";
+import { AgentCard, type AgentPreset } from "@/features/talks/components/agent-selector";
 
 export const Route = createFileRoute("/_authenticated/talks/$talkId")({
   component: RouteComponent,
@@ -36,7 +37,7 @@ function RouteComponent() {
   const { talkId } = Route.useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { talks, loading: talksLoading } = useTalks();
+  const { loading: talksLoading, talks } = useTalks();
   const [activeTab, setActiveTab] = useState<TabValue>("chat");
   const [inputText, setInputText] = useState("");
   const [replyTo, setReplyTo] = useState<{
@@ -49,12 +50,12 @@ function RouteComponent() {
     TalkStatus.UNSPECIFIED,
   );
   const [agents, setAgents] = useState<
-    Array<{ name: string; description: string }>
+    { name: string; description: string }[]
   >([]);
   const [newAgent, setNewAgent] = useState<AgentPreset>({
+    description: "",
     id: "new",
     name: "",
-    description: "",
   });
   const [isAddingAgent, setIsAddingAgent] = useState(false);
   const [isAddCardOpen, setIsAddCardOpen] = useState(false);
@@ -68,50 +69,50 @@ function RouteComponent() {
 
   // タブごとのヘルプステップ設定
   useEffect(() => {
-    let newSteps: any[] = [];
-
-    if (activeTab === 'chat') {
-      newSteps = [
+    const getNewSteps = () => {
+      if (activeTab === 'chat') {
+        return [
+          {
+            description: 'ここを「実行中」にすると、AIメンバーがあなたの投げかけに反応し始めます。',
+            targetId: 'talk-control',
+            title: 'トークの開始・停止'
+          },
+          {
+            description: 'AIたちとの会話が表示されます。吹き出しをリプライして深掘りすることもできます！',
+            targetId: 'chat-scroll-area',
+            title: 'チャット画面'
+          },
+          {
+            description: 'あなたの考えを入力して送信しましょう。AIがすぐに答えてくれます。',
+            targetId: 'message-input-zone',
+            title: 'メッセージ入力'
+          }
+        ];
+      }
+      if (activeTab === 'members') {
+        return [
+          {
+            description: '現在のAIメンバーの役割を確認したり、新しい役割（エンジニア、詩人など）を村に招待したりできます。',
+            targetId: 'members-list',
+            title: 'メンバー管理'
+          }
+        ];
+      }
+      return [
         {
-          targetId: 'talk-control',
-          title: 'トークの開始・停止',
-          description: 'ここを「実行中」にすると、AIメンバーがあなたの投げかけに反応し始めます。'
-        },
-        {
-          targetId: 'chat-scroll-area',
-          title: 'チャット画面',
-          description: 'AIたちとの会話が表示されます。吹き出しをリプライして深掘りすることもできます！'
-        },
-        {
-          targetId: 'message-input-zone',
-          title: 'メッセージ入力',
-          description: 'あなたの考えを入力して送信しましょう。AIがすぐに答えてくれます。'
-        }
-      ];
-    } else if (activeTab === 'members') {
-      newSteps = [
-        {
-          targetId: 'members-list',
-          title: 'メンバー管理',
-          description: '現在のAIメンバーの役割を確認したり、新しい役割（エンジニア、詩人など）を村に招待したりできます。'
-        }
-      ];
-    } else if (activeTab === 'map') {
-      newSteps = [
-        {
+          description: '会話の中で出た「アイデア」が自動的にここにまとまります。全体像を眺めるのに最適です。',
           targetId: 'whiteboard-container',
-          title: 'ホワイトボード',
-          description: '会話の中で出た「アイデア」が自動的にここにまとまります。全体像を眺めるのに最適です。'
+          title: 'ホワイトボード'
         }
       ];
-    }
+    };
 
-    setSteps(newSteps);
-    return () => setSteps([]);
+    setSteps(getNewSteps());
+    return () => { setSteps([]); };
   }, [setSteps, activeTab]);
 
   const [messages, setMessages] = useState<
-    Array<{
+    {
       id: string;
       text: string;
       uid: string;
@@ -122,9 +123,9 @@ function RouteComponent() {
       agentName?: string;
       ideaName?: string;
       replyToMessageId?: string;
-      ideas?: Array<{ name: string; details: string }>;
+      ideas?: { name: string; details: string }[];
       embedding?: number[];
-    }>
+    }[]
   >([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -136,7 +137,7 @@ function RouteComponent() {
 
     const hash = window.location.hash;
     // ハッシュがある場合は、その場所へのジャンプを優先する
-    if (hash && hash.startsWith("#message-")) {
+    if (hash.startsWith("#message-")) {
       // すでにこのハッシュを処理済みの場合は何もしない
       if (hash === lastProcessedHash.current) return;
       lastProcessedHash.current = hash;
@@ -174,7 +175,7 @@ function RouteComponent() {
           }, 3000);
         }
       }, 500);
-      return () => clearTimeout(timer);
+      return () => { clearTimeout(timer); };
     }
 
     // ハッシュがない場合のみ最下部へスクロール
@@ -186,16 +187,16 @@ function RouteComponent() {
   // パソコン画面判定 (451px以上)
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 451);
   useEffect(() => {
-    const handleResize = () => setIsDesktop(window.innerWidth >= 451);
+    const handleResize = () => { setIsDesktop(window.innerWidth >= 451); };
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    return () => { window.removeEventListener("resize", handleResize); };
   }, []);
 
   // talkId が "none" の場合、最新のトークがあれば遷移させる (モバイルのみ)
   // パソコンの場合は "none" のままにして空白を表示する
   useEffect(() => {
     if (talkId === "none" && !talksLoading && talks.length > 0 && !isDesktop) {
-      navigate({ to: "/talks/$talkId", params: { talkId: talks[0].id } });
+      void navigate({ params: { talkId: talks[0].id }, to: "/talks/$talkId" });
     }
   }, [talkId, talks, talksLoading, isDesktop, navigate]);
 
@@ -212,9 +213,9 @@ function RouteComponent() {
       (snapshot) => {
         if (snapshot.exists()) {
           const data = snapshot.data();
-          setTopic(data.topic || "");
-          setTalkStatus((data.status as TalkStatus) || TalkStatus.STOPPED);
-          setAgents(data.agents || []);
+          setTopic((data.topic as string | undefined) ?? "");
+          setTalkStatus((data.status as TalkStatus | undefined) ?? TalkStatus.STOPPED);
+          setAgents((data.agents as { name: string; description: string }[] | undefined) ?? []);
         } else {
           setTopic("トークが見つかりません");
         }
@@ -225,7 +226,7 @@ function RouteComponent() {
       },
     );
 
-    return () => unsubscribe();
+    return () => { unsubscribe(); };
   }, [talkId]);
 
   useEffect(() => {
@@ -245,25 +246,25 @@ function RouteComponent() {
         const newMessages = snapshot.docs.map((doc) => {
           const data = doc.data();
           const createdAt = data.createdAt as Timestamp;
-          const favoritedBy = (data.favoritedBy || []) as string[];
+          const favoritedBy = (data.favoritedBy ?? []) as string[];
           const isFavorite = user ? favoritedBy.includes(user.uid) : false;
 
           return {
-            id: doc.id,
-            text: data.text,
-            uid: data.uid,
+            agentName: data.agentName as string | undefined,
             createdAt: {
-              seconds: createdAt?.seconds || 0,
-              nanoseconds: createdAt?.nanoseconds || 0,
+              nanoseconds: createdAt.nanoseconds,
+              seconds: createdAt.seconds,
             },
-            isFavorite,
+            embedding: data.embedding as number[] | undefined,
+            id: doc.id,
+            ideaName: data.ideaName as string | undefined,
+            ideas: data.ideas as { name: string; details: string }[] | undefined,
             isDiscarded: !!data.isDiscarded,
+            isFavorite,
             isRecycled: !!data.isRecycled,
-            agentName: data.agentName,
-            ideaName: data.ideaName,
-            replyToMessageId: data.replyToMessageId,
-            ideas: data.ideas as Array<{ name: string; details: string }>,
-            embedding: data.embedding,
+            replyToMessageId: data.replyToMessageId as string | undefined,
+            text: data.text as string,
+            uid: data.uid as string,
           };
         });
         setMessages(newMessages);
@@ -273,17 +274,17 @@ function RouteComponent() {
       },
     );
 
-    return () => unsubscribe();
+    return () => { unsubscribe(); };
   }, [talkId]);
 
 
 
-  const handleStartTalk = async () => {
+  const handleStartTalk = () => {
     if (talkStatus === TalkStatus.RUNNING || talkId === "none") return;
     try {
       const stream = talkClient.startTalkStream({ talkId });
       // Consume the stream. Backend writes to Firestore; snapshots will update our UI.
-      (async () => {
+      void (async () => {
         try {
           for await (const _ of stream) {
             // Stream provides data used internally by the backend
@@ -301,9 +302,9 @@ function RouteComponent() {
     if (!inputText.trim() || talkId === "none") return;
     try {
       await messageClient.sendMessage({
+        replyToMessageId: replyTo?.id ?? "",
         talkId,
         text: inputText,
-        replyToMessageId: replyTo?.id || "",
       });
       setInputText("");
       setReplyTo(null);
@@ -320,8 +321,8 @@ function RouteComponent() {
     if (talkId === "none") return;
     try {
       await messageClient.toggleFavorite({
-        talkId,
         messageId,
+        talkId,
       });
     } catch (err) {
       console.error("Failed to toggle favorite:", err);
@@ -333,13 +334,13 @@ function RouteComponent() {
     setIsAddingAgent(true);
     try {
       await talkClient.addAgent({
-        talkId,
         agent: {
-          name: newAgent.name,
           description: newAgent.description,
+          name: newAgent.name,
         },
+        talkId,
       });
-      setNewAgent({ id: "new", name: "", description: "" });
+      setNewAgent({ description: "", id: "new", name: "" });
       setIsAddCardOpen(false);
     } catch (err) {
       console.error("Failed to add agent:", err);
@@ -353,8 +354,8 @@ function RouteComponent() {
     if (!window.confirm("このメンバーを村から送り返しますか？")) return;
     try {
       await talkClient.removeAgent({
-        talkId,
         agentIndex: index,
+        talkId,
       });
     } catch (err) {
       console.error("Failed to remove agent:", err);
@@ -363,16 +364,16 @@ function RouteComponent() {
   };
 
   const handleUpdateAgent = async () => {
-    if (!editingAgent || !editingAgent.name.trim()) return;
+    if (!editingAgent?.name.trim()) return;
     setIsUpdatingAgent(true);
     try {
       await talkClient.updateAgent({
-        talkId,
-        agentIndex: editingAgent.index,
         agent: {
-          name: editingAgent.name,
           description: editingAgent.description,
+          name: editingAgent.name,
         },
+        agentIndex: editingAgent.index,
+        talkId,
       });
       setEditingAgent(null);
     } catch (err) {
@@ -385,7 +386,7 @@ function RouteComponent() {
 
   const handleDiscardIdea = async (messageId: string) => {
     try {
-      await messageClient.discardIdea({ talkId, messageId });
+      await messageClient.discardIdea({ messageId, talkId });
     } catch (err) {
       console.error("Failed to discard idea:", err);
     }
@@ -393,7 +394,7 @@ function RouteComponent() {
 
   const handleRecycleIdea = async (messageId: string) => {
     try {
-      await messageClient.recycleIdea({ talkId, messageId });
+      await messageClient.recycleIdea({ messageId, talkId });
     } catch (err) {
       console.error("Failed to recycle idea:", err);
     }
@@ -441,7 +442,7 @@ function RouteComponent() {
     try {
       await talkClient.deleteTalk({ talkId: id });
       if (id === talkId) {
-        navigate({ to: "/talks/$talkId", params: { talkId: "none" } });
+        void navigate({ params: { talkId: "none" }, to: "/talks/$talkId" });
       }
     } catch (err) {
       console.error("Failed to delete talk:", err);
@@ -470,32 +471,37 @@ function RouteComponent() {
                 読み込み中...
               </p>
             ) : (
-              talks.map((rawTalk) => (
-                <Link
-                  key={rawTalk.id}
-                  to="/talks/$talkId"
-                  params={{ talkId: rawTalk.id }}
-                  className={`flex w-full max-w-full items-center justify-between p-3 rounded-xl transition-all text-sm group overflow-hidden ${rawTalk.id === talkId
-                    ? "bg-[#e8eed2]/50 text-[#5a4a35] shadow-inner"
-                    : "text-[#c2baa6] hover:bg-[#fcfaf2] hover:text-[#5a4a35]"
-                    }`}
-                >
-                  <span className="truncate font-black tracking-tight flex-1 min-w-0 mr-2">
-                    {rawTalk.topic}
-                  </span>
-                  <div className="flex items-center">
-                    <button
-                      onClick={(e) => handleDeleteTalk(e, rawTalk.id)}
-                      className="p-1 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                    <span className="shrink-0 font-black text-lg opacity-70 group-hover:opacity-100 transition-opacity ml-1">
-                      {">"}
+              talks.map((rawTalk) => {
+                const isSelected = rawTalk.id === talkId;
+                const statusClasses = isSelected
+                  ? "bg-[#e8eed2]/50 text-[#5a4a35] shadow-inner"
+                  : "text-[#c2baa6] hover:bg-[#fcfaf2] hover:text-[#5a4a35]";
+                const linkClassName = `flex w-full max-w-full items-center justify-between p-3 rounded-xl transition-all text-sm group overflow-hidden ${statusClasses}`;
+                return (
+                  <Link
+                    key={rawTalk.id}
+                    params={{ talkId: rawTalk.id }}
+                    to="/talks/$talkId"
+                    className={linkClassName}
+                  >
+                    <span className="truncate font-black tracking-tight flex-1 min-w-0 mr-2">
+                      {rawTalk.topic}
                     </span>
-                  </div>
-                </Link>
-              ))
+                    <div className="flex items-center">
+                      <button
+                        onClick={(e) => { void handleDeleteTalk(e, rawTalk.id); }}
+                        className="p-1 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                        type="button"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                      <span className="shrink-0 font-black text-lg opacity-70 group-hover:opacity-100 transition-opacity ml-1">
+                        {">"}
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })
             )}
           </div>
         </aside>
@@ -511,10 +517,10 @@ function RouteComponent() {
                 helpGuide={<PageGuide steps={useGuide().steps} />}
                 onDelete={() => {
                   const syntheticEvent = {
-                    preventDefault: () => {},
-                    stopPropagation: () => {},
+                    preventDefault: () => { /* No-op for synthetic event */ },
+                    stopPropagation: () => { /* No-op for synthetic event */ },
                   } as React.MouseEvent;
-                  handleDeleteTalk(syntheticEvent, talkId);
+                  void handleDeleteTalk(syntheticEvent, talkId);
                 }}
               />
 
@@ -537,7 +543,7 @@ function RouteComponent() {
                       {messages.map((msg) => {
                         const replyTarget = msg.replyToMessageId
                           ? messages.find((m) => m.id === msg.replyToMessageId)
-                          : null;
+                          : undefined;
                         return (
                           <MessageBubble
                             key={msg.id}
@@ -552,28 +558,28 @@ function RouteComponent() {
                             })}
                             avatar=""
                             isFavorite={msg.isFavorite}
-                            onToggleFavorite={() => handleToggleFavorite(msg.id)}
+                            onToggleFavorite={() => { void handleToggleFavorite(msg.id); }}
                             agentName={msg.agentName}
                             replyTo={
                               replyTarget
                                 ? {
-                                    id: replyTarget.id,
-                                    text: replyTarget.ideaName
-                                      ? `【${replyTarget.ideaName}】 ${replyTarget.text}`
-                                      : replyTarget.text,
-                                    sender: replyTarget.agentName || "ユーザー",
-                                  }
+                                  id: replyTarget.id,
+                                  sender: replyTarget.agentName ?? "ユーザー",
+                                  text: replyTarget.ideaName
+                                    ? `【${replyTarget.ideaName}】 ${replyTarget.text}`
+                                    : replyTarget.text,
+                                }
                                 : null
                             }
-                            onReply={() =>
+                            onReply={() => {
                               setReplyTo({
                                 id: msg.id,
+                                sender: msg.agentName ?? "ユーザー",
                                 text: msg.ideaName
                                   ? `【${msg.ideaName}】 ${msg.text}`
                                   : msg.text,
-                                sender: msg.agentName || "ユーザー",
-                              })
-                            }
+                              });
+                            }}
                           />
                         );
                       })}
@@ -600,13 +606,14 @@ function RouteComponent() {
                           <div className="grid grid-cols-1 gap-3">
                             {agents.map((agent, i) => {
                               const isEditing = editingAgent?.index === i;
+                              const editClasses = isEditing
+                                ? "border-[#ffcb05] shadow-md ring-4 ring-[#ffcb05]/10"
+                                : "border-[#d5cba1] shadow-sm";
+                              const cardClassName = `bg-white rounded-2xl p-4 border-2 transition-all ${editClasses}`;
                               return (
                                 <div
-                                  key={i}
-                                  className={`bg-white rounded-2xl p-4 border-2 transition-all ${isEditing
-                                    ? "border-[#ffcb05] shadow-md ring-4 ring-[#ffcb05]/10"
-                                    : "border-[#d5cba1] shadow-sm"
-                                    }`}
+                                  key={`${agent.name}-${agent.description}`}
+                                  className={cardClassName}
                                 >
                                   {isEditing ? (
                                     <div className="space-y-4">
@@ -615,8 +622,9 @@ function RouteComponent() {
                                           メンバーを編集
                                         </h4>
                                         <button
-                                          onClick={() => setEditingAgent(null)}
+                                          onClick={() => { setEditingAgent(null); }}
                                           className="text-[#a3967d] hover:text-[#7a6446]"
+                                          type="button"
                                         >
                                           <X className="h-4 w-4" />
                                         </button>
@@ -629,12 +637,12 @@ function RouteComponent() {
                                           <input
                                             type="text"
                                             value={editingAgent.name}
-                                            onChange={(e) =>
+                                            onChange={(e) => {
                                               setEditingAgent({
                                                 ...editingAgent,
                                                 name: e.target.value,
-                                              })
-                                            }
+                                              });
+                                            }}
                                             className="w-full bg-[#fcfaf2] rounded-xl px-4 py-2 text-sm font-bold border-2 border-[#d5cba1] focus:outline-none focus:border-[#ffcb05] transition-colors"
                                           />
                                         </div>
@@ -644,23 +652,24 @@ function RouteComponent() {
                                           </label>
                                           <textarea
                                             value={editingAgent.description}
-                                            onChange={(e) =>
+                                            onChange={(e) => {
                                               setEditingAgent({
                                                 ...editingAgent,
                                                 description: e.target.value,
-                                              })
-                                            }
+                                              });
+                                            }}
                                             rows={2}
                                             className="w-full bg-[#fcfaf2] rounded-xl px-4 py-2 text-sm font-bold border-2 border-[#d5cba1] focus:outline-none focus:border-[#ffcb05] transition-colors resize-none"
                                           />
                                         </div>
                                         <button
-                                          onClick={handleUpdateAgent}
+                                          onClick={() => { void handleUpdateAgent(); }}
                                           disabled={
                                             isUpdatingAgent ||
                                             !editingAgent.name.trim()
                                           }
                                           className="w-full bg-[#ffcb05] text-[#7a6446] font-black py-2 rounded-xl border-b-4 border-[#e6b800] active:translate-y-[2px] active:border-b-2 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                                          type="button"
                                         >
                                           {isUpdatingAgent ? (
                                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -682,25 +691,27 @@ function RouteComponent() {
                                           </p>
                                           <div className="flex items-center gap-1 shrink-0">
                                             <button
-                                              onClick={() =>
+                                              onClick={() => {
                                                 setEditingAgent({
-                                                  index: i,
-                                                  name: agent.name,
                                                   description:
                                                     agent.description,
-                                                })
-                                              }
+                                                  index: i,
+                                                  name: agent.name,
+                                                });
+                                              }}
                                               className="p-1.5 text-[#a3967d] hover:text-[#7a6446] hover:bg-[#f9f1c8] rounded-lg transition-colors"
                                               title="編集"
+                                              type="button"
                                             >
                                               <Pencil className="h-3.5 w-3.5" />
                                             </button>
                                             <button
-                                              onClick={() =>
-                                                handleRemoveAgent(i)
-                                              }
+                                              onClick={() => {
+                                                void handleRemoveAgent(i);
+                                              }}
                                               className="p-1.5 text-[#a3967d] hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                                               title="削除"
+                                              type="button"
                                             >
                                               <Trash2 className="h-3.5 w-3.5" />
                                             </button>
@@ -732,22 +743,19 @@ function RouteComponent() {
                           <AgentCard
                             agent={newAgent}
                             isOpen={isAddCardOpen}
-                            onToggle={() => setIsAddCardOpen(!isAddCardOpen)}
-                            onRemove={() => { }}
-                            onUpdate={(field: keyof AgentPreset, value: string) =>
-                              setNewAgent({ ...newAgent, [field]: value })
-                            }
-                            onApplyPreset={(preset: AgentPreset) =>
-                              setNewAgent({ ...preset, id: "new" })
-                            }
+                            onToggle={() => { setIsAddCardOpen(!isAddCardOpen); }}
+                            onRemove={() => { /* Remove not implemented for new agent */ }}
+                            onUpdate={(field, value) => { setNewAgent({ ...newAgent, [field]: value }); }}
+                            onApplyPreset={(preset) => { setNewAgent({ ...preset, id: "new" }); }}
                             showRemove={false}
                           />
 
                           {isAddCardOpen && (
                             <button
-                              onClick={handleAddAgent}
+                              onClick={() => { void handleAddAgent(); }}
                               disabled={isAddingAgent || !newAgent.name.trim()}
                               className="w-full bg-[#ffcb05] text-[#7a6446] font-black py-3 rounded-2xl border-b-4 border-[#e6b800] active:translate-y-[2px] active:border-b-2 transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-2 shadow-sm"
+                              type="button"
                             >
                               {isAddingAgent ? (
                                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -760,20 +768,14 @@ function RouteComponent() {
                         </div>
                       </div>
                     </div>
-                  ) : activeTab === "map" ? (
+                  ) : (
                     <div id="whiteboard-container" className="h-full w-full overflow-hidden">
                       <IdeaMap
                         messages={messages}
                         onJumpToChat={handleJumpToChat}
-                        onDiscardIdea={handleDiscardIdea}
-                        onRecycleIdea={handleRecycleIdea}
+                        onDiscardIdea={(id) => { void handleDiscardIdea(id); }}
+                        onRecycleIdea={(id) => { void handleRecycleIdea(id); }}
                       />
-                    </div>
-                  ) : (
-                    <div className="flex h-full items-center justify-center p-8 text-center text-[#c2baa6]">
-                      <p className="font-bold">
-                        「メンバー」はまだ準備中です...
-                      </p>
                     </div>
                   )}
                 </div>
@@ -784,9 +786,9 @@ function RouteComponent() {
                       <MessageInput
                         value={inputText}
                         onChange={setInputText}
-                        onSend={handleSend}
+                        onSend={() => { void handleSend(); }}
                         replyInfo={replyTo}
-                        onCancelReply={() => setReplyTo(null)}
+                        onCancelReply={() => { setReplyTo(null); }}
                       />
                     </div>
                   </div>

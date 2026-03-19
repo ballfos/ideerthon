@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
-import { useGuide } from '@/features/guide/GuideContext'
-import { messageClient } from '#/lib/api'
+import { useGuide } from '#/features/guide/guide-context'
 import { type Message } from '#/gen/proto/api/v1/message_pb'
+import { messageClient } from '#/lib/api'
 import { Star } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 export const Route = createFileRoute('/_authenticated/_layout/favorites')({
     component: FavoritesPage,
@@ -17,12 +17,12 @@ function FavoritesPage() {
     useEffect(() => {
         setSteps([
             {
+                description: 'トークの中で「星」をつけたメッセージがここに集まります。後で見返したい大切なヒントはどんどんお気に入り登録しましょう！',
                 targetId: 'favorites-list',
-                title: 'お気に入り',
-                description: 'トークの中で「星」をつけたメッセージがここに集まります。後で見返したい大切なヒントはどんどんお気に入り登録しましょう！'
+                title: 'お気に入り'
             }
         ])
-        return () => setSteps([])
+        return () => { setSteps([]); }
     }, [setSteps])
 
     useEffect(() => {
@@ -36,7 +36,7 @@ function FavoritesPage() {
                 setLoading(false)
             }
         }
-        fetchFavorites()
+        void fetchFavorites()
     }, [])
 
     return (

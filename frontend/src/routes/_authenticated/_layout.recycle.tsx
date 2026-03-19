@@ -1,13 +1,14 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
-import { useGuide } from '@/features/guide/GuideContext'
-import { messageClient } from '#/lib/api'
 import type { RecycledIdea } from '#/gen/proto/api/v1/message_pb'
-import { RefreshCcw, Box, Sparkles } from 'lucide-react'
+
+import { createFileRoute } from '@tanstack/react-router'
 import { Button } from '#/components/ui/button'
+import { useGuide } from '#/features/guide/guide-context'
+import { messageClient } from '#/lib/api'
+import { RefreshCcw, Box, Sparkles } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 export const Route = createFileRoute('/_authenticated/_layout/recycle')({
-  component: RecyclePage,
+    component: RecyclePage,
 })
 
 function RecyclePage() {
@@ -18,12 +19,12 @@ function RecyclePage() {
     useEffect(() => {
         setSteps([
             {
+                description: 'ここには、村の誰かが手放したアイデアの「かけら」が流れてきます。自分では思いつかないような意外なヒントが見つかるかもしれません！',
                 targetId: 'recycle-list',
-                title: 'リサイクルボックス',
-                description: 'ここには、村の誰かが手放したアイデアの「かけら」が流れてきます。自分では思いつかないような意外なヒントが見つかるかもしれません！'
+                title: 'リサイクルボックス'
             }
         ])
-        return () => setSteps([])
+        return () => { setSteps([]); }
     }, [setSteps])
 
     const fetchRecycled = async () => {
@@ -31,7 +32,8 @@ function RecyclePage() {
         try {
             const res = await messageClient.listRecycledIdeas({ limit: 20 })
             // Shuffle locally for extra randomness if the backend set is small
-            const shuffled = [...res.ideas].sort(() => Math.random() - 0.5)
+            const HALF = 0.5
+            const shuffled = [...res.ideas].sort(() => Math.random() - HALF)
             setRecycledIdeas(shuffled)
         } catch (err) {
             console.error('Failed to fetch recycled ideas:', err)
@@ -41,7 +43,7 @@ function RecyclePage() {
     }
 
     useEffect(() => {
-        fetchRecycled()
+        void fetchRecycled()
     }, [])
 
     return (
@@ -56,9 +58,9 @@ function RecyclePage() {
                         誰かが手放したアイデアの「かけら」たちが集まる場所です。
                     </p>
                 </div>
-                <Button 
-                    variant="yellow" 
-                    onClick={fetchRecycled}
+                <Button
+                    variant="yellow"
+                    onClick={() => { void fetchRecycled(); }}
                     className="flex items-center gap-2 rounded-2xl shadow-md"
                 >
                     <RefreshCcw size={18} className={loading ? "animate-spin" : ""} />
@@ -98,7 +100,7 @@ function RecyclePage() {
                                     {idea.name}
                                 </h3>
                             </div>
-                            
+
                             <div className="flex-1 md:border-l-2 md:border-[#fcfaf2] md:pl-6">
                                 <div className="mb-2 flex items-center gap-2">
                                     <span className="text-[9px] font-black text-[#cbb698] tracking-widest uppercase">Description</span>

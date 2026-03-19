@@ -1,15 +1,16 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { Header } from "#/components/ui/header";
 import {
   BottomActionBar,
   BottomActionBarItem,
   BottomActionFAB,
 } from "#/components/ui/bottom-action-bar";
-import { Home, List, MessagesSquare, Star, RefreshCcw } from "lucide-react";
 import { DesktopSidebar } from "#/components/ui/desktop-sidebar";
-import { UserMenu } from "@/features/auth";
-import { useGuide } from "@/features/guide/GuideContext";
+import { Header } from "#/components/ui/header";
 import { PageGuide } from "#/components/ui/page-guide";
+import { useGuide } from "#/features/guide/guide-context";
+import { Home, List, MessagesSquare, Star, RefreshCcw } from "lucide-react";
+
+import { UserMenu } from "@/features/auth";
 
 export const Route = createFileRoute("/_authenticated/_layout")({
   component: RouteComponent,
@@ -69,7 +70,6 @@ function RouteComponent() {
               label="トーク履歴"
             />
             <BottomActionBarItem
-              // @ts-ignore
               to="/favorites"
               icon={<Star size={24} strokeWidth={2.5} />}
               label="お気に入り"

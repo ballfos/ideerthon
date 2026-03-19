@@ -1,6 +1,6 @@
-import * as React from "react"
-import { cn } from "#/utils/ui/cn"
 import { Link } from "@tanstack/react-router"
+import { cn } from "#/utils/ui/cn"
+import * as React from "react"
 
 // TanStack Router の Link からプロパティを継承して型の恩恵を受けられるようにします
 type LinkProps = React.ComponentProps<typeof Link>
@@ -9,7 +9,7 @@ export interface BottomActionBarProps extends React.HTMLAttributes<HTMLDivElemen
     fab?: React.ReactNode // 真ん中の中央上に浮遊するFAB
 }
 
-export function BottomActionBar({ className, children, fab, ...props }: BottomActionBarProps) {
+export function BottomActionBar({ children, className, fab, ...props }: BottomActionBarProps) {
     return (
         <div className="fixed bottom-6 left-0 right-0 z-50 flex justify-center px-3 pointer-events-none">
             <div className="flex items-center gap-2 max-w-full">
@@ -42,7 +42,7 @@ export interface BottomActionFABProps extends Omit<LinkProps, 'children'> {
     label?: string
 }
 
-export function BottomActionFAB({ icon, label, className, ...props }: BottomActionFABProps) {
+export function BottomActionFAB({ className, icon, label, ...props }: BottomActionFABProps) {
     return (
         <Link
             {...props}
@@ -71,7 +71,7 @@ export interface BottomActionBarItemProps extends Omit<LinkProps, 'children'> {
     label: string
 }
 
-export function BottomActionBarItem({ icon, label, className, ...props }: BottomActionBarItemProps) {
+export function BottomActionBarItem({ className, icon, label, ...props }: BottomActionBarItemProps) {
     return (
         <Link
             {...props}

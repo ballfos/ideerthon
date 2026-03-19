@@ -1,7 +1,7 @@
-import * as React from "react";
-import { ArrowLeft, Trash2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Header } from "#/components/ui/header";
+import { ArrowLeft, Trash2 } from "lucide-react";
+import * as React from "react";
 
 export interface TalkTopBarProps extends React.HTMLAttributes<HTMLDivElement> {
     title: string;
@@ -12,10 +12,10 @@ export interface TalkTopBarProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function TalkTopBar({
     className,
-    title,
-    titleClassName,
     helpGuide,
     onDelete,
+    title,
+    titleClassName,
     ...props
 }: TalkTopBarProps) {
     return (

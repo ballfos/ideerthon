@@ -1,17 +1,19 @@
-import ReactDOM from "react-dom/client";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
-import { routeTree } from "./routeTree.gen";
+import ReactDOM from "react-dom/client";
+
 import { AuthProvider, useAuth } from "@/features/auth";
+
+import { routeTree } from "./routeTree.gen";
 import "./styles.css";
 
 const router = createRouter({
-  routeTree,
-  defaultPreload: "intent",
-  scrollRestoration: true,
   context: {
-    user: null, // 初期値
     loading: true,
+    user: null, // 初期値
   },
+  defaultPreload: "intent",
+  routeTree,
+  scrollRestoration: true,
 });
 
 declare module "@tanstack/react-router" {
@@ -34,9 +36,9 @@ function App() {
   );
 }
 
-const rootElement = document.getElementById("app")!;
+const rootElement = document.getElementById("app");
 
-if (!rootElement.innerHTML) {
+if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(<App />);
 }

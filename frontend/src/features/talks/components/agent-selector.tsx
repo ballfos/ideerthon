@@ -1,6 +1,6 @@
-import React from 'react'
-import { User, Trash2, ChevronDown, ChevronUp, Pencil } from 'lucide-react'
 import { cn } from '#/utils/ui/cn'
+import { User, Trash2, ChevronDown, ChevronUp, Pencil } from 'lucide-react'
+import React from 'react'
 
 export interface AgentPreset {
   id: string;
@@ -10,52 +10,52 @@ export interface AgentPreset {
 
 export const AGENT_PRESETS: AgentPreset[] = [
   {
+    description: '最新技術が大好き。実現可能性やシステム化の視点から、現実的でスマートなアイデアを提案します。',
     id: 'engineer',
-    name: '若手エンジニア',
-    description: '最新技術が大好き。実現可能性やシステム化の視点から、現実的でスマートなアイデアを提案します。'
+    name: '若手エンジニア'
   },
   {
+    description: 'トレンドに敏感でスマホネイティブ。大人の常識を無視した、直感的なアイデアを提案します。',
     id: 'gen-z',
-    name: '女子高生',
-    description: 'トレンドに敏感でスマホネイティブ。大人の常識を無視した、直感的なアイデアを提案します。'
+    name: '女子高生'
   },
   {
+    description: 'ユーザー体験（UX）が最優先。使いやすさや、人の感情・美しさに寄り添うアイデアを提案します。',
     id: 'designer',
-    name: 'デザイナー',
-    description: 'ユーザー体験（UX）が最優先。使いやすさや、人の感情・美しさに寄り添うアイデアを提案します。'
+    name: 'デザイナー'
   },
   {
+    description: 'コスパと実用性の鬼。日常生活のリアルな不便さや、生活者の視点から地に足のついたアイデアを提案します。',
     id: 'housewife',
-    name: 'おばちゃん',
-    description: 'コスパと実用性の鬼。日常生活のリアルな不便さや、生活者の視点から地に足のついたアイデアを提案します。'
+    name: 'おばちゃん'
   },
   {
+    description: 'バズと売上が正義。「誰にどう届けるか」「どうやってバズらせるか」というビジネスと集客の視点でアイデアを広げます。',
     id: 'marketer',
-    name: '敏腕マーケター',
-    description: 'バズと売上が正義。「誰にどう届けるか」「どうやってバズらせるか」というビジネスと集客の視点でアイデアを広げます。'
+    name: '敏腕マーケター'
   },
   {
+    description: '陽気でグローバルな視点から、ぶっ飛んだアイデアを提案します。',
     id: 'american-tom',
-    name: 'アメリカ人トム',
-    description: '陽気でグローバルな視点から、ぶっ飛んだアイデアを提案します。'
+    name: 'アメリカ人トム'
   },
   {
+    description: '事業化できるかが全て。「それで儲かるの？」「競合は？」と、ビジネスモデルとスケールの視点から鋭く突っ込みます。',
     id: 'investor',
-    name: '辛口ベンチャーキャピタル',
-    description: '事業化できるかが全て。「それで儲かるの？」「競合は？」と、ビジネスモデルとスケールの視点から鋭く突っ込みます。'
+    name: '辛口ベンチャーキャピタル'
   },
   {
+    description: '純粋な好奇心のかたまり。複雑なことを嫌い、「それって面白いの？」「ゲームみたいにしよう！」と無邪気なアイデアを提案します。',
     id: 'kid',
-    name: '小学生',
-    description: '純粋な好奇心のかたまり。複雑なことを嫌い、「それって面白いの？」「ゲームみたいにしよう！」と無邪気なアイデアを提案します。'
+    name: '小学生'
   }, {
+    description: '豊富な知恵と深い共感力。ゆったりした時の流れの中で、物事の本質や人の心の機微を捉えた温かいアイデアを提案します。',
     id: 'grandma',
-    name: 'おばあちゃん',
-    description: '豊富な知恵と深い共感力。ゆったりした時の流れの中で、物事の本質や人の心の機微を捉えた温かいアイデアを提案します。'
+    name: 'おばあちゃん'
   }, {
+    description: '最強のアイデアマン。あらゆる視点から斬新かつ共感性の高い最高のアイデアを提案します。',
     id: 'idea-deer',
-    name: 'アイディアー🦌',
-    description: '最強のアイデアマン。あらゆる視点から斬新かつ共感性の高い最高のアイデアを提案します。'
+    name: 'アイディアー🦌'
   },
 ]
 
@@ -72,10 +72,10 @@ interface AgentCardProps {
 export const AgentCard: React.FC<AgentCardProps> = ({
   agent,
   isOpen,
-  onToggle,
-  onRemove,
-  onUpdate,
   onApplyPreset,
+  onRemove,
+  onToggle,
+  onUpdate,
   showRemove
 }) => {
   const [isNameTouched, setIsNameTouched] = React.useState(false)
@@ -87,7 +87,10 @@ export const AgentCard: React.FC<AgentCardProps> = ({
   const showDescError = isDescTouched && isDescEmpty
 
   return (
-    <div className={`bg-white rounded-[24px] border-2 transition-all ${isOpen ? 'border-[#ffcb05] shadow-md ring-4 ring-[#ffcb05]/10' : 'border-[#d5cba1] shadow-sm'}`}>
+    <div className={cn(
+      "bg-white rounded-[24px] border-2 transition-all shadow-sm",
+      isOpen ? "border-[#ffcb05] shadow-md ring-4 ring-[#ffcb05]/10" : "border-[#d5cba1]"
+    )}>
       <div
         className="p-4 flex items-center justify-between cursor-pointer"
         onClick={onToggle}
@@ -127,7 +130,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({
                 <button
                   key={p.id}
                   type="button"
-                  onClick={() => onApplyPreset(p)}
+                  onClick={() => { onApplyPreset(p); }}
                   className="px-3 py-1.5 rounded-full bg-white border-2 border-[#d5cba1] hover:border-[#ffcb05] hover:bg-[#fff9e6] text-xs font-black text-[#7a6446] transition-all"
                 >
                   {p.name.split(' (')[0]}
@@ -135,7 +138,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({
               ))}
               <button
                 type="button"
-                onClick={() => onApplyPreset({ id: 'custom', name: '', description: '' })}
+                onClick={() => { onApplyPreset({ description: '', id: 'custom', name: '' }); }}
                 className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#fcfaf2]/50 border-2 border-dashed border-[#d5cba1] hover:border-[#ffcb05] hover:bg-[#fff9e6] text-xs font-black text-[#7a6446] transition-all"
               >
                 <Pencil className="h-3 w-3" />
@@ -155,7 +158,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({
                   onUpdate('name', e.target.value)
                   if (!isNameTouched) setIsNameTouched(true)
                 }}
-                onBlur={() => setIsNameTouched(true)}
+                onBlur={() => { setIsNameTouched(true); }}
                 maxLength={15}
                 className={cn(
                   "w-full bg-white rounded-xl px-4 py-3 text-sm font-bold border-2 transition-colors",
@@ -182,7 +185,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({
                   onUpdate('description', e.target.value)
                   if (!isDescTouched) setIsDescTouched(true)
                 }}
-                onBlur={() => setIsDescTouched(true)}
+                onBlur={() => { setIsDescTouched(true); }}
                 rows={2}
                 maxLength={100}
                 className={cn(

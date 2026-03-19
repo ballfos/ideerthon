@@ -2,6 +2,7 @@
 import { render, screen, fireEvent, cleanup } from "@testing-library/react"
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import "@testing-library/jest-dom/vitest"
+
 import { RouteComponent } from "@/routes/_authenticated/talks.new"
 
 // モック関数の定義（巻き上げに対応）
@@ -27,33 +28,33 @@ vi.mock("@/features/auth/useAuth", () => ({
 
 // TanStack Router のモック (importOriginal を使用して内部エクスポートを維持)
 vi.mock("@tanstack/react-router", async (importOriginal) => {
-  const actual = await importOriginal() as any
+  const actual = await importOriginal() as object
   return {
     ...actual,
     createFileRoute: () => () => ({
-      useSearch: mockUseSearch,
       useNavigate: () => mockNavigate,
+      useSearch: mockUseSearch,
     }),
+    Link: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     useNavigate: () => mockNavigate,
-    Link: ({ children }: any) => <div>{children}</div>,
   }
 })
 
 vi.mock("@/features/guide/GuideContext", () => ({
-  useGuide: () => ({ steps: [], setSteps: mockSetSteps }),
+  useGuide: () => ({ setSteps: mockSetSteps, steps: [] }),
 }))
 
 vi.mock("lucide-react", () => ({
-  Plus: () => <span />,
-  Loader2: () => <span />,
   ArrowLeft: () => <span />,
-  Trash2: () => <span />,
   ChevronDown: () => <span />,
   ChevronUp: () => <span />,
-  User: () => <span />,
-  Lightbulb: () => <span />,
-  MessageSquare: () => <span />,
   Leaf: () => <span />,
+  Lightbulb: () => <span />,
+  Loader2: () => <span />,
+  MessageSquare: () => <span />,
+  Plus: () => <span />,
+  Trash2: () => <span />,
+  User: () => <span />,
 }))
 
 // エイリアス解決のために両方モック
@@ -61,14 +62,14 @@ vi.mock("@/components/ui/page-guide", () => ({ PageGuide: () => <div /> }))
 vi.mock("#/components/ui/page-guide", () => ({ PageGuide: () => <div /> }))
 
 vi.mock("@/features/talks/components/agent-selector", () => ({
-  AgentCard: ({ agent, onToggle }: any) => <div onClick={onToggle}>{agent.name}</div>,
-  AGENT_PRESETS: [{ id: 'engineer', name: '若手エンジニア', description: 'desc' }]
+  AGENT_PRESETS: [{ description: 'desc', id: 'engineer', name: '若手エンジニア' }],
+  AgentCard: ({ agent, onToggle }: { agent: { name: string }; onToggle: () => void }) => <div onClick={onToggle}>{agent.name}</div>
 }))
 
 describe("TalksNew バリデーションテスト", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockUseSearch.mockReturnValue({ topic: "", presets: "engineer", custom: "" })
+    mockUseSearch.mockReturnValue({ custom: "", presets: "engineer", topic: "" })
   })
 
   afterEach(() => {

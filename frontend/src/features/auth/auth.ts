@@ -5,6 +5,7 @@ import {
   signOut as firebaseSignOut,
   type UserCredential,
 } from "firebase/auth";
+
 import { auth } from "@/lib/firebase";
 
 /**

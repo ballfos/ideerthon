@@ -1,16 +1,17 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useTalks } from '@/features/talks'
-import { useGuide } from '@/features/guide/GuideContext'
-import { useEffect } from 'react'
+import { useGuide } from '#/features/guide/guide-context'
 import { talkClient } from '#/lib/api'
 import { Trash2 } from 'lucide-react'
+import { useEffect } from 'react'
+
+import { useTalks } from '@/features/talks'
 
 export const Route = createFileRoute('/_authenticated/_layout/talks')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const { talks, loading, error } = useTalks()
+  const { error, loading, talks } = useTalks()
   const { setSteps } = useGuide()
 
   const handleDeleteTalk = async (e: React.MouseEvent, id: string) => {
@@ -28,12 +29,12 @@ function RouteComponent() {
   useEffect(() => {
     setSteps([
       {
+        description: 'これまでの議論の記録がここに並びます。タップすると続きから始められます。',
         targetId: 'talk-history-list',
-        title: 'トーク履歴',
-        description: 'これまでの議論の記録がここに並びます。タップすると続きから始められます。'
+        title: 'トーク履歴'
       }
     ])
-    return () => setSteps([])
+    return () => { setSteps([]); }
   }, [setSteps])
 
   if (loading) return <div className="p-4">読み込み中...</div>
@@ -56,8 +57,8 @@ function RouteComponent() {
           {talks.map((talk) => (
             <Link
               key={talk.id}
-              // @ts-ignore
-              to={`/talks/${talk.id}`}
+              to="/talks/$talkId"
+              params={{ talkId: talk.id }}
               className="group relative flex w-full max-w-full items-center justify-between bg-white border-t-[2px] border-b-[8px] border-x-[3px] border-[#d5cba1] rounded-[24px] py-[1.2rem] px-6 shadow-sm transition-all duration-100 hover:brightness-[1.02] active:translate-y-[6px] active:border-b-[2px] active:mb-[6px] overflow-hidden"
               style={{
                 boxShadow: '0 4px 0 0 #d5cba1'
@@ -68,12 +69,12 @@ function RouteComponent() {
                   {talk.topic}
                 </h2>
                 <span className="text-[#8B5E3C] text-[10px] font-black mt-1 truncate">
-                  {talk.updatedAt ? new Date(talk.updatedAt.toMillis()).toLocaleString('ja-JP') : '未設定'}
+                  {new Date(talk.updatedAt.toMillis()).toLocaleString('ja-JP')}
                 </span>
               </div>
               <div className="flex items-center gap-4 ml-4">
                 <button
-                  onClick={(e) => handleDeleteTalk(e, talk.id)}
+                  onClick={(e) => { void handleDeleteTalk(e, talk.id); }}
                   className="p-2 text-[#c2baa6] hover:text-red-500 transition-colors pointer-events-auto"
                 >
                   <Trash2 className="h-5 w-5" />

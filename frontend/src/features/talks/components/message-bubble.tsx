@@ -1,7 +1,7 @@
-import * as React from "react";
 import { cn } from "#/utils/ui/cn";
-import { Star } from "lucide-react";
 import { motion, useAnimation, type PanInfo } from "framer-motion";
+import { Star } from "lucide-react";
+import * as React from "react";
 
 export interface MessageBubbleProps {
     id: string; // メッセージID
@@ -19,17 +19,17 @@ export interface MessageBubbleProps {
 }
 
 export function MessageBubble({
-    className,
-    id,
-    content,
-    isOwn = false,
-    avatar,
-    timestamp,
-    isFavorite = false,
-    onToggleFavorite,
-    onReply,
-    replyTo,
     agentName,
+    avatar,
+    className,
+    content,
+    id,
+    isFavorite = false,
+    isOwn = false,
+    onReply,
+    onToggleFavorite,
+    replyTo,
+    timestamp,
     ...props
 }: MessageBubbleProps) {
     const controls = useAnimation();
@@ -38,16 +38,16 @@ export function MessageBubble({
 
     React.useEffect(() => {
         setIsMobile(window.innerWidth < 768);
-        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        const handleResize = () => { setIsMobile(window.innerWidth < 768); };
         window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
+        return () => { window.removeEventListener('resize', handleResize); };
     }, []);
 
-    const handleDragEnd = (_event: any, info: PanInfo) => {
+    const handleDragEnd = (_event: unknown, info: PanInfo) => {
         if (info.offset.x < -60) {
             if (onReply) onReply();
         }
-        controls.start({ x: 0 });
+        void controls.start({ x: 0 });
     };
 
     const handleContextMenu = (e: React.MouseEvent) => {
@@ -84,7 +84,7 @@ export function MessageBubble({
                     className
                 )}
                 drag={isMobile ? "x" : false}
-                dragConstraints={{ right: 0, left: -60 }}
+                dragConstraints={{ left: -60, right: 0 }}
                 dragElastic={0.1}
                 onDragEnd={handleDragEnd}
                 animate={controls}

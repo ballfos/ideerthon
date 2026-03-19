@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
 import { collection, query, where, orderBy, onSnapshot } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { useEffect, useState } from "react";
+
 import { useAuth } from "@/features/auth";
+import { db } from "@/lib/firebase";
+
 import type { Talk } from "./types";
 
 export const useTalks = () => {
@@ -32,13 +34,13 @@ export const useTalks = () => {
             q,
             (snapshot) => {
                 const fetchedTalks = snapshot.docs.map((doc) => {
-                    const data = doc.data();
+                    const data = doc.data() as { ownerId: string; topic: string; updatedAt: import('firebase/firestore').Timestamp };
                     return {
                         id: doc.id,
                         ownerId: data.ownerId,
                         topic: data.topic,
                         updatedAt: data.updatedAt,
-                    } as Talk;
+                    };
                 });
                 setTalks(fetchedTalks);
                 setLoading(false);
@@ -50,8 +52,8 @@ export const useTalks = () => {
             }
         );
 
-        return () => unsubscribe();
+        return () => { unsubscribe(); };
     }, [user]);
 
-    return { talks, loading, error };
+    return { error, loading, talks };
 };

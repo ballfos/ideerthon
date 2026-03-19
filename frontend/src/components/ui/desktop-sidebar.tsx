@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Home, List, Star, MessagesSquare, RefreshCcw } from "lucide-react";
 import { cn } from "#/utils/ui/cn";
+import { Home, List, Star, MessagesSquare, RefreshCcw } from "lucide-react";
 
 export function DesktopSidebar() {
   return (
@@ -9,11 +9,11 @@ export function DesktopSidebar() {
         {/* ナビゲーション */}
         <nav className="flex flex-col gap-4 w-full px-1">
           <SidebarItem to="/home" icon={<Home size={28} />} label="ホーム" />
-          <SidebarItem 
-            to="/talks/$talkId" 
+          <SidebarItem
+            to="/talks/$talkId"
             params={{ talkId: "none" }}
-            icon={<List size={28} />} 
-            label="トーク履歴" 
+            icon={<List size={28} />}
+            label="トーク履歴"
           />
           <SidebarItem to="/favorites" icon={<Star size={28} />} label="お気に入り" />
           <SidebarItem to="/recycle" icon={<RefreshCcw size={28} />} label="リサイクル" />
@@ -21,6 +21,7 @@ export function DesktopSidebar() {
           {/* FAB代わりのボタン: コンパクトな円形/角丸ボタン */}
           <Link
             to="/talks/new"
+            search={{ custom: undefined, presets: undefined, topic: undefined }}
             className="mt-6 flex flex-col items-center justify-center gap-1 rounded-2xl bg-gradient-to-b from-blue-500 to-blue-600 p-3 text-white shadow-lg transition-all hover:brightness-110 active:translate-y-1 active:shadow-none"
             aria-label="始める!!"
           >
@@ -33,16 +34,16 @@ export function DesktopSidebar() {
   );
 }
 
-function SidebarItem({ 
-  to, 
-  params, 
-  icon, 
-  label 
-}: { 
-  to: string; 
-  params?: any;
-  icon: React.ReactNode; 
-  label: string 
+function SidebarItem({
+  icon,
+  label,
+  params,
+  to
+}: {
+  to: string;
+  params?: Record<string, string>;
+  icon: React.ReactNode;
+  label: string
 }) {
   return (
     <Link
