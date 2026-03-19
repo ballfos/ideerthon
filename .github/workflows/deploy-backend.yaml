@@ -4,7 +4,8 @@ on:
   push:
     branches: [ "main" ]
     paths: [ "backend/**" ]
-
+  workflow_dispatch:
+  
 env:
   PROJECT_ID: ideerthon
   REGION: asia-northeast2
@@ -58,7 +59,7 @@ jobs:
             --no-cpu-throttling
             --max-instances=5
             --allow-unauthenticated
-            --timeout=120s
+            --timeout=200s
           env_vars: |-
             ALLOWED_ORIGIN=${{ vars.ALLOWED_ORIGIN }}
             GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }}
