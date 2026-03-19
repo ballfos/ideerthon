@@ -23,7 +23,7 @@ export const Route = createFileRoute('/_authenticated/talks/new')({
 
 export function RouteComponent() {
   const { custom: searchCustom, presets: searchPresets, topic: searchTopic } = Route.useSearch()
-  const [topic, setTopic] = useState(searchTopic || "")
+  const [topic, setTopic] = useState(searchTopic ?? "")
   const { user } = useAuth()
   const navigate = useNavigate()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -35,9 +35,8 @@ export function RouteComponent() {
 
   // Initialize with 3 agents (2 from presets + 1 custom/specific)
   const [selectedAgents, setSelectedAgents] = useState<AgentPreset[]>(() => {
-    let baseAgents: AgentPreset[] = []
-
     // 1. Load Presets if IDs provided
+    const baseAgents: AgentPreset[] = [];
     if (searchPresets) {
       const ids = searchPresets.split(',')
       ids.forEach(id => {
@@ -49,30 +48,33 @@ export function RouteComponent() {
     }
 
     // 2. Default to first 2 presets if none specified or found
-    if (baseAgents.length === 0) {
-      baseAgents = AGENT_PRESETS.slice(0, 2).map(p => ({ ...p, id: Math.random().toString(36).slice(2, 11) }))
-    }
+    const finalBaseAgents = baseAgents.length === 0
+      ? AGENT_PRESETS.slice(0, 2).map(p => ({ ...p, id: Math.random().toString(36).slice(2, 11) }))
+      : baseAgents;
 
     // 3. Add Grandma agent as 3rd default
     const grandma = AGENT_PRESETS.find(p => p.id === 'grandma')
-    let thirdAgent: AgentPreset = grandma
+    const initialThirdAgent: AgentPreset = grandma
       ? { ...grandma, id: 'grandma-init' }
       : { description: '', id: 'custom-init', name: '' }
 
     // If searchCustom is provided, it overrides the default third agent with a blank custom one.
     // This effectively removes the initial custom agent if a custom one was previously specified
     // but we now want to start fresh with the grandma preset.
-    if (searchCustom) {
-      try {
-        const parsed = JSON.parse(searchCustom) as { name: string; description: string }
-        thirdAgent = { ...parsed, id: 'custom-init' }
-      } catch (e) {
-        console.error("Failed to parse search custom agent:", e)
-        thirdAgent = { description: '', id: 'custom-init', name: '' }
+    const thirdAgent: AgentPreset = (() => {
+      if (searchCustom) {
+        try {
+          const parsed = JSON.parse(searchCustom) as { name: string; description: string }
+          return { ...parsed, id: 'custom-init' }
+        } catch (e) {
+          console.error("Failed to parse search custom agent:", e)
+          return { description: '', id: 'custom-init', name: '' }
+        }
       }
-    }
+      return initialThirdAgent
+    })()
 
-    return [...baseAgents, thirdAgent]
+    return [...finalBaseAgents, thirdAgent]
   })
   const [openAccordion, setOpenAccordion] = useState<string | null>(null)
   const { setSteps } = useGuide()
@@ -98,7 +100,7 @@ export function RouteComponent() {
     return () => { setSteps([]); }
   }, [setSteps])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault()
 
     if (!topic || !user || selectedAgents.length === 0) return
@@ -111,12 +113,12 @@ export function RouteComponent() {
       })
 
       if (response.talk?.id) {
-        navigate({
+        void navigate({
           params: { talkId: response.talk.id },
           to: '/talks/$talkId'
         })
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to create talk:", err)
       alert("トークの作成に失敗しました")
     } finally {
@@ -168,7 +170,7 @@ export function RouteComponent() {
           </p>
         </header>
 
-        <form onSubmit={handleSubmit} className="p-6 md:p-10 space-y-8 md:space-y-12">
+        <form onSubmit={(e) => { void handleSubmit(e); }} className="p-6 md:p-10 space-y-8 md:space-y-12">
           {/* STEP 1: Topic */}
           <section id="step-topic" className="space-y-4">
             <h2 className="text-base md:text-lg font-black text-[#7a6446] flex items-center gap-3">

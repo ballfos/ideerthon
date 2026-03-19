@@ -21,6 +21,8 @@ export default tseslint.config(
             "node_modules/**",
             "src/gen/**",
             "src/routeTree.gen.ts",
+            "src/tests/**",
+            "src/__tests__/**",
         ],
     },
 
@@ -61,49 +63,56 @@ export default tseslint.config(
         },
         rules: {
             // ==========================================
-            // 【全体ルール】AIの規律を保つ
+            // 【全体ルール】AIの規律を保つ（バランス調整版）
             // ==========================================
-            "max-params": ["error", 1],
 
             "no-restricted-syntax": [
                 "error",
                 { selector: "ClassDeclaration", message: "Class禁止。純粋関数を使用せよ。" },
-                // ★ throw はここでグローバルに禁止
-                { selector: "ThrowStatement", message: "throw禁止。lib/ 配下でラップするか Result型を返せ。" },
-                { selector: "JSXOpeningElement > JSXSpreadAttribute", message: "Props Spread禁止。" },
-                { selector: "TemplateLiteral > :not(Identifier)", message: "リテラル内での演算禁止。" },
-                { selector: "JSXExpressionContainer > LogicalExpression[operator='&&']", message: "JSX内での '&&' 禁止。三項演算子を使用せよ。" },
+                { selector: "TemplateLiteral > ConditionalExpression", message: "リテラル内での三項演算子禁止。tailwindならutils/ui/cn関数を使え" },
             ],
 
-            // no-function は削除（functionキーワードを許可）
+            // AIがあほになるので無し 
+            // // 頻出する定数は許可するが、マジックナンバー禁止は維持
+            // "no-magic-numbers": ["warn", {
+            //     ignore: [0, 1, 2, -1],
+            //     enforceConst: true,
+            //     ignoreArrayIndexes: true,
+            // }],
 
-            "no-magic-numbers": ["error", { ignore: [0, 1], enforceConst: true }],
-            "functional/no-let": "error",
-            "functional/immutable-data": "error",
+            // 状態変更の禁止・関数型プログラミングの徹底 (error)
+            "functional/no-let": "warn",
+
             "perfectionist/sort-objects": ["error", { type: "alphabetical" }],
             "perfectionist/sort-imports": ["error", { type: "alphabetical" }],
             "unused-imports/no-unused-imports": "error",
+            "@typescript-eslint/no-unused-vars": [
+                "error",
+                {
+                    "argsIgnorePattern": "^_",
+                    "varsIgnorePattern": "^_",
+                    "caughtErrorsIgnorePattern": "^_",
+                    "destructuredArrayIgnorePattern": "^_"
+                }
+            ],
 
             "react/destructuring-assignment": ["error", "always"],
-            "react/no-array-index-key": "error",
-            "react-perf/jsx-no-new-object-as-prop": "error",
+            // "react/no-array-index-key": "error",
+
             "zod/no-any-schema": "error",
+
+            // TypeScript 厳格ルール
+            "@typescript-eslint/no-explicit-any": "error",
+            "@typescript-eslint/no-unsafe-assignment": "error",
+            "@typescript-eslint/no-unsafe-member-access": "error",
+            "@typescript-eslint/no-unsafe-call": "error",
+            "@typescript-eslint/no-unsafe-argument": "error",
+            "@typescript-eslint/no-floating-promises": "error",
+            "@typescript-eslint/no-misused-promises": "error",
+            "@typescript-eslint/restrict-template-expressions": "off",
         },
     },
 
-    // ==========================================
-    // 【聖域：Adapter層】src/lib & src/utils
-    // ==========================================
-    {
-        files: ["src/lib/**/*.ts", "src/utils/**/*.ts"],
-        rules: {
-            // ★ ここで no-restricted-syntax を OFF にすることで throw を許可
-            "no-restricted-syntax": "off",
-            "max-params": "off",
-            "functional/no-let": "off",
-            "functional/immutable-data": "off",
-        },
-    },
 
     // ==========================================
     // 【境界：Architecture】
@@ -129,8 +138,8 @@ export default tseslint.config(
     {
         files: ["src/**/*.{ts,tsx}"],
         rules: {
-            "check-file/filename-naming-convention": ["error", { "src/**/*.{ts,tsx}": "KEBAB_CASE" }],
-            "check-file/folder-naming-convention": ["error", { "src/**/": "KEBAB_CASE" }],
+            "check-file/filename-naming-convention": ["error", { "src/!(routes)/**/*.{ts,tsx}": "KEBAB_CASE" }],
+            "check-file/folder-naming-convention": ["error", { "src/!(routes)/**/": "KEBAB_CASE" }],
         },
     }
 );

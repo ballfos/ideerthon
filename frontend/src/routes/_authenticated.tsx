@@ -40,6 +40,7 @@ export const Route = createFileRoute("/_authenticated")({
     const user = await getCurrentUser();
 
     if (!user) {
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
       throw redirect({
         search: {
           redirect: location.href,

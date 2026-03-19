@@ -28,14 +28,14 @@ vi.mock("@/features/auth/useAuth", () => ({
 
 // TanStack Router のモック (importOriginal を使用して内部エクスポートを維持)
 vi.mock("@tanstack/react-router", async (importOriginal) => {
-  const actual = await importOriginal() as any
+  const actual = await importOriginal() as object
   return {
     ...actual,
     createFileRoute: () => () => ({
       useNavigate: () => mockNavigate,
       useSearch: mockUseSearch,
     }),
-    Link: ({ children }: any) => <div>{children}</div>,
+    Link: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     useNavigate: () => mockNavigate,
   }
 })
@@ -63,7 +63,7 @@ vi.mock("#/components/ui/page-guide", () => ({ PageGuide: () => <div /> }))
 
 vi.mock("@/features/talks/components/agent-selector", () => ({
   AGENT_PRESETS: [{ description: 'desc', id: 'engineer', name: '若手エンジニア' }],
-  AgentCard: ({ agent, onToggle }: any) => <div onClick={onToggle}>{agent.name}</div>
+  AgentCard: ({ agent, onToggle }: { agent: { name: string }; onToggle: () => void }) => <div onClick={onToggle}>{agent.name}</div>
 }))
 
 describe("TalksNew バリデーションテスト", () => {

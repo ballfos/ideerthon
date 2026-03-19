@@ -57,8 +57,8 @@ function RouteComponent() {
           {talks.map((talk) => (
             <Link
               key={talk.id}
-              // @ts-ignore
-              to={`/talks/${talk.id}`}
+              to="/talks/$talkId"
+              params={{ talkId: talk.id }}
               className="group relative flex w-full max-w-full items-center justify-between bg-white border-t-[2px] border-b-[8px] border-x-[3px] border-[#d5cba1] rounded-[24px] py-[1.2rem] px-6 shadow-sm transition-all duration-100 hover:brightness-[1.02] active:translate-y-[6px] active:border-b-[2px] active:mb-[6px] overflow-hidden"
               style={{
                 boxShadow: '0 4px 0 0 #d5cba1'
@@ -69,12 +69,12 @@ function RouteComponent() {
                   {talk.topic}
                 </h2>
                 <span className="text-[#8B5E3C] text-[10px] font-black mt-1 truncate">
-                  {talk.updatedAt ? new Date(talk.updatedAt.toMillis()).toLocaleString('ja-JP') : '未設定'}
+                  {new Date(talk.updatedAt.toMillis()).toLocaleString('ja-JP')}
                 </span>
               </div>
               <div className="flex items-center gap-4 ml-4">
                 <button
-                  onClick={(e) => handleDeleteTalk(e, talk.id)}
+                  onClick={(e) => { void handleDeleteTalk(e, talk.id); }}
                   className="p-2 text-[#c2baa6] hover:text-red-500 transition-colors pointer-events-auto"
                 >
                   <Trash2 className="h-5 w-5" />

@@ -43,11 +43,11 @@ export function MessageBubble({
         return () => { window.removeEventListener('resize', handleResize); };
     }, []);
 
-    const handleDragEnd = (_event: any, info: PanInfo) => {
+    const handleDragEnd = (_event: unknown, info: PanInfo) => {
         if (info.offset.x < -60) {
             if (onReply) onReply();
         }
-        controls.start({ x: 0 });
+        void controls.start({ x: 0 });
     };
 
     const handleContextMenu = (e: React.MouseEvent) => {

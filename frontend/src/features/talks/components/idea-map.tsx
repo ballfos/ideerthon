@@ -65,88 +65,89 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onDiscardIdea, onJumpToChat
             .filter(m => m.embedding && m.embedding.length > 0 && !m.isDiscarded && !m.isRecycled)
             .map(m => ({
                 description: (m.ideas && m.ideas.length > 0) ? m.ideas[0].details : m.text,
-                embedding: m.embedding!,
+                embedding: m.embedding ?? [],
                 id: m.id,
-                label: m.ideaName || m.agentName || "アイデア",
+                label: m.ideaName ?? m.agentName ?? "アイデア",
             }));
     }, [messages]);
 
     // Helper: Cosine Similarity
     const cosineSimilarity = (vecA: number[], vecB: number[]) => {
-        let dotProduct = 0;
-        let normA = 0;
-        let normB = 0;
-        for (let i = 0; i < vecA.length; i++) {
-            dotProduct += vecA[i] * vecB[i];
-            normA += vecA[i] ** 2;
-            normB += vecB[i] ** 2;
-        }
+        const dotProduct = vecA.reduce((sum, v, i) => sum + v * vecB[i], 0);
+        const normA = vecA.reduce((sum, v) => sum + v ** 2, 0);
+        const normB = vecB.reduce((sum, v) => sum + v ** 2, 0);
+
         if (normA === 0 || normB === 0) return 0;
         return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
     };
 
-    const calculatedLinks = useMemo(() => {
+    const calculatedLinks: LinkData[] = useMemo(() => {
         const threshold = 0.7;
-        const links: LinkData[] = [];
-
-        for (let i = 0; i < nodes.length; i++) {
-            for (let j = i + 1; j < nodes.length; j++) {
-                const similarity = cosineSimilarity(nodes[i].embedding, nodes[j].embedding);
+        return nodes.flatMap((nodeA, i) =>
+            nodes.slice(i + 1).flatMap(nodeB => {
+                const similarity = cosineSimilarity(nodeA.embedding, nodeB.embedding);
                 if (similarity >= threshold) {
-                    links.push({
+                    return [{
                         similarity: similarity,
-                        source: nodes[i].id,
-                        target: nodes[j].id
-                    });
+                        source: nodeA.id,
+                        target: nodeB.id
+                    } satisfies LinkData];
                 }
-            }
-        }
-        return links;
+                return [];
+            })
+        );
     }, [nodes]);
 
     // Clustering logic
     const kCount = Math.min(6, nodes.length);
-    const clusters = useMemo(() => {
+    /* eslint-disable functional/no-let */
+    const clusters: number[] = useMemo(() => {
         if (nodes.length === 0 || kCount === 0) return [];
         const k = kCount;
         // Simple K-means
         let centroids = nodes.slice(0, k).map(n => [...n.embedding]);
-        const assignment = new Array(nodes.length).fill(-1);
+        const assignment: number[] = new Array<number>(nodes.length).fill(-1);
 
         for (let iter = 0; iter < 10; iter++) {
             let changed = false;
             // E-step: assign
-            nodes.forEach((node, i) => {
+            for (let i = 0; i < nodes.length; i++) {
+                const node = nodes[i];
                 let minDist = Infinity;
                 let bestK = 0;
-                centroids.forEach((c, ki) => {
+                for (let ki = 0; ki < centroids.length; ki++) {
+                    const c = centroids[ki];
                     const dist = Math.sqrt(node.embedding.reduce((sum, val, idx) => sum + Math.pow(val - c[idx], 2), 0));
                     if (dist < minDist) {
                         minDist = dist;
                         bestK = ki;
                     }
-                });
+                }
                 if (assignment[i] !== bestK) {
                     assignment[i] = bestK;
                     changed = true;
                 }
-            });
+            }
 
             if (!changed) break;
 
             // M-step: update centroids
-            const dim = nodes[0].embedding.length;
-            const nextCentroids = Array.from({ length: k }, () => new Array(dim).fill(0));
-            const counts = new Array(k).fill(0);
-            nodes.forEach((node, i) => {
+            const dimCnt = nodes[0].embedding.length;
+            const nextCentroids = Array.from({ length: k }, () => new Array<number>(dimCnt).fill(0));
+            const counts = new Array<number>(k).fill(0);
+            for (let i = 0; i < nodes.length; i++) {
+                const node = nodes[i];
                 const ki = assignment[i];
-                node.embedding.forEach((val, idx) => nextCentroids[ki][idx] += val);
+                for (let idx = 0; idx < node.embedding.length; idx++) {
+                    nextCentroids[ki][idx] += node.embedding[idx];
+                }
                 counts[ki]++;
-            });
-            centroids = nextCentroids.map((c, ki) => counts[ki] > 0 ? c.map(v => v / counts[ki]) : centroids[ki]);
+            }
+            centroids = nextCentroids.map((c, ki) => counts[ki] > 0 ? c.map(v => v / (counts[ki])) : centroids[ki]);
         }
         return assignment;
     }, [nodes, kCount]);
+    /* eslint-enable functional/no-let */
 
     const getClusterParams = (clusterId: number) => {
         const palettes = [
@@ -187,8 +188,8 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onDiscardIdea, onJumpToChat
 
         const zoom = d3.zoom<SVGSVGElement, unknown>()
             .scaleExtent([0.1, 5])
-            .on('zoom', (event) => {
-                g.attr('transform', event.transform);
+            .on('zoom', (event: d3.D3ZoomEvent<SVGSVGElement, unknown>) => {
+                g.attr('transform', event.transform.toString());
             });
         svg.call(zoom);
 
@@ -203,8 +204,8 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onDiscardIdea, onJumpToChat
 
         const simulation = d3.forceSimulation<NodeData>(nodes)
             .velocityDecay(0.6)
-            .force('cluster', d3.forceX<NodeData>(d => clusterCenters[clusters[nodes.indexOf(d)]]?.x || width / 2).strength(0.3))
-            .force('clusterY', d3.forceY<NodeData>(d => clusterCenters[clusters[nodes.indexOf(d)]]?.y || height / 2).strength(0.3))
+            .force('cluster', d3.forceX<NodeData>(d => clusterCenters[clusters[nodes.indexOf(d)]]?.x ?? (width / 2)).strength(0.3))
+            .force('clusterY', d3.forceY<NodeData>(d => clusterCenters[clusters[nodes.indexOf(d)]]?.y ?? (height / 2)).strength(0.3))
             .force('charge', d3.forceManyBody().strength(width < 768 ? -200 : -150))
             .force('center', d3.forceCenter(width / 2, height / 2).strength(0.05))
             .force('collision', d3.forceCollide<NodeData>().radius(width < 768 ? 50 : 65));
@@ -293,22 +294,22 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onDiscardIdea, onJumpToChat
 
         simulation.on('tick', () => {
             link
-                .attr('x1', d => (d.source as any).x)
-                .attr('y1', d => (d.source as any).y)
-                .attr('x2', d => (d.target as any).x)
-                .attr('y2', d => (d.target as any).y);
+                .attr('x1', d => (d.source as unknown as NodeData).x ?? 0)
+                .attr('y1', d => (d.source as unknown as NodeData).y ?? 0)
+                .attr('x2', d => (d.target as unknown as NodeData).x ?? 0)
+                .attr('y2', d => (d.target as unknown as NodeData).y ?? 0);
 
-            node.attr('transform', d => `translate(${d.x!},${d.y!})`);
+            node.attr('transform', d => `translate(${d.x ?? 0},${d.y ?? 0})`);
         });
 
-        const getClientXY = (sourceEvent: any) => {
-            if (sourceEvent.clientX !== undefined) {
+        const getClientXY = (sourceEvent: MouseEvent | TouchEvent) => {
+            if ('clientX' in sourceEvent) {
                 return { x: sourceEvent.clientX, y: sourceEvent.clientY };
             }
-            if (sourceEvent.touches && sourceEvent.touches.length > 0) {
+            if ('touches' in sourceEvent && sourceEvent.touches.length > 0) {
                 return { x: sourceEvent.touches[0].clientX, y: sourceEvent.touches[0].clientY };
             }
-            if (sourceEvent.changedTouches && sourceEvent.changedTouches.length > 0) {
+            if ('changedTouches' in sourceEvent && sourceEvent.changedTouches.length > 0) {
                 return { x: sourceEvent.changedTouches[0].clientX, y: sourceEvent.changedTouches[0].clientY };
             }
             return { x: 0, y: 0 };
@@ -323,14 +324,14 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onDiscardIdea, onJumpToChat
             function dragged(event: d3.D3DragEvent<SVGGElement, NodeData, NodeData>) {
                 event.subject.fx = event.x;
                 event.subject.fy = event.y;
-                const { x, y } = getClientXY(event.sourceEvent);
+                const { x, y } = getClientXY(event.sourceEvent as MouseEvent | TouchEvent);
                 setIsOverTrash(checkTrashHit(x, y));
                 setIsOverRecycle(checkRecycleHit(x, y));
             }
             function dragended(event: d3.D3DragEvent<SVGGElement, NodeData, NodeData>) {
                 if (!event.active) sim.alphaTarget(0);
 
-                const { x, y } = getClientXY(event.sourceEvent);
+                const { x, y } = getClientXY(event.sourceEvent as MouseEvent | TouchEvent);
                 const overTrash = checkTrashHit(x, y);
                 const overRecycle = checkRecycleHit(x, y);
 
@@ -498,6 +499,7 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onDiscardIdea, onJumpToChat
                                 <h3 className="text-[10px] font-black text-[#a3967d] uppercase tracking-widest mb-4">Innovation Vector</h3>
                                 <div className="grid grid-cols-5 gap-2 opacity-60">
                                     {selectedNode.embedding.slice(0, 15).map((val, i) => (
+
                                         <div key={i} className="h-1 rounded-full bg-[#d5cba1]" style={{ width: `${Math.max(10, Math.min(100, Math.abs(val) * 1000))}%` }} />
                                     ))}
                                 </div>

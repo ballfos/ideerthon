@@ -70,7 +70,6 @@ function RouteComponent() {
               label="トーク履歴"
             />
             <BottomActionBarItem
-              // @ts-ignore
               to="/favorites"
               icon={<Star size={24} strokeWidth={2.5} />}
               label="お気に入り"

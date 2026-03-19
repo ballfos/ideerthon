@@ -36,7 +36,7 @@ function FavoritesPage() {
                 setLoading(false)
             }
         }
-        fetchFavorites()
+        void fetchFavorites()
     }, [])
 
     return (

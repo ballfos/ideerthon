@@ -12,7 +12,7 @@ vi.mock("@/features/talks", () => ({
 }))
 
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({ children, to }: any) => <a href={to}>{children}</a>
+  Link: ({ children, to }: { children: React.ReactNode; to: string }) => <a href={to}>{children}</a>
 }))
 
 describe("LatestTopics Component", () => {
@@ -38,10 +38,10 @@ describe("LatestTopics Component", () => {
       { id: "talk-1", topic: "テストトピック1", updatedAt: { nanoseconds: 0, seconds: 1710831600 } },
       { id: "talk-2", topic: "テストトピック2", updatedAt: { nanoseconds: 0, seconds: 1710831600 } }
     ]
-    vi.mocked(useTalks).mockReturnValue({ error: null, loading: false, talks: mockTalks as any })
-    
+    vi.mocked(useTalks).mockReturnValue({ error: null, loading: false, talks: mockTalks as unknown as import('@/features/talks').Talk[] })
+
     render(<LatestTopics />)
-    
+
     expect(screen.getByText("テストトピック1")).toBeInTheDocument()
     expect(screen.getByText("テストトピック2")).toBeInTheDocument()
   })

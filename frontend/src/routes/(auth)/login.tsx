@@ -23,7 +23,7 @@ export const Route = createFileRoute("/(auth)/login")({
 function RouteComponent() {
   const { loading, user } = useAuth();
   const search = Route.useSearch();
-  const redirectUrl = search.redirect || "/";
+  const redirectUrl = search.redirect ?? "/";
   const navigate = useNavigate();
   const router = useRouter();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -31,7 +31,7 @@ function RouteComponent() {
 
   useEffect(() => {
     if (!loading && user) {
-      navigate({ to: redirectUrl });
+      void navigate({ to: redirectUrl });
     }
   }, [user, loading, navigate, redirectUrl]);
 
@@ -40,7 +40,7 @@ function RouteComponent() {
       setIsLoggingIn(true);
       setErrorMsg(null);
       await signInWithGoogle();
-      router.invalidate();
+      void router.invalidate();
     } catch (error) {
       console.error(error);
       setErrorMsg("ログインに失敗しました。もう一度お試しください。");
@@ -87,7 +87,7 @@ function RouteComponent() {
             variant="green"
             size="lg"
             className="w-full gap-3 shadow-lg rounded-2xl py-6"
-            onClick={handleGoogleLogin}
+            onClick={() => { void handleGoogleLogin(); }}
             disabled={isLoggingIn}
           >
             {isLoggingIn ? (

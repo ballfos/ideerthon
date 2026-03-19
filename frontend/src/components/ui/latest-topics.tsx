@@ -138,41 +138,42 @@ function TopicZone({ borderColor, title, topics, zoneBg, zoneBorder }: TopicZone
               to={isRecommended ? "/talks/new" : "/talks/$talkId"}
               params={isRecommended ? undefined : { talkId: topic.id }}
               search={isRecommended ? {
-                  custom: topic.customAgent ? JSON.stringify(topic.customAgent) : undefined, 
-                  presets: topic.presetAgentIds?.join(','),
-                  topic: topic.title 
+                custom: topic.customAgent ? JSON.stringify(topic.customAgent) : undefined,
+                presets: topic.presetAgentIds?.join(','),
+                topic: topic.title
               } : undefined}
               className="group relative flex w-full max-w-full items-center gap-3 rounded-2xl bg-white p-3 border-t-[2px] border-b-[8px] border-x-[3px] transition-all duration-100 hover:brightness-[1.02] hover:bg-[color-mix(in_srgb,var(--theme-color),white_85%)] active:brightness-95 active:translate-y-[10px] active:shadow-none active:border-b-[2px] active:bg-[var(--theme-color)] active:mb-[6px] overflow-hidden"
               style={{
-                // @ts-ignore
+                // @ts-expect-error template literal CSS variables are not yet in React types
                 '--theme-color': borderColor,
                 borderColor: borderColor,
                 boxShadow: `0 4px 0 0 ${borderColor}`
               }}
             >
 
-            {/* アイコン（真円） */}
-            <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${topic.iconBg} border-2 border-white shadow-sm`}>
-              {/* アイコン関数を直接呼び出して描画 */}
-              {topic.icon({ size: 20 })}
-            </div>
+              {/* アイコン（真円） */}
+              <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${topic.iconBg} border-2 border-white shadow-sm`}>
+                {/* アイコン関数を直接呼び出して描画 */}
+                {topic.icon({ size: 20 })}
+              </div>
 
-            {/* テキスト部分 */}
-            <div className="flex flex-col overflow-hidden flex-1 min-w-0">
+              {/* テキスト部分 */}
+              <div className="flex flex-col overflow-hidden flex-1 min-w-0">
                 <span className="text-lg font-black tracking-wider text-[#5a4a35] truncate leading-tight group-active:text-white">
-                    {topic.title}
+                  {topic.title}
                 </span>
                 <span className="text-xs font-bold text-gray-500 truncate mt-0.5 group-active:text-white">
-                    {topic.description}
+                  {topic.description}
                 </span>
-            </div>
+              </div>
 
-            {/* 矢印アイコン */}
-            <div className="ml-auto shrink-0 flex items-center self-end pb-1">
-              <span className="font-black mr-1 text-xl group-active:text-white" style={{ color: borderColor }}>{'>'}</span>
-            </div>
-          </Link>
-        )})}
+              {/* 矢印アイコン */}
+              <div className="ml-auto shrink-0 flex items-center self-end pb-1">
+                <span className="font-black mr-1 text-xl group-active:text-white" style={{ color: borderColor }}>{'>'}</span>
+              </div>
+            </Link>
+          )
+        })}
       </div>
     </div>
   )
@@ -192,32 +193,30 @@ export function LatestTopics() {
   if (talks.length === 0) {
     return (
       <div id="latest-topics">
-      <div className="mx-auto w-full max-w-[500px] lg:max-w-none bg-[#fcfaf2]/50 py-12 px-4 border-2 border-[#e8eed2] font-yusei flex flex-col items-center justify-center gap-6">
-        <h2 className="text-2xl font-black tracking-widest text-[#5a4a35]">最新のトピック</h2>
-        <div className="flex flex-col items-center gap-2 opacity-60">
+        <div className="mx-auto w-full max-w-[500px] lg:max-w-none bg-[#fcfaf2]/50 py-12 px-4 border-2 border-[#e8eed2] font-yusei flex flex-col items-center justify-center gap-6">
+          <h2 className="text-2xl font-black tracking-widest text-[#5a4a35]">最新のトピック</h2>
+          <div className="flex flex-col items-center gap-2 opacity-60">
             <Lightbulb className="h-10 w-10 text-[#dbe3c6]" />
             <p className="text-sm font-bold text-[#7a6446]">履歴がまだありません</p>
-        </div>
-        <Link 
+          </div>
+          <Link
             to="/talks/new"
             search={{ custom: undefined, presets: undefined, topic: undefined }}
             className="w-full max-w-[280px]"
-        >
+          >
             <Button variant="yellow" className="w-full py-6 text-lg shadow-md rounded-2xl group">
-                <Plus className="mr-2 h-5 w-5 group-hover:rotate-90 transition-transform" />
-                トークをはじめる!!
+              <Plus className="mr-2 h-5 w-5 group-hover:rotate-90 transition-transform" />
+              トークをはじめる!!
             </Button>
-        </Link>
-      </div>
+          </Link>
+        </div>
       </div>
     )
   }
 
   // 最新3件を表示するように変換
   const latestTalks: Topic[] = talks.slice(0, 3).map((talk) => ({
-    description: talk.updatedAt 
-        ? `${new Date(talk.updatedAt.seconds * 1000).toLocaleString('ja-JP')} に更新`
-        : 'まもなく開始',
+    description: `${new Date(talk.updatedAt.seconds * 1000).toLocaleString('ja-JP')} に更新`,
     icon: (props) => <MessageSquare {...props} className="text-[#8c662d]" />,
     iconBg: 'bg-[#fcfaf2]',
     id: talk.id,
@@ -227,13 +226,13 @@ export function LatestTopics() {
 
   return (
     <div id="latest-topics">
-    <TopicZone
-      title="最新のトピック"
-      topics={latestTalks}
-      zoneBg="bg-[#fcfaf2]/50"
-      zoneBorder="border-[#e8eed2]"
-      borderColor="#d5cba1"
-    />
+      <TopicZone
+        title="最新のトピック"
+        topics={latestTalks}
+        zoneBg="bg-[#fcfaf2]/50"
+        zoneBorder="border-[#e8eed2]"
+        borderColor="#d5cba1"
+      />
     </div>
   )
 }
@@ -249,11 +248,11 @@ export function RecommendedTopics() {
     <div id="recommended-topics">
       <TopicZone
         title="おすすめのトピック"
-      topics={randomTopics}
-      zoneBg="bg-gray-50"
-      zoneBorder="border-gray-200"
-      borderColor="#9ca3af" // gray-400
-    />
+        topics={randomTopics}
+        zoneBg="bg-gray-50"
+        zoneBorder="border-gray-200"
+        borderColor="#9ca3af" // gray-400
+      />
     </div>
   )
 }

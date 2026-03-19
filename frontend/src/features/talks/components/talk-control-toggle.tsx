@@ -25,7 +25,7 @@ export function TalkControlToggle({ className, status, talkId }: TalkControlTogg
                 // But we must initiate the call.
                 const stream = talkClient.startTalkStream({ talkId });
                 // Consume the stream to keep it alive
-                (async () => {
+                void (async () => {
                     try {
                         for await (const _ of stream) {
                             // Messages are saved to Firestore by backend, 
@@ -46,7 +46,7 @@ export function TalkControlToggle({ className, status, talkId }: TalkControlTogg
 
     return (
         <button
-            onClick={handleToggle}
+            onClick={() => { void handleToggle(); }}
             disabled={loading}
             className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-full font-bold transition-all active:scale-95 shadow-md disabled:opacity-50",

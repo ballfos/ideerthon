@@ -87,7 +87,10 @@ export const AgentCard: React.FC<AgentCardProps> = ({
   const showDescError = isDescTouched && isDescEmpty
 
   return (
-    <div className={`bg-white rounded-[24px] border-2 transition-all ${isOpen ? 'border-[#ffcb05] shadow-md ring-4 ring-[#ffcb05]/10' : 'border-[#d5cba1] shadow-sm'}`}>
+    <div className={cn(
+      "bg-white rounded-[24px] border-2 transition-all shadow-sm",
+      isOpen ? "border-[#ffcb05] shadow-md ring-4 ring-[#ffcb05]/10" : "border-[#d5cba1]"
+    )}>
       <div
         className="p-4 flex items-center justify-between cursor-pointer"
         onClick={onToggle}

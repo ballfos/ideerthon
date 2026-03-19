@@ -19,7 +19,7 @@ interface PageGuideProps {
 
 export function PageGuide({ onClose, steps: propSteps }: PageGuideProps) {
     const { steps: contextSteps } = useGuide();
-    const steps = propSteps || contextSteps;
+    const steps = propSteps ?? contextSteps;
 
     const [isOpen, setIsOpen] = useState(false);
     const [currentStep, setCurrentStep] = useState(0);
@@ -46,21 +46,16 @@ export function PageGuide({ onClose, steps: propSteps }: PageGuideProps) {
             const height = window.innerHeight;
             const bubbleWidth = Math.min(320, width - 40);
 
-            let top: number | string = 'auto';
-            let bottom: number | string = 'auto';
-            const left: number | string = Math.max(20, Math.min(width - bubbleWidth - 20, rect.left + (rect.width / 2) - (bubbleWidth / 2)));
+            const isAbove = (rect.bottom + 250 > height && rect.top > 250);
+            const isCentered = !isAbove && (rect.bottom + 250 > height);
 
-            if (rect.bottom + 250 > height && rect.top > 250) {
-                // Not enough space below, and enough space above: show above
-                bottom = (height - rect.top) + 20;
-            } else if (rect.bottom + 250 > height) {
-                // Not enough space below AND above: center vertically
-                top = '50%';
+            const left = Math.max(20, Math.min(width - bubbleWidth - 20, rect.left + (rect.width / 2) - (bubbleWidth / 2)));
+            const top = isCentered ? '50%' : (isAbove ? 'auto' : rect.bottom + 20);
+            const bottom = isAbove ? (height - rect.top) + 20 : 'auto';
+
+            if (isCentered) {
                 setBubbleStyle({ left, top, transform: 'translateY(-50%)', width: bubbleWidth });
                 return;
-            } else {
-                // Show below
-                top = rect.bottom + 20;
             }
 
             setBubbleStyle({ bottom, left, top, width: bubbleWidth });
@@ -166,9 +161,9 @@ export function PageGuide({ onClose, steps: propSteps }: PageGuideProps) {
 
                                     <div className="flex items-center justify-between mt-auto">
                                         <div className="flex gap-1">
-                                            {steps.map((_, i) => (
+                                            {steps.map((s, i) => (
                                                 <div
-                                                    key={i}
+                                                    key={s.targetId}
                                                     className={cn(
                                                         "h-2 w-2 rounded-full transition-all",
                                                         i === currentStep ? "bg-[#ffcb05] w-4" : "bg-[#f9f1c8]"

@@ -32,7 +32,8 @@ function RecyclePage() {
         try {
             const res = await messageClient.listRecycledIdeas({ limit: 20 })
             // Shuffle locally for extra randomness if the backend set is small
-            const shuffled = [...res.ideas].sort(() => Math.random() - 0.5)
+            const HALF = 0.5
+            const shuffled = [...res.ideas].sort(() => Math.random() - HALF)
             setRecycledIdeas(shuffled)
         } catch (err) {
             console.error('Failed to fetch recycled ideas:', err)
@@ -42,7 +43,7 @@ function RecyclePage() {
     }
 
     useEffect(() => {
-        fetchRecycled()
+        void fetchRecycled()
     }, [])
 
     return (
@@ -59,7 +60,7 @@ function RecyclePage() {
                 </div>
                 <Button
                     variant="yellow"
-                    onClick={fetchRecycled}
+                    onClick={() => { void fetchRecycled(); }}
                     className="flex items-center gap-2 rounded-2xl shadow-md"
                 >
                     <RefreshCcw size={18} className={loading ? "animate-spin" : ""} />

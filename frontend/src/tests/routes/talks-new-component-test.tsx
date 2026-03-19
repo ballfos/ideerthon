@@ -23,13 +23,14 @@ describe("AgentCard バリデーションテスト", () => {
   it("名前と役割に正しい maxLength が設定されていること", () => {
     // isOpen=true でレンダリングして入力を表示させる
     render(
-      <AgentCard 
-        agent={mockAgent} 
-        isOpen={true} 
-        onToggle={vi.fn()} 
-        onUpdate={vi.fn()} 
-        onApplyPreset={vi.fn()} 
-        onRemove={vi.fn()} 
+      <AgentCard
+        agent={mockAgent}
+        isOpen={true}
+        onToggle={vi.fn()}
+        onUpdate={vi.fn()}
+        onApplyPreset={vi.fn()}
+        onRemove={vi.fn()}
+        showRemove={true}
       />
     )
 
@@ -42,13 +43,14 @@ describe("AgentCard バリデーションテスト", () => {
 
   it("名前と役割の文字数カウントが正しく表示されること", () => {
     render(
-      <AgentCard 
-        agent={mockAgent} 
-        isOpen={true} 
-        onToggle={vi.fn()} 
-        onUpdate={vi.fn()} 
-        onApplyPreset={vi.fn()} 
-        onRemove={vi.fn()} 
+      <AgentCard
+        agent={mockAgent}
+        isOpen={true}
+        onToggle={vi.fn()}
+        onUpdate={vi.fn()}
+        onApplyPreset={vi.fn()}
+        onRemove={vi.fn()}
+        showRemove={true}
       />
     )
 

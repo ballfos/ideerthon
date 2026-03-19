@@ -13,14 +13,14 @@ const { mockNavigate, mockSetSteps, mockUseSearch } = vi.hoisted(() => ({
 }))
 
 vi.mock("@tanstack/react-router", async (importOriginal) => {
-  const actual = await importOriginal() as any
+  const actual = await importOriginal() as object
   return {
     ...actual,
     createFileRoute: () => () => ({
       useNavigate: () => mockNavigate,
       useSearch: mockUseSearch,
     }),
-    Link: ({ children }: any) => <div>{children}</div>,
+    Link: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     useNavigate: () => mockNavigate,
   }
 })
@@ -63,7 +63,7 @@ describe("TalksNew テーマ文字数検証 (100文字)", () => {
     render(<RouteComponent />)
     const topicInput = screen.getByPlaceholderText(/例\) 新しいキャンプ用品/i)
     expect(topicInput).toHaveAttribute("maxLength", "100")
-    
+
     fireEvent.change(topicInput, { target: { value: "テスト" } })
     expect(screen.getByText("3 / 100")).toBeInTheDocument()
   })
