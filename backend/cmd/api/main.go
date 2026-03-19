@@ -8,7 +8,8 @@ import (
 	"connectrpc.com/connect"
 	firebase "firebase.google.com/go/v4"
 	"github.com/rs/cors"
-	"google.golang.org/api/option"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 
 	"github.com/ballfos/ideerthon/gen/proto/api/v1/apiv1connect"
 	"github.com/ballfos/ideerthon/internal/config"
@@ -26,7 +27,7 @@ func main() {
 
 	// Firebase App Initialization
 	conf := &firebase.Config{ProjectID: cfg.ProjectID}
-	app, err := firebase.NewApp(ctx, conf, option.WithoutAuthentication())
+	app, err := firebase.NewApp(ctx, conf)
 	if err != nil {
 		log.Fatalf("error initializing firebase app: %v\n", err)
 	}
@@ -69,14 +70,29 @@ func main() {
 		allowedOrigin = "http://localhost:3000"
 	}
 
+	// Connect RPC requires specific headers: Content-Type, Connect-Protocol-Version,
+	// Authorization (Firebase ID token), and Connect-Timeout-Ms.
 	corsHandler := cors.New(cors.Options{
 		AllowedOrigins: []string{allowedOrigin},
 		AllowedMethods: []string{"GET", "POST", "OPTIONS"},
-		AllowedHeaders: []string{"*"},
+		AllowedHeaders: []string{
+			"Authorization",
+			"Content-Type",
+			"Connect-Protocol-Version",
+			"Connect-Timeout-Ms",
+			"X-Grpc-Web",
+			"Grpc-Timeout",
+			"X-User-Agent",
+		},
+		ExposedHeaders:   []string{"Grpc-Status", "Grpc-Message", "Grpc-Status-Details-Bin"},
+		AllowCredentials: true,
 	}).Handler(mux)
 
 	// Start Server
-	if err := http.ListenAndServe(":"+cfg.Port, corsHandler); err != nil {
+	// h2c enables HTTP/2 over cleartext (no TLS), required for gRPC / Connect streaming.
+	// Cloud Run terminates TLS and forwards traffic via h2c to this server.
+	h2cHandler := h2c.NewHandler(corsHandler, &http2.Server{})
+	if err := http.ListenAndServe(":"+cfg.Port, h2cHandler); err != nil {
 		log.Fatalf("server failed: %v", err)
 	}
 }
