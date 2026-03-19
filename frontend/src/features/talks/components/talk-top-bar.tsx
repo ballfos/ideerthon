@@ -6,12 +6,14 @@ import { Header } from "#/components/ui/header";
 export interface TalkTopBarProps extends React.HTMLAttributes<HTMLDivElement> {
     title: string;
     titleClassName?: string;
+    helpGuide?: React.ReactNode;
 }
 
 export function TalkTopBar({
     className,
     title,
     titleClassName,
+    helpGuide,
     ...props
 }: TalkTopBarProps) {
     return (
@@ -27,6 +29,7 @@ export function TalkTopBar({
                     <ArrowLeft className="h-6 w-6" strokeWidth={3} />
                 </Link>
             }
+            helpGuide={helpGuide}
             {...props}
         />
     );

@@ -139,11 +139,12 @@ func (x *Message) GetIsRecycled() bool {
 }
 
 type SendMessageRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TalkId        string                 `protobuf:"bytes,1,opt,name=talk_id,json=talkId,proto3" json:"talk_id,omitempty"`
-	Text          string                 `protobuf:"bytes,2,opt,name=text,proto3" json:"text,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	TalkId           string                 `protobuf:"bytes,1,opt,name=talk_id,json=talkId,proto3" json:"talk_id,omitempty"`
+	Text             string                 `protobuf:"bytes,2,opt,name=text,proto3" json:"text,omitempty"`
+	ReplyToMessageId string                 `protobuf:"bytes,3,opt,name=reply_to_message_id,json=replyToMessageId,proto3" json:"reply_to_message_id,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *SendMessageRequest) Reset() {
@@ -186,6 +187,13 @@ func (x *SendMessageRequest) GetTalkId() string {
 func (x *SendMessageRequest) GetText() string {
 	if x != nil {
 		return x.Text
+	}
+	return ""
+}
+
+func (x *SendMessageRequest) GetReplyToMessageId() string {
+	if x != nil {
+		return x.ReplyToMessageId
 	}
 	return ""
 }
@@ -762,10 +770,11 @@ const file_proto_api_v1_message_proto_rawDesc = "" +
 	"\fis_discarded\x18\t \x01(\bR\visDiscarded\x12\x1f\n" +
 	"\vis_recycled\x18\n" +
 	" \x01(\bR\n" +
-	"isRecycled\"A\n" +
+	"isRecycled\"p\n" +
 	"\x12SendMessageRequest\x12\x17\n" +
 	"\atalk_id\x18\x01 \x01(\tR\x06talkId\x12\x12\n" +
-	"\x04text\x18\x02 \x01(\tR\x04text\"@\n" +
+	"\x04text\x18\x02 \x01(\tR\x04text\x12-\n" +
+	"\x13reply_to_message_id\x18\x03 \x01(\tR\x10replyToMessageId\"@\n" +
 	"\x13SendMessageResponse\x12)\n" +
 	"\amessage\x18\x01 \x01(\v2\x0f.api.v1.MessageR\amessage\"O\n" +
 	"\x15ToggleFavoriteRequest\x12\x17\n" +

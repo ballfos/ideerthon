@@ -1,6 +1,6 @@
 import * as React from "react";
 import { cn } from "#/utils/ui/cn";
-import { SendHorizontal } from "lucide-react";
+import { SendHorizontal, X, Reply } from "lucide-react";
 import { Button } from "#/components/ui/button";
 
 export interface MessageInputProps {
@@ -9,6 +9,8 @@ export interface MessageInputProps {
     onSend: () => void;
     placeholder?: string;
     className?: string;
+    replyInfo?: { text: string; sender: string } | null;
+    onCancelReply?: () => void;
 }
 
 export function MessageInput({
@@ -17,6 +19,8 @@ export function MessageInput({
     onSend,
     placeholder = "メッセージを入力...",
     className,
+    replyInfo,
+    onCancelReply,
 }: MessageInputProps) {
     const [isComposing, setIsComposing] = React.useState(false);
 
@@ -32,8 +36,32 @@ export function MessageInput({
     };
 
     return (
-        <div className={cn("flex w-full items-end gap-2 bg-[#f9f1c8] p-4 border-t-2 border-[#d5cba1] shadow-[0_-4px_12px_rgba(0,0,0,0.05)]", className)}>
-            <div className="relative flex-1">
+        <div className={cn("flex flex-col w-full bg-[#f9f1c8] border-t-2 border-[#d5cba1] shadow-[0_-4px_12px_rgba(0,0,0,0.05)]", className)}>
+            {/* Reply Preview */}
+            {replyInfo && (
+                <div className="flex items-center justify-between px-4 py-2 bg-[#ffffff]/60 border-b border-[#d5cba1] animate-in slide-in-from-bottom-2 duration-300">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                        <Reply className="h-3 w-3 text-[#a3967d] shrink-0" />
+                        <div className="overflow-hidden">
+                            <span className="text-[10px] font-black text-[#a3967d] uppercase truncate block">
+                                Replying to {replyInfo.sender}
+                            </span>
+                            <p className="text-[11px] text-[#7a6446] font-bold truncate">
+                                {replyInfo.text}
+                            </p>
+                        </div>
+                    </div>
+                    <button 
+                        onClick={onCancelReply}
+                        className="p-1 hover:bg-[#d5cba1]/30 rounded-full transition-colors"
+                    >
+                        <X className="h-4 w-4 text-[#a3967d]" />
+                    </button>
+                </div>
+            )}
+
+            <div className="flex w-full items-end gap-2 p-4">
+                <div className="relative flex-1">
                 <textarea
                     rows={1}
                     value={value}
@@ -42,9 +70,13 @@ export function MessageInput({
                     onCompositionStart={() => setIsComposing(true)}
                     onCompositionEnd={() => setIsComposing(false)}
                     placeholder={placeholder}
+                    maxLength={100}
                     className="w-full resize-none rounded-2xl border-2 border-[#d5cba1] bg-white px-4 py-2.5 text-sm font-bold text-[#7a6446] placeholder-[#c2baa6] focus:border-[#4b9635] focus:outline-none transition-colors"
                     style={{ minHeight: "44px", maxHeight: "120px" }}
                 />
+                <div className="absolute bottom-[-14px] right-2 text-[9px] font-black text-[#a3967d] opacity-50">
+                    {value.length}/100
+                </div>
             </div>
             <Button
                 size="icon"
@@ -55,6 +87,7 @@ export function MessageInput({
             >
                 <SendHorizontal className="h-5 w-5" />
             </Button>
+            </div>
         </div>
     );
 }

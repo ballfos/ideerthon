@@ -138,9 +138,13 @@ export const AgentCard: React.FC<AgentCardProps> = ({
                 type="text"
                 value={agent.name}
                 onChange={(e) => onUpdate('name', e.target.value)}
+                maxLength={15}
                 className="w-full bg-white rounded-xl px-4 py-3 text-sm font-bold border-2 border-[#d5cba1] focus:outline-none focus:border-[#ffcb05] transition-colors"
                 placeholder="例: 村の案内人 (ファシリテーター)"
               />
+              <div className="mt-1 text-right text-[10px] font-black text-[#a3967d] opacity-60">
+                {agent.name.length} / 15
+              </div>
             </div>
             <div className="space-y-1">
               <label className="text-[10px] font-black text-[#a3967d] tracking-widest uppercase ml-1">この子の役割</label>
@@ -148,9 +152,13 @@ export const AgentCard: React.FC<AgentCardProps> = ({
                 value={agent.description}
                 onChange={(e) => onUpdate('description', e.target.value)}
                 rows={2}
-                className="w-full bg-white rounded-xl px-4 py-3 text-sm font-bold border-2 border-[#d5cba1] focus:outline-none focus:border-[#ffcb05] transition-colors resize-none overflow-hidden"
+                maxLength={100}
+                className="w-full bg-white rounded-xl px-4 py-3 text-sm font-bold border-2 border-[#d5cba1] focus:outline-none focus:border-[#ffcb05] transition-colors resize-none"
                 placeholder="この子の性格や、話し方の特徴を入力してください"
               />
+              <div className="mt-1 text-right text-[10px] font-black text-[#a3967d] opacity-60">
+                {agent.description.length} / 100
+              </div>
             </div>
           </div>
         </div>

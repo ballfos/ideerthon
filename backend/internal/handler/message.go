@@ -51,10 +51,11 @@ func (h *MessageHandler) SendMessage(
 
 	// Firestore data
 	data := map[string]interface{}{
-		"uid":       uid,
-		"text":      req.Msg.Text,
-		"createdAt": now,
-		"talkId":    req.Msg.TalkId,
+		"uid":                uid,
+		"text":               req.Msg.Text,
+		"createdAt":          now,
+		"talkId":             req.Msg.TalkId,
+		"replyToMessageId":   req.Msg.ReplyToMessageId,
 	}
 
 	// Save to Firestore: talks/{talkId}/messages/{messageId}

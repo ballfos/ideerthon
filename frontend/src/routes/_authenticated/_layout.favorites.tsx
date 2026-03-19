@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import { useGuide } from '@/features/guide/GuideContext'
 import { messageClient } from '#/lib/api'
 import { type Message } from '#/gen/proto/api/v1/message_pb'
 import { Star } from 'lucide-react'
@@ -11,6 +12,18 @@ export const Route = createFileRoute('/_authenticated/_layout/favorites')({
 function FavoritesPage() {
     const [favorites, setFavorites] = useState<Message[]>([])
     const [loading, setLoading] = useState(true)
+    const { setSteps } = useGuide()
+
+    useEffect(() => {
+        setSteps([
+            {
+                targetId: 'favorites-list',
+                title: 'お気に入り',
+                description: 'トークの中で「星」をつけたメッセージがここに集まります。後で見返したい大切なヒントはどんどんお気に入り登録しましょう！'
+            }
+        ])
+        return () => setSteps([])
+    }, [setSteps])
 
     useEffect(() => {
         const fetchFavorites = async () => {
@@ -40,12 +53,12 @@ function FavoritesPage() {
                         読み込み中...
                     </div>
                 ) : favorites.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-[#c2baa6] text-center border-2 border-dashed border-[#e8eed2] rounded-[32px] bg-[#fcfaf2]/30">
+                    <div id="favorites-list" className="flex flex-col items-center justify-center py-12 text-[#c2baa6] text-center border-2 border-dashed border-[#e8eed2] rounded-[32px] bg-[#fcfaf2]/30">
                         <Star className="h-12 w-12 mb-4 opacity-20" />
                         <p className="font-black text-lg">お気に入り登録された<br />メッセージはありません</p>
                     </div>
                 ) : (
-                    <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
+                    <div id="favorites-list" className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
                         {favorites.map((msg) => (
                             <Link
                                 key={msg.id}

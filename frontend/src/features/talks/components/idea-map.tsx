@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import * as d3 from 'd3';
-import { Trash2, RefreshCcw } from 'lucide-react';
+import { Trash2, RefreshCcw, Sparkles, HelpCircle } from 'lucide-react';
 import { cn } from '#/utils/ui/cn';
 
 interface NodeData {
@@ -43,6 +43,7 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat, onDiscardIdea
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
     const [isOverTrash, setIsOverTrash] = useState(false);
     const [isOverRecycle, setIsOverRecycle] = useState(false);
+    const [showRecycleHelp, setShowRecycleHelp] = useState(false);
 
     const checkTrashHit = (x: number, y: number) => {
         const bin = document.getElementById('trash-bin');
@@ -297,8 +298,21 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat, onDiscardIdea
                 .attr('x2', d => (d.target as any).x)
                 .attr('y2', d => (d.target as any).y);
 
-            node.attr('transform', d => `translate(${d.x!},${d.y!})`);
+        node.attr('transform', d => `translate(${d.x!},${d.y!})`);
         });
+
+        const getClientXY = (sourceEvent: any) => {
+            if (sourceEvent.clientX !== undefined) {
+                return { x: sourceEvent.clientX, y: sourceEvent.clientY };
+            }
+            if (sourceEvent.touches && sourceEvent.touches.length > 0) {
+                return { x: sourceEvent.touches[0].clientX, y: sourceEvent.touches[0].clientY };
+            }
+            if (sourceEvent.changedTouches && sourceEvent.changedTouches.length > 0) {
+                return { x: sourceEvent.changedTouches[0].clientX, y: sourceEvent.changedTouches[0].clientY };
+            }
+            return { x: 0, y: 0 };
+        };
 
         function drag(sim: d3.Simulation<NodeData, undefined>) {
             function dragstarted(event: d3.D3DragEvent<SVGGElement, NodeData, NodeData>) {
@@ -309,14 +323,16 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat, onDiscardIdea
             function dragged(event: d3.D3DragEvent<SVGGElement, NodeData, NodeData>) {
                 event.subject.fx = event.x;
                 event.subject.fy = event.y;
-                setIsOverTrash(checkTrashHit(event.sourceEvent.clientX, event.sourceEvent.clientY));
-                setIsOverRecycle(checkRecycleHit(event.sourceEvent.clientX, event.sourceEvent.clientY));
+                const { x, y } = getClientXY(event.sourceEvent);
+                setIsOverTrash(checkTrashHit(x, y));
+                setIsOverRecycle(checkRecycleHit(x, y));
             }
             function dragended(event: d3.D3DragEvent<SVGGElement, NodeData, NodeData>) {
                 if (!event.active) sim.alphaTarget(0);
                 
-                const overTrash = checkTrashHit(event.sourceEvent.clientX, event.sourceEvent.clientY);
-                const overRecycle = checkRecycleHit(event.sourceEvent.clientX, event.sourceEvent.clientY);
+                const { x, y } = getClientXY(event.sourceEvent);
+                const overTrash = checkTrashHit(x, y);
+                const overRecycle = checkRecycleHit(x, y);
 
                 if (overTrash && onDiscardIdea) {
                     onDiscardIdea(event.subject.id);
@@ -355,7 +371,31 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat, onDiscardIdea
 
                 <div className="absolute top-3 right-3 md:top-6 md:right-6 z-20 flex flex-row items-start gap-2 md:gap-4 pointer-events-none">
                     {/* リサイクルボックス */}
-                    <div className="flex flex-col items-center gap-2">
+                    <div className="flex flex-col items-center gap-2 relative">
+                        {/* Help Button */}
+                        <button 
+                            className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-md border border-[#d5cba1] text-[#a3967d] hover:text-[#7a6446] transition-colors pointer-events-auto z-40 opacity-60 hover:opacity-100"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setShowRecycleHelp(!showRecycleHelp);
+                            }}
+                        >
+                            <HelpCircle size={14} />
+                        </button>
+
+                        {/* Help Tooltip */}
+                        {showRecycleHelp && (
+                            <div className="absolute top-full mt-3 right-0 w-64 bg-white/95 backdrop-blur-sm p-4 rounded-2xl border-2 border-[#ffcb05] shadow-xl z-50 pointer-events-auto">
+                                <div className="flex items-start gap-2">
+                                    <Sparkles className="text-[#ffcb05] flex-shrink-0" size={18} />
+                                    <p className="text-[11px] font-black text-[#7a6446] leading-relaxed">
+                                        リサイクルしたアイデアは自分の一覧から削除され、「リサイクルボックス」に入ることで村の全員が共有できるようになります。
+                                    </p>
+                                </div>
+                                <div className="absolute -top-2 right-4 w-4 h-4 bg-white border-t-2 border-l-2 border-[#ffcb05] rotate-45" />
+                            </div>
+                        )}
+
                         <div 
                             id="recycle-bin"
                             className={cn(

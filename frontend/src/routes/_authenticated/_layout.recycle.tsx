@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import { useGuide } from '@/features/guide/GuideContext'
 import { messageClient } from '#/lib/api'
 import type { RecycledIdea } from '#/gen/proto/api/v1/message_pb'
 import { RefreshCcw, Box, Sparkles } from 'lucide-react'
@@ -12,6 +13,18 @@ export const Route = createFileRoute('/_authenticated/_layout/recycle')({
 function RecyclePage() {
     const [recycledIdeas, setRecycledIdeas] = useState<RecycledIdea[]>([])
     const [loading, setLoading] = useState(true)
+    const { setSteps } = useGuide()
+
+    useEffect(() => {
+        setSteps([
+            {
+                targetId: 'recycle-list',
+                title: 'リサイクルボックス',
+                description: 'ここには、村の誰かが手放したアイデアの「かけら」が流れてきます。自分では思いつかないような意外なヒントが見つかるかもしれません！'
+            }
+        ])
+        return () => setSteps([])
+    }, [setSteps])
 
     const fetchRecycled = async () => {
         setLoading(true)
@@ -58,12 +71,12 @@ function RecyclePage() {
                     かけらを探しています...🦌
                 </div>
             ) : recycledIdeas.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 text-[#c2baa6] text-center border-4 border-dashed border-[#e8eed2] rounded-[40px] bg-white/30">
+                <div id="recycle-list" className="flex flex-col items-center justify-center py-20 text-[#c2baa6] text-center border-4 border-dashed border-[#e8eed2] rounded-[40px] bg-white/30">
                     <Box size={64} className="mb-4 opacity-10" />
                     <p className="font-black text-xl">まだリサイクルされたアイデアは<br />ありません</p>
                 </div>
             ) : (
-                <div className="flex flex-col gap-4">
+                <div id="recycle-list" className="flex flex-col gap-4">
                     {recycledIdeas.map((idea) => (
                         <div
                             key={idea.id}

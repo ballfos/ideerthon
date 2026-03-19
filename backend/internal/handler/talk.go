@@ -241,13 +241,68 @@ func (h *TalkHandler) StartTalkStream(
 			return combined[i].Time.Before(combined[j].Time)
 		})
 
+		// Extra context for replies
+		var replyContext string
+		var aiReplyInfo *ReplyContext
+		if len(msgDocs) > 0 {
+			latestMsg := msgDocs[0].Data()
+			replyID, _ := latestMsg["replyToMessageId"].(string)
+			if replyID != "" {
+				// Fetch direct reply target
+				replySnap, err := docRef.Collection("messages").Doc(replyID).Get(ctx)
+				if err == nil {
+					rd := replySnap.Data()
+					rText, _ := rd["text"].(string)
+					rSender, _ := rd["agentName"].(string)
+					if rSender == "" { rSender = "ユーザー" }
+					rTime, _ := rd["createdAt"].(time.Time)
+
+					aiReplyInfo = &ReplyContext{
+						ReplyTargetText:   rText,
+						ReplyTargetSender: rSender,
+					}
+
+					replyContext += fmt.Sprintf("\n--- REPLY TARGET ---\n[%s]: %s\n", rSender, rText)
+
+					// Fetch previous context of the reply target
+					prevIter := docRef.Collection("messages").
+						Where("createdAt", "<", rTime).
+						OrderBy("createdAt", firestore.Desc).
+						Limit(1).
+						Documents(ctx)
+					prevDocs, err := prevIter.GetAll()
+					if err == nil && len(prevDocs) > 0 {
+						pd := prevDocs[0].Data()
+						pText, _ := pd["text"].(string)
+						pSender, _ := pd["agentName"].(string)
+						if pSender == "" {
+							pSender = "ユーザー"
+						}
+						aiReplyInfo.PreviousContext = pText
+						replyContext = fmt.Sprintf("\n--- PRE-REPLY CONTEXT ---\n[%s]: %s", pSender, pText) + replyContext
+					}
+				}
+			}
+		}
+
 		recentContext := ""
-		for _, m := range combined {
-			recentContext += fmt.Sprintf("[%s]: %s\n", m.Sender, m.Text)
+		for i, m := range combined {
+			msgText := m.Text
+			// Format the very last message specially if it's a reply
+			if i == len(combined)-1 && aiReplyInfo != nil {
+				msgText = fmt.Sprintf("「%s」に対して「%s」", aiReplyInfo.ReplyTargetText, m.Text)
+				aiReplyInfo.ReplyText = m.Text // Update the actual reply text for the refined system prompt
+			}
+			recentContext += fmt.Sprintf("[%s]: %s\n", m.Sender, msgText)
+		}
+
+		if replyContext != "" {
+			recentContext += "\n[IMPORTANT: The latest message is a reply to a previous discussion point. Focus your response based on this specific context:]"
+			recentContext += replyContext
 		}
 
 		// AI Response
-		aiRes, err := h.ai.GenerateResponse(ctx, agentName, agentDesc, topic, whiteboard, recentContext)
+		aiRes, err := h.ai.GenerateResponse(ctx, agentName, agentDesc, topic, whiteboard, recentContext, aiReplyInfo)
 		if err != nil {
 			fmt.Printf("AI error: %v\n", err)
 			aiRes = map[string]interface{}{
