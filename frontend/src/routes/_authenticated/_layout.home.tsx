@@ -1,11 +1,31 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { LatestTopics, RecommendedTopics } from '#/components/ui/latest-topics'
+import { useGuide } from '@/features/guide/GuideContext'
+import { useEffect } from 'react'
 
 export const Route = createFileRoute('/_authenticated/_layout/home')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
+  const { setSteps } = useGuide()
+
+  useEffect(() => {
+    setSteps([
+      {
+        targetId: 'latest-topics',
+        title: 'あなたのアイデア村',
+        description: '最近開いたトークが表示されます。ここから続きの議論を始められます。'
+      },
+      {
+        targetId: 'recommended-topics',
+        title: 'おすすめのテーマ',
+        description: 'どんな話題で話すか迷ったら、ここから面白いテーマを選んでみましょう！'
+      }
+    ])
+    return () => setSteps([])
+  }, [setSteps])
+
   return (
     <div className="flex w-full flex-col gap-6 pb-8 pt-4">
       {/* コンパクトな横長画像 */}

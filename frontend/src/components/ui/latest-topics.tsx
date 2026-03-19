@@ -183,6 +183,7 @@ export function LatestTopics() {
 
   if (talks.length === 0) {
     return (
+      <div id="latest-topics">
       <div className="mx-auto w-full max-w-[500px] lg:max-w-none bg-[#fcfaf2]/50 py-12 px-4 border-2 border-[#e8eed2] font-yusei flex flex-col items-center justify-center gap-6">
         <h2 className="text-2xl font-black tracking-widest text-[#5a4a35]">最新のトピック</h2>
         <div className="flex flex-col items-center gap-2 opacity-60">
@@ -200,6 +201,7 @@ export function LatestTopics() {
             </Button>
         </Link>
       </div>
+      </div>
     )
   }
 
@@ -215,6 +217,7 @@ export function LatestTopics() {
   }))
 
   return (
+    <div id="latest-topics">
     <TopicZone
       title="最新のトピック"
       topics={latestTalks}
@@ -222,6 +225,7 @@ export function LatestTopics() {
       zoneBorder="border-[#e8eed2]"
       borderColor="#d5cba1"
     />
+    </div>
   )
 }
 
@@ -232,12 +236,14 @@ export function RecommendedTopics() {
     .slice(0, 3)
 
   return (
-    <TopicZone
-      title="おすすめのトピック"
+    <div id="recommended-topics">
+      <TopicZone
+        title="おすすめのトピック"
       topics={randomTopics}
       zoneBg="bg-gray-50"
       zoneBorder="border-gray-200"
       borderColor="#9ca3af" // gray-400
     />
+    </div>
   )
 }

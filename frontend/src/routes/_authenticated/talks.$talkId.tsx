@@ -25,6 +25,8 @@ import { talkClient } from "#/lib/api";
 import { messageClient } from "#/lib/api";
 import { useAuth } from "#/features/auth/useAuth";
 import IdeaMap from "#/features/talks/components/idea-map";
+import { useGuide } from "@/features/guide/GuideContext";
+import { PageGuide } from "#/components/ui/page-guide";
 
 export const Route = createFileRoute("/_authenticated/talks/$talkId")({
   component: RouteComponent,
@@ -62,6 +64,51 @@ function RouteComponent() {
     description: string;
   } | null>(null);
   const [isUpdatingAgent, setIsUpdatingAgent] = useState(false);
+  const { setSteps } = useGuide();
+
+  // タブごとのヘルプステップ設定
+  useEffect(() => {
+    let newSteps: any[] = [];
+    
+    if (activeTab === 'chat') {
+      newSteps = [
+        {
+          targetId: 'talk-control',
+          title: 'トークの開始・停止',
+          description: 'ここを「実行中」にすると、AIメンバーがあなたの投げかけに反応し始めます。'
+        },
+        {
+          targetId: 'chat-scroll-area',
+          title: 'チャット画面',
+          description: 'AIたちとの会話が表示されます。吹き出しをリプライして深掘りすることもできます！'
+        },
+        {
+          targetId: 'message-input-zone',
+          title: 'メッセージ入力',
+          description: 'あなたの考えを入力して送信しましょう。AIがすぐに答えてくれます。'
+        }
+      ];
+    } else if (activeTab === 'members') {
+      newSteps = [
+        {
+          targetId: 'members-list',
+          title: 'メンバー管理',
+          description: '現在のAIメンバーの役割を確認したり、新しい役割（エンジニア、詩人など）を村に招待したりできます。'
+        }
+      ];
+    } else if (activeTab === 'supplies') {
+      newSteps = [
+        {
+          targetId: 'whiteboard-container',
+          title: 'ホワイトボード',
+          description: '会話の中で出た「アイデア」が自動的にここにまとまります。全体像を眺めるのに最適です。'
+        }
+      ];
+    }
+
+    setSteps(newSteps);
+    return () => setSteps([]);
+  }, [setSteps, activeTab]);
 
   const [messages, setMessages] = useState<
     Array<{
@@ -418,20 +465,23 @@ function RouteComponent() {
                 title={topic}
                 className="min-[451px]:h-20 min-[451px]:rounded-none min-[451px]:bg-transparent min-[451px]:from-transparent min-[451px]:to-transparent min-[451px]:shadow-none min-[451px]:border-b-0 shrink-0"
                 titleClassName="min-[451px]:text-[#7a6446] min-[451px]:drop-shadow-none"
+                helpGuide={<PageGuide steps={useGuide().steps} />}
               />
 
-              <div className="px-4 py-2 flex justify-center bg-[#fcfaf2]">
+              <div id="talk-control" className="px-4 py-2 flex justify-center bg-[#fcfaf2]">
                 <TalkControlToggle talkId={talkId} status={talkStatus} />
               </div>
 
               <div className="flex-1 flex flex-col overflow-hidden bg-white/30 backdrop-blur-sm">
+                <div id="talk-tabs">
                 <TalkTabs
                   activeTab={activeTab}
                   onTabChange={setActiveTab}
                   className="mt-2 shrink-0 px-4"
                 />
+                </div>
 
-                <div ref={scrollRef} className="flex-1 overflow-y-auto pb-4 scroll-smooth">
+                <div id="chat-scroll-area" ref={scrollRef} className="flex-1 overflow-y-auto pb-4 scroll-smooth">
                   {activeTab === "chat" ? (
                     <div className="flex flex-col py-2 max-w-4xl mx-auto w-full">
                       {messages.map((msg) => {
@@ -481,7 +531,7 @@ function RouteComponent() {
                       )}
                     </div>
                   ) : activeTab === "members" ? (
-                    <div className="flex flex-col p-4 gap-6">
+                    <div id="members-list" className="flex flex-col p-4 gap-6">
                       {/* エージェント一覧 */}
                       <div className="space-y-4">
                         <h3 className="text-sm font-black text-[#7a6446] flex items-center gap-2">
@@ -654,7 +704,7 @@ function RouteComponent() {
                       </div>
                     </div>
                   ) : activeTab === "supplies" ? (
-                    <div className="h-full w-full overflow-hidden">
+                    <div id="whiteboard-container" className="h-full w-full overflow-hidden">
                       <IdeaMap
                         messages={messages}
                         onJumpToChat={handleJumpToChat}
@@ -672,7 +722,7 @@ function RouteComponent() {
                 </div>
 
                 {activeTab === "chat" && (
-                  <div className="shrink-0 p-4 min-[451px]:p-6 border-t border-[#fcfaf2] bg-white/50">
+                  <div id="message-input-zone" className="shrink-0 p-4 min-[451px]:p-6 border-t border-[#fcfaf2] bg-white/50">
                     <div className="max-w-4xl mx-auto w-full">
                       <MessageInput
                         value={inputText}

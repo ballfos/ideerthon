@@ -1,9 +1,12 @@
 import { useNavigate, createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useGuide } from '@/features/guide/GuideContext'
 import { talkClient } from '../../lib/api'
 import { useAuth } from '@/features/auth/useAuth'
-import { Plus, Loader2 } from 'lucide-react'
+import { Plus, Loader2, ArrowLeft } from 'lucide-react'
 import { AgentCard, AGENT_PRESETS, type AgentPreset } from '@/features/talks/components/agent-selector'
+import { PageGuide } from '#/components/ui/page-guide'
+import { Link } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_authenticated/talks/new')({
   component: RouteComponent,
@@ -62,6 +65,28 @@ function RouteComponent() {
     return [...baseAgents.slice(0, 2), customAgent]
   })
   const [openAccordion, setOpenAccordion] = useState<string | null>(null)
+  const { setSteps } = useGuide()
+
+  useEffect(() => {
+    setSteps([
+      {
+        targetId: 'step-topic',
+        title: 'テーマを決める',
+        description: 'これから話し合いたいアイデアの題名を30文字以内で入力しましょう。'
+      },
+      {
+        targetId: 'step-members',
+        title: 'メンバーを招待する',
+        description: '議論に参加してほしいAIメンバーを選びます。プリセットから選ぶことも、自分で役割を作ることもできます。'
+      },
+      {
+        targetId: 'start-button-zone',
+        title: 'トークを開始！',
+        description: '準備ができたらボタンを押して、アイデアの村へ出発しましょう！'
+      }
+    ])
+    return () => setSteps([])
+  }, [setSteps])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -108,11 +133,24 @@ function RouteComponent() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto font-yusei overflow-hidden">
+    <div className="max-w-2xl mx-auto font-yusei overflow-hidden p-4">
       <div className="bg-white rounded-[40px] shadow-sm border-2 border-[#d5cba1] overflow-hidden">
         {/* Header */}
-        <header className="bg-[#f9f1c8]/50 p-6 md:p-10 border-b-2 border-[#d5cba1] text-center">
-          <h1 className="text-2xl md:text-3xl font-black text-[#7a6446] tracking-widest leading-tight">
+        <header className="relative bg-[#f9f1c8]/50 p-6 md:p-10 border-b-2 border-[#d5cba1] text-center">
+          {/* Back Button */}
+          <Link 
+            to="/home" 
+            className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/50 text-[#7a6446] hover:bg-white transition-all shadow-sm md:left-8"
+          >
+            <ArrowLeft size={24} />
+          </Link>
+
+          {/* Help Button */}
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 md:right-8">
+            {useGuide().steps.length > 0 && <PageGuide />}
+          </div>
+
+          <h1 className="text-xl md:text-3xl font-black text-[#7a6446] tracking-widest leading-tight">
             新しいトークを始める
           </h1>
           <p className="text-[#a3967d] mt-2 font-black opacity-80 uppercase tracking-tighter text-[10px] md:text-xs">
@@ -122,7 +160,7 @@ function RouteComponent() {
 
         <form onSubmit={handleSubmit} className="p-6 md:p-10 space-y-8 md:space-y-12">
           {/* STEP 1: Topic */}
-          <section className="space-y-4">
+          <section id="step-topic" className="space-y-4">
             <h2 className="text-base md:text-lg font-black text-[#7a6446] flex items-center gap-3">
               <span className="w-8 h-8 rounded-full bg-[#ffcb05] text-[#7a6446] flex items-center justify-center text-sm shadow-sm ring-4 ring-[#ffcb05]/10 flex-shrink-0">1</span>
               テーマを決める
@@ -144,7 +182,7 @@ function RouteComponent() {
           </section>
 
           {/* STEP 2: Members */}
-          <section className="space-y-4">
+          <section id="step-members" className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-base md:text-lg font-black text-[#7a6446] flex items-center gap-3">
                 <span className="w-8 h-8 rounded-full bg-[#ffcb05] text-[#7a6446] flex items-center justify-center text-sm shadow-sm ring-4 ring-[#ffcb05]/10 flex-shrink-0">2</span>
@@ -177,7 +215,7 @@ function RouteComponent() {
           </section>
 
           {/* Submission */}
-          <div className="pt-4 flex flex-col items-center">
+          <div id="start-button-zone" className="pt-4 flex flex-col items-center">
             <button
               type="submit"
               disabled={isSubmitting || !topic.trim() || selectedAgents.length === 0}

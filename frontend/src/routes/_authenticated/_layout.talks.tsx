@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useTalks } from '@/features/talks'
+import { useGuide } from '@/features/guide/GuideContext'
+import { useEffect } from 'react'
 
 export const Route = createFileRoute('/_authenticated/_layout/talks')({
   component: RouteComponent,
@@ -7,6 +9,18 @@ export const Route = createFileRoute('/_authenticated/_layout/talks')({
 
 function RouteComponent() {
   const { talks, loading, error } = useTalks()
+  const { setSteps } = useGuide()
+
+  useEffect(() => {
+    setSteps([
+      {
+        targetId: 'talk-history-list',
+        title: 'トーク履歴',
+        description: 'これまでの議論の記録がここに並びます。タップすると続きから始められます。'
+      }
+    ])
+    return () => setSteps([])
+  }, [setSteps])
 
   if (loading) return <div className="p-4">読み込み中...</div>
   if (error) return <div className="p-4 text-red-500">エラーが発生しました: {error.message}</div>
@@ -20,11 +34,11 @@ function RouteComponent() {
       </div>
 
       {talks.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-[#c2baa6] text-center border-2 border-dashed border-[#e8eed2] rounded-[32px] bg-[#fcfaf2]/30">
+        <div id="talk-history-list" className="flex flex-col items-center justify-center py-12 text-[#c2baa6] text-center border-2 border-dashed border-[#e8eed2] rounded-[32px] bg-[#fcfaf2]/30">
           <p className="font-bold text-lg">トークがありません。<br />「始める!!」を押してみましょう!!</p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        <div id="talk-history-list" className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {talks.map((talk) => (
             <Link
               key={talk.id}

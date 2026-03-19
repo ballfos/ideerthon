@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { getCurrentUser } from "@/features/auth";
 import { motion } from "motion/react";
+import { GuideProvider } from "@/features/guide/GuideContext";
 
 // 角丸の正三角形（おにぎり型）をSVGポリゴンで描画するコンポーネント
 function RoundedEquilateralTriangle({
@@ -86,8 +87,8 @@ export const Route = createFileRoute("/_authenticated")({
 
 function RouteComponent() {
   return (
-    <div>
+    <GuideProvider>
       <Outlet />
-    </div>
+    </GuideProvider>
   );
 }

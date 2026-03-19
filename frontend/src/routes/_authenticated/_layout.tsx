@@ -8,12 +8,16 @@ import {
 import { Home, List, MessagesSquare, Star, RefreshCcw } from "lucide-react";
 import { DesktopSidebar } from "#/components/ui/desktop-sidebar";
 import { UserMenu } from "@/features/auth";
+import { useGuide } from "@/features/guide/GuideContext";
+import { PageGuide } from "#/components/ui/page-guide";
 
 export const Route = createFileRoute("/_authenticated/_layout")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { steps } = useGuide();
+
   return (
     <div
       className="flex min-h-[100dvh] flex-col bg-white font-sans"
@@ -32,6 +36,7 @@ function RouteComponent() {
           className="rounded-none border-b-2 bg-white from-transparent to-transparent shadow-none"
           titleClassName="text-[#5a4a35] drop-shadow-none"
           userAction={<UserMenu />}
+          helpGuide={steps.length > 0 ? <PageGuide steps={steps} /> : null}
         />
 
         {/* メインコンテンツエリア */}

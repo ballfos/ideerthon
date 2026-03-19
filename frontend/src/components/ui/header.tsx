@@ -6,6 +6,7 @@ export interface HeaderProps extends React.HTMLAttributes<HTMLHeadingElement> {
   titleClassName?: string;
   userAction?: React.ReactNode;
   leftAction?: React.ReactNode;
+  helpGuide?: React.ReactNode;
 }
 
 export function Header({
@@ -14,6 +15,7 @@ export function Header({
   titleClassName,
   userAction,
   leftAction,
+  helpGuide,
   ...props
 }: HeaderProps) {
   return (
@@ -88,8 +90,11 @@ export function Header({
       </h1>
 
       {/* 右側のアクション（ログイン・プロフィール等） */}
-      <div className="flex h-10 w-10 items-center justify-center">
-        {userAction}
+      <div className="flex items-center gap-2">
+        {helpGuide}
+        <div className="flex h-10 w-10 items-center justify-center">
+          {userAction}
+        </div>
       </div>
     </header>
   );
