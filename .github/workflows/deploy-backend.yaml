@@ -5,10 +5,11 @@ on:
     branches: [ "main" ]
     paths: [ "backend/**" ]
   workflow_dispatch:
-  
+
 env:
   PROJECT_ID: ideerthon
   REGION: asia-northeast2
+  VERTEX_REGITON: asia-northeast1
   SERVICE_NAME: ideerthon
 
 jobs:
@@ -63,6 +64,8 @@ jobs:
           env_vars: |-
             ALLOWED_ORIGIN=${{ vars.ALLOWED_ORIGIN }}
             GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }}
+            VERTEX_AI_PROJECT_ID=${{ env.PROJECT_ID }}
+            VERTEX_AI_LOCATION=${{ env.VERTEX_REGITON }}
 
       - name: Show Output
         run: echo "$DEPLOY_URL"

@@ -108,10 +108,12 @@ func (a *AIClient) GenerateResponse(ctx context.Context, name, role, topic strin
 
 	prompt += "\n上記の文脈を踏まえて、あなたの役割として発言し、今回の発言内容に基づいたJSON（message, summary, ideas）を出力してください。\n既存のアイデアと重複しない、全く新しい切り口のアイデアを提案してください。"
 
+	const maxOutputTokens = 4096
+
 	config := &genai.GenerateContentConfig{
 		Temperature:       genai.Ptr(float32(0.7)),
 		ResponseMIMEType:  "application/json",
-		MaxOutputTokens:   1024,
+		MaxOutputTokens:   maxOutputTokens,
 		SystemInstruction: &genai.Content{Parts: []*genai.Part{{Text: systemInstruction}}},
 	}
 
@@ -135,6 +137,11 @@ func (a *AIClient) GenerateResponse(ctx context.Context, name, role, topic strin
 
 	if len(resp.Candidates) == 0 || len(resp.Candidates[0].Content.Parts) == 0 {
 		return nil, fmt.Errorf("no response from AI")
+	}
+
+	// Log finish reason to detect truncation caused by token limit
+	if reason := resp.Candidates[0].FinishReason; reason == "MAX_TOKENS" {
+		fmt.Printf("warning: AI response was truncated (FinishReason=MAX_TOKENS). Consider increasing MaxOutputTokens (current: %d)\n", maxOutputTokens)
 	}
 
 	text := resp.Text()
