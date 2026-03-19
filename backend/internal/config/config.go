@@ -6,6 +6,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// Config はアプリケーション全体の設定を保持します。
 type Config struct {
 	Port                  string
 	ProjectID             string
@@ -16,6 +17,7 @@ type Config struct {
 	VertexAILocation      string
 }
 
+// Load は環境変数から設定を読み込みます。
 func Load() *Config {
 	_ = godotenv.Load()
 

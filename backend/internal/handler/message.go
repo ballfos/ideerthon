@@ -7,25 +7,27 @@ import (
 
 	"cloud.google.com/go/firestore"
 	"connectrpc.com/connect"
-	"github.com/google/uuid"
-	"google.golang.org/protobuf/types/known/timestamppb"
-
 	apiv1 "github.com/ballfos/ideerthon/gen/proto/api/v1"
 	"github.com/ballfos/ideerthon/gen/proto/api/v1/apiv1connect"
 	"github.com/ballfos/ideerthon/internal/middleware"
+	"github.com/google/uuid"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+// MessageHandler はメッセージに関連する操作を担当するハンドラーです。
 type MessageHandler struct {
 	apiv1connect.UnimplementedMessageServiceHandler
 	firestore *firestore.Client
 }
 
+// NewMessageHandler は新しい MessageHandler を作成します。
 func NewMessageHandler(fs *firestore.Client) *MessageHandler {
 	return &MessageHandler{
 		firestore: fs,
 	}
 }
 
+// SendMessage は新しいメッセージを送信します。
 func (h *MessageHandler) SendMessage(
 	ctx context.Context,
 	req *connect.Request[apiv1.SendMessageRequest],
@@ -51,12 +53,12 @@ func (h *MessageHandler) SendMessage(
 
 	// Firestore data
 	data := map[string]interface{}{
-		"uid":        uid,
-		"text":       req.Msg.Text,
-		"createdAt":  now,
-		"talkId":     req.Msg.TalkId,
-		"isFavorite": false,
-		"replyToMessageId":   req.Msg.ReplyToMessageId,
+		"uid":              uid,
+		"text":             req.Msg.Text,
+		"createdAt":        now,
+		"talkId":           req.Msg.TalkId,
+		"isFavorite":       false,
+		"replyToMessageId": req.Msg.ReplyToMessageId,
 	}
 
 	// Save to Firestore: talks/{talkId}/messages/{messageId}
@@ -64,7 +66,7 @@ func (h *MessageHandler) SendMessage(
 	_, err := h.firestore.Collection("talks").Doc(req.Msg.TalkId).Collection("messages").Doc(id).Set(ctx, data)
 	if err != nil {
 		fmt.Printf("Failed to save message: %v\n", err)
-		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to save message: %v", err))
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to save message: %w", err))
 	}
 	fmt.Printf("Message saved successfully\n")
 
@@ -94,6 +96,7 @@ func (h *MessageHandler) SendMessage(
 	return res, nil
 }
 
+// ToggleFavorite はメッセージのお気に入り状態を切り替えます。
 func (h *MessageHandler) ToggleFavorite(
 	ctx context.Context,
 	req *connect.Request[apiv1.ToggleFavoriteRequest],
@@ -114,7 +117,7 @@ func (h *MessageHandler) ToggleFavorite(
 
 		data := doc.Data()
 		favoritedBy, _ := data["favoritedBy"].([]interface{})
-		
+
 		found := false
 		for _, u := range favoritedBy {
 			if s, ok := u.(string); ok && s == uid {
@@ -135,9 +138,8 @@ func (h *MessageHandler) ToggleFavorite(
 			})
 		}
 	})
-
 	if err != nil {
-		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to toggle favorite: %v", err))
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to toggle favorite: %w", err))
 	}
 
 	// 最終的な状態を再取得
@@ -157,6 +159,7 @@ func (h *MessageHandler) ToggleFavorite(
 	}), nil
 }
 
+// ListFavoriteMessages はお気に入り登録されたメッセージの一覧を取得します。
 func (h *MessageHandler) ListFavoriteMessages(
 	ctx context.Context,
 	req *connect.Request[apiv1.ListFavoriteMessagesRequest],
@@ -174,15 +177,15 @@ func (h *MessageHandler) ListFavoriteMessages(
 
 	docs, err := iter.GetAll()
 	if err != nil {
-		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to fetch favorite messages: %v", err))
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to fetch favorite messages: %w", err))
 	}
 
 	var messages []*apiv1.Message
 	for _, doc := range docs {
 		data := doc.Data()
 		createdAt, _ := data["createdAt"].(time.Time)
-		// ドキュメントパス talks/{talkId}/messages/{messageId} から talkId を取得
-		talkId := doc.Ref.Parent.Parent.ID
+		// ドキュメントパス talks/{talkId}/messages/{messageId} から talkID を取得
+		talkID := doc.Ref.Parent.Parent.ID
 
 		agentName, _ := data["agentName"].(string)
 		ideaName, _ := data["ideaName"].(string)
@@ -193,7 +196,7 @@ func (h *MessageHandler) ListFavoriteMessages(
 			Text:       data["text"].(string),
 			CreatedAt:  timestamppb.New(createdAt),
 			IsFavorite: true,
-			TalkId:     talkId,
+			TalkId:     talkID,
 			AgentName:  agentName,
 			IdeaName:   ideaName,
 		})
@@ -204,6 +207,7 @@ func (h *MessageHandler) ListFavoriteMessages(
 	}), nil
 }
 
+// DiscardIdea はアイデアを破棄（非表示）にします。
 func (h *MessageHandler) DiscardIdea(
 	ctx context.Context,
 	req *connect.Request[apiv1.DiscardIdeaRequest],
@@ -214,12 +218,13 @@ func (h *MessageHandler) DiscardIdea(
 		{Path: "isDiscarded", Value: true},
 	})
 	if err != nil {
-		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to discard idea: %v", err))
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to discard idea: %w", err))
 	}
 
 	return connect.NewResponse(&apiv1.DiscardIdeaResponse{}), nil
 }
 
+// RecycleIdea はアイデアをリサイクルボックスに送ります。
 func (h *MessageHandler) RecycleIdea(
 	ctx context.Context,
 	req *connect.Request[apiv1.RecycleIdeaRequest],
@@ -234,7 +239,7 @@ func (h *MessageHandler) RecycleIdea(
 		}
 		data := doc.Data()
 		ideaName, _ = data["ideaName"].(string)
-		
+
 		// Extract from ideas list if present
 		if ideas, ok := data["ideas"].([]interface{}); ok && len(ideas) > 0 {
 			if firstIdea, ok := ideas[0].(map[string]interface{}); ok {
@@ -251,7 +256,7 @@ func (h *MessageHandler) RecycleIdea(
 		})
 	})
 	if err != nil {
-		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to recycle idea: %v", err))
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to recycle idea: %w", err))
 	}
 
 	// Add to global recycle box
@@ -267,6 +272,7 @@ func (h *MessageHandler) RecycleIdea(
 	return connect.NewResponse(&apiv1.RecycleIdeaResponse{}), nil
 }
 
+// ListRecycledIdeas はリサイクルされたアイデアの一覧を取得します。
 func (h *MessageHandler) ListRecycledIdeas(
 	ctx context.Context,
 	req *connect.Request[apiv1.ListRecycledIdeasRequest],
@@ -285,7 +291,7 @@ func (h *MessageHandler) ListRecycledIdeas(
 
 	docs, err := iter.GetAll()
 	if err != nil {
-		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to fetch recycled ideas: %v", err))
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to fetch recycled ideas: %w", err))
 	}
 
 	var ideas []*apiv1.RecycledIdea

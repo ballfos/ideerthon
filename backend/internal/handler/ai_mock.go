@@ -8,15 +8,16 @@ import (
 
 // MockAIClient is a mock implementation of AIGenerator for testing
 type MockAIClient struct {
-	GenerateResponseFn    func(ctx context.Context, name, role, topic string, whiteboard map[string]interface{}, recentContext string, reply *ReplyContext) (map[string]interface{}, error)
+	GenerateResponseFn     func(ctx context.Context, name, role, topic string, whiteboard map[string]interface{}, recentContext string, reply *ReplyContext) (map[string]interface{}, error)
 	UpdateTalkWhiteboardFn func(ctx context.Context, docRef *firestore.DocumentRef, summary string, ideas []interface{})
-	EmbedTextFn           func(ctx context.Context, text string) ([]float32, error)
+	EmbedTextFn            func(ctx context.Context, text string) ([]float32, error)
 
-	GenerateResponseCalled bool
+	GenerateResponseCalled     bool
 	UpdateTalkWhiteboardCalled bool
-	EmbedTextCalled bool
+	EmbedTextCalled            bool
 }
 
+// GenerateResponse はテスト用のモック実装です。
 func (m *MockAIClient) GenerateResponse(ctx context.Context, name, role, topic string, whiteboard map[string]interface{}, recentContext string, reply *ReplyContext) (map[string]interface{}, error) {
 	m.GenerateResponseCalled = true
 	if m.GenerateResponseFn != nil {
@@ -29,6 +30,7 @@ func (m *MockAIClient) GenerateResponse(ctx context.Context, name, role, topic s
 	}, nil
 }
 
+// UpdateTalkWhiteboard はテスト用のモック実装です。
 func (m *MockAIClient) UpdateTalkWhiteboard(ctx context.Context, docRef *firestore.DocumentRef, summary string, ideas []interface{}) {
 	m.UpdateTalkWhiteboardCalled = true
 	if m.UpdateTalkWhiteboardFn != nil {
@@ -36,6 +38,7 @@ func (m *MockAIClient) UpdateTalkWhiteboard(ctx context.Context, docRef *firesto
 	}
 }
 
+// EmbedText はテスト用のモック実装です。
 func (m *MockAIClient) EmbedText(ctx context.Context, text string) ([]float32, error) {
 	m.EmbedTextCalled = true
 	if m.EmbedTextFn != nil {

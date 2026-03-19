@@ -6,11 +6,10 @@ import (
 
 	"cloud.google.com/go/firestore"
 	"connectrpc.com/connect"
-	"github.com/stretchr/testify/assert"
-	"google.golang.org/api/option"
-
 	apiv1 "github.com/ballfos/ideerthon/gen/proto/api/v1"
 	"github.com/ballfos/ideerthon/internal/middleware"
+	"github.com/stretchr/testify/assert"
+	"google.golang.org/api/option"
 )
 
 func TestTalkHandler_CreateTalk(t *testing.T) {
@@ -21,7 +20,9 @@ func TestTalkHandler_CreateTalk(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create firestore client: %v", err)
 	}
-	defer client.Close()
+	defer func() {
+		_ = client.Close()
+	}()
 
 	mockAI := &MockAIClient{}
 	h := NewTalkHandler(client, mockAI)

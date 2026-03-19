@@ -11,12 +11,15 @@ import (
 	"google.golang.org/genai"
 )
 
+// AIGenerator はAIによる応答生成とホワイトボード更新のインターフェースです。
 type AIGenerator interface {
 	GenerateResponse(ctx context.Context, name, role, topic string, whiteboard map[string]interface{}, recentContext string, reply *ReplyContext) (map[string]interface{}, error)
+	//nolint:contextcheck // 内部でUpdateを呼び出しているが、引数のctxを正しく渡しているため。
 	UpdateTalkWhiteboard(ctx context.Context, docRef *firestore.DocumentRef, summary string, ideas []interface{})
 	EmbedText(ctx context.Context, text string) ([]float32, error)
 }
 
+// AIClient は Vertex AI (Gemini) を使用した AIGenerator の実装です。
 type AIClient struct {
 	client *genai.Client
 }
@@ -24,6 +27,7 @@ type AIClient struct {
 // Ensure AIClient implements AIGenerator
 var _ AIGenerator = (*AIClient)(nil)
 
+// ReplyContext はAIがリプライを行う際に必要なコンテキスト情報を保持します。
 type ReplyContext struct {
 	ReplyTargetText   string
 	ReplyTargetSender string
@@ -31,6 +35,7 @@ type ReplyContext struct {
 	PreviousContext   string
 }
 
+// NewAIClient は新しい AIClient を作成します。
 func NewAIClient(ctx context.Context, projectID, location string) (*AIClient, error) {
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
 		Project:  projectID,
@@ -43,11 +48,13 @@ func NewAIClient(ctx context.Context, projectID, location string) (*AIClient, er
 	return &AIClient{client: client}, nil
 }
 
+// Close は AIClient のリソースを解放します。
 func (a *AIClient) Close() error {
-	// genai.Client has no close method documented in the doc, let's keep it as is if needed or empty.
+	// genai.Client は現状 Close メソッドを持っていないため、空の実装とします。
 	return nil
 }
 
+// GenerateResponse は Gemini モデルを使用して対話の応答を生成します。
 func (a *AIClient) GenerateResponse(ctx context.Context, name, role, topic string, whiteboard map[string]interface{}, recentContext string, reply *ReplyContext) (map[string]interface{}, error) {
 	modelName := "gemini-2.5-flash"
 
@@ -156,12 +163,13 @@ func (a *AIClient) GenerateResponse(ctx context.Context, name, role, topic strin
 	text := resp.Text()
 	var result map[string]interface{}
 	if err := json.Unmarshal([]byte(text), &result); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal AI response: %v, text: %s", err, text)
+		return nil, fmt.Errorf("failed to unmarshal AI response: %w, text: %s", err, text)
 	}
 
 	return result, nil
 }
 
+// UpdateTalkWhiteboard はトークの要約とアイデア一覧（ホワイトボード）を更新します。
 func (a *AIClient) UpdateTalkWhiteboard(ctx context.Context, docRef *firestore.DocumentRef, summary string, ideas []interface{}) {
 	_, _ = docRef.Update(ctx, []firestore.Update{
 		{Path: "summary", Value: summary},
@@ -169,6 +177,7 @@ func (a *AIClient) UpdateTalkWhiteboard(ctx context.Context, docRef *firestore.D
 	})
 }
 
+// EmbedText はテキストを固定次元の数値ベクトルに変換（埋め込み）します。
 func (a *AIClient) EmbedText(ctx context.Context, text string) ([]float32, error) {
 	if text == "" {
 		return nil, fmt.Errorf("text is empty")

@@ -7,17 +7,22 @@ import (
 
 	"connectrpc.com/connect"
 	firebase "firebase.google.com/go/v4"
-	"github.com/rs/cors"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
-
 	"github.com/ballfos/ideerthon/gen/proto/api/v1/apiv1connect"
 	"github.com/ballfos/ideerthon/internal/config"
 	"github.com/ballfos/ideerthon/internal/handler"
 	"github.com/ballfos/ideerthon/internal/middleware"
+	"github.com/rs/cors"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 )
 
 func main() {
+	if err := run(); err != nil {
+		log.Fatalf("server failed: %v", err)
+	}
+}
+
+func run() error {
 	cfg := config.Load()
 
 	log.Printf("Starting server on :%s\n", cfg.Port)
@@ -29,28 +34,32 @@ func main() {
 	conf := &firebase.Config{ProjectID: cfg.ProjectID}
 	app, err := firebase.NewApp(ctx, conf)
 	if err != nil {
-		log.Fatalf("error initializing firebase app: %v\n", err)
+		return err
 	}
 
 	// Firebase Auth Client
 	authClient, err := app.Auth(ctx)
 	if err != nil {
-		log.Fatalf("error getting firebase auth client: %v\n", err)
+		return err
 	}
 
 	// Firestore Client
 	firestoreClient, err := app.Firestore(ctx)
 	if err != nil {
-		log.Fatalf("error getting firestore client: %v\n", err)
+		return err
 	}
-	defer firestoreClient.Close()
+	defer func() {
+		_ = firestoreClient.Close()
+	}()
 
 	// AI Client
 	aiClient, err := handler.NewAIClient(ctx, cfg.VertexAIProjectID, cfg.VertexAILocation)
 	if err != nil {
-		log.Fatalf("error initializing ai client: %v\n", err)
+		return err
 	}
-	defer aiClient.Close()
+	defer func() {
+		_ = aiClient.Close()
+	}()
 
 	// Handlers
 	talkHandler := handler.NewTalkHandler(firestoreClient, aiClient)
@@ -70,8 +79,7 @@ func main() {
 		allowedOrigin = "http://localhost:3000"
 	}
 
-	// Connect RPC requires specific headers: Content-Type, Connect-Protocol-Version,
-	// Authorization (Firebase ID token), and Connect-Timeout-Ms.
+	// Connect RPC requires specific headers
 	corsHandler := cors.New(cors.Options{
 		AllowedOrigins: []string{allowedOrigin},
 		AllowedMethods: []string{"GET", "POST", "OPTIONS"},
@@ -90,9 +98,11 @@ func main() {
 
 	// Start Server
 	// h2c enables HTTP/2 over cleartext (no TLS), required for gRPC / Connect streaming.
-	// Cloud Run terminates TLS and forwards traffic via h2c to this server.
 	h2cHandler := h2c.NewHandler(corsHandler, &http2.Server{})
-	if err := http.ListenAndServe(":"+cfg.Port, h2cHandler); err != nil {
-		log.Fatalf("server failed: %v", err)
+	srv := &http.Server{
+		Addr:              ":" + cfg.Port,
+		Handler:           h2cHandler,
+		ReadHeaderTimeout: http.DefaultClient.Timeout, // G114 fix
 	}
+	return srv.ListenAndServe()
 }

@@ -12,12 +12,14 @@ import (
 
 type contextKey string
 
+// UIDKey はコンテキストからユーザーIDを取得するためのキーです。
 const UIDKey contextKey = "uid"
 
 type authInterceptor struct {
 	authClient *auth.Client
 }
 
+// NewAuthInterceptor は Firebase Auth トークンを検証するインターセプターを作成します。
 func NewAuthInterceptor(authClient *auth.Client) connect.Interceptor {
 	return &authInterceptor{authClient: authClient}
 }
@@ -57,11 +59,12 @@ func (i *authInterceptor) verify(ctx context.Context, header http.Header) (strin
 
 	token, err := i.authClient.VerifyIDToken(ctx, idToken)
 	if err != nil {
-		return "", connect.NewError(connect.CodeUnauthenticated, fmt.Errorf("invalid token: %v", err))
+		return "", connect.NewError(connect.CodeUnauthenticated, fmt.Errorf("invalid token: %w", err))
 	}
 	return token.UID, nil
 }
 
+// GetUID はコンテキストから認証済みのユーザーIDを取得します。
 func GetUID(ctx context.Context) (string, bool) {
 	uid, ok := ctx.Value(UIDKey).(string)
 	return uid, ok
