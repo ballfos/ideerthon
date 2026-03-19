@@ -535,7 +535,7 @@ function RouteComponent() {
                       {/* エージェント一覧 */}
                       <div className="space-y-4">
                         <h3 className="text-sm font-black text-[#7a6446] flex items-center gap-2">
-                          <User className="h-4 w-4" /> 現状のメンバー (
+                          <User className="h-5 w-5" /> 現状のメンバー (
                           {agents.length})
                         </h3>
                         {agents.length === 0 ? (
@@ -669,7 +669,11 @@ function RouteComponent() {
                       {/* エージェント追加フォーム */}
                       <div className="space-y-4">
                         <h3 className="text-sm font-black text-[#7a6446] flex items-center gap-2">
-                          <Plus className="h-4 w-4" /> メンバーを新しく呼ぶ
+                          <div className="relative inline-flex items-center justify-center mr-1">
+                            <User className="h-5 w-5" />
+                            <Plus className="h-3.5 w-3.5 absolute -top-1 -right-1.5 stroke-[3]" />
+                          </div>
+                          メンバーを新しく呼ぶ
                         </h3>
                         <div className="space-y-4">
                           <AgentCard
