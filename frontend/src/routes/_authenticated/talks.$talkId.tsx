@@ -128,13 +128,20 @@ function RouteComponent() {
   >([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const lastProcessedHash = useRef("");
+
   // オートスクロール & ハッシュジャンプ
   useEffect(() => {
     if (messages.length === 0) return;
 
+    const hash = window.location.hash;
     // ハッシュがある場合は、その場所へのジャンプを優先する
-    if (window.location.hash) {
-      const messageId = window.location.hash.replace("#message-", "");
+    if (hash && hash.startsWith("#message-")) {
+      // すでにこのハッシュを処理済みの場合は何もしない
+      if (hash === lastProcessedHash.current) return;
+      lastProcessedHash.current = hash;
+
+      const messageId = hash.replace("#message-", "");
       const timer = setTimeout(() => {
         const element = document.getElementById(`message-${messageId}`);
         if (element) {
@@ -160,6 +167,10 @@ function RouteComponent() {
               "relative",
               "z-20",
             );
+            // ハイライトが終わったらハッシュをクリアする
+            if (window.location.hash === hash) {
+              window.history.replaceState(null, "", window.location.pathname + window.location.search);
+            }
           }, 3000);
         }
       }, 500);
@@ -167,7 +178,7 @@ function RouteComponent() {
     }
 
     // ハッシュがない場合のみ最下部へスクロール
-    if (scrollRef.current) {
+    if (scrollRef.current && !hash) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages.length, talkStatus, talkId]);
@@ -265,17 +276,7 @@ function RouteComponent() {
     return () => unsubscribe();
   }, [talkId]);
 
-  // ジャンプ機能用: URLにハッシュがある場合にスクロール
-  useEffect(() => {
-    const hash = window.location.hash;
-    if (hash && messages.length > 0) {
-      const id = hash.replace("#", "");
-      const element = document.getElementById(id);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
-      }
-    }
-  }, [messages]);
+
 
   const handleStartTalk = async () => {
     if (talkStatus === TalkStatus.RUNNING || talkId === "none") return;
