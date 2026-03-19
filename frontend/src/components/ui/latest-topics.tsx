@@ -44,6 +44,7 @@ interface TopicZoneProps {
   zoneBg: string
   borderColor: string
   zoneBorder: string
+  headerAction?: ReactNode
 }
 
 function TopicZone({ title, topics, zoneBg, borderColor, zoneBorder }: TopicZoneProps) {
@@ -108,21 +109,23 @@ export function LatestTopics() {
 
   if (talks.length === 0) {
     return (
-      <div className="mx-auto w-full max-w-[500px] lg:max-w-none bg-[#fcfaf2]/50 py-12 px-4 border-2 border-[#e8eed2] font-yusei flex flex-col items-center justify-center gap-6">
-        <h2 className="text-2xl font-black tracking-widest text-[#5a4a35]">最新のトピック</h2>
-        <div className="flex flex-col items-center gap-2 opacity-60">
-            <Lightbulb className="h-10 w-10 text-[#dbe3c6]" />
-            <p className="text-sm font-bold text-[#7a6446]">履歴がまだありません</p>
+      <div className="mx-auto w-full max-w-[500px] lg:max-w-none bg-[#fcfaf2]/50 py-6 px-4 border-2 border-[#e8eed2] font-yusei flex flex-col gap-6">
+        <h2 className="px-2 text-2xl font-black tracking-widest text-[#5a4a35]">最新のトピック</h2>
+        <div className="flex flex-col items-center justify-center py-6 gap-6">
+          <div className="flex flex-col items-center gap-2 opacity-60">
+              <Lightbulb className="h-10 w-10 text-[#dbe3c6]" />
+              <p className="text-sm font-bold text-[#7a6446]">履歴がまだありません</p>
+          </div>
+          <Link 
+              to="/talks/new"
+              className="w-full max-w-[280px]"
+          >
+              <Button variant="yellow" className="w-full py-6 text-lg shadow-md rounded-2xl group">
+                  <Plus className="mr-2 h-5 w-5 group-hover:rotate-90 transition-transform" />
+                  トークをはじめる!!
+              </Button>
+          </Link>
         </div>
-        <Link 
-            to="/talks/new"
-            className="w-full max-w-[280px]"
-        >
-            <Button variant="yellow" className="w-full py-6 text-lg shadow-md rounded-2xl group">
-                <Plus className="mr-2 h-5 w-5 group-hover:rotate-90 transition-transform" />
-                トークをはじめる!!
-            </Button>
-        </Link>
       </div>
     )
   }
