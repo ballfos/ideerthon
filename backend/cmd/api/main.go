@@ -45,8 +45,15 @@ func main() {
 	}
 	defer firestoreClient.Close()
 
+	// AI Client
+	aiClient, err := handler.NewAIClient(ctx, cfg.VertexAIProjectID, cfg.VertexAILocation)
+	if err != nil {
+		log.Fatalf("error initializing ai client: %v\n", err)
+	}
+	defer aiClient.Close()
+
 	// Handlers
-	talkHandler := handler.NewTalkHandler(firestoreClient)
+	talkHandler := handler.NewTalkHandler(firestoreClient, aiClient)
 	messageHandler := handler.NewMessageHandler(firestoreClient)
 
 	// Mux & Interceptors

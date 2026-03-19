@@ -43,6 +43,10 @@ const (
 	TalkServiceStopTalkStreamProcedure = "/api.v1.TalkService/StopTalkStream"
 	// TalkServiceAddAgentProcedure is the fully-qualified name of the TalkService's AddAgent RPC.
 	TalkServiceAddAgentProcedure = "/api.v1.TalkService/AddAgent"
+	// TalkServiceRemoveAgentProcedure is the fully-qualified name of the TalkService's RemoveAgent RPC.
+	TalkServiceRemoveAgentProcedure = "/api.v1.TalkService/RemoveAgent"
+	// TalkServiceUpdateAgentProcedure is the fully-qualified name of the TalkService's UpdateAgent RPC.
+	TalkServiceUpdateAgentProcedure = "/api.v1.TalkService/UpdateAgent"
 )
 
 // TalkServiceClient is a client for the api.v1.TalkService service.
@@ -51,6 +55,8 @@ type TalkServiceClient interface {
 	StartTalkStream(context.Context, *connect.Request[v1.StartTalkStreamRequest]) (*connect.ServerStreamForClient[v1.Message], error)
 	StopTalkStream(context.Context, *connect.Request[v1.StopTalkStreamRequest]) (*connect.Response[v1.StopTalkStreamResponse], error)
 	AddAgent(context.Context, *connect.Request[v1.AddAgentRequest]) (*connect.Response[v1.AddAgentResponse], error)
+	RemoveAgent(context.Context, *connect.Request[v1.RemoveAgentRequest]) (*connect.Response[v1.RemoveAgentResponse], error)
+	UpdateAgent(context.Context, *connect.Request[v1.UpdateAgentRequest]) (*connect.Response[v1.UpdateAgentResponse], error)
 }
 
 // NewTalkServiceClient constructs a client for the api.v1.TalkService service. By default, it uses
@@ -88,6 +94,18 @@ func NewTalkServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(talkServiceMethods.ByName("AddAgent")),
 			connect.WithClientOptions(opts...),
 		),
+		removeAgent: connect.NewClient[v1.RemoveAgentRequest, v1.RemoveAgentResponse](
+			httpClient,
+			baseURL+TalkServiceRemoveAgentProcedure,
+			connect.WithSchema(talkServiceMethods.ByName("RemoveAgent")),
+			connect.WithClientOptions(opts...),
+		),
+		updateAgent: connect.NewClient[v1.UpdateAgentRequest, v1.UpdateAgentResponse](
+			httpClient,
+			baseURL+TalkServiceUpdateAgentProcedure,
+			connect.WithSchema(talkServiceMethods.ByName("UpdateAgent")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -97,6 +115,8 @@ type talkServiceClient struct {
 	startTalkStream *connect.Client[v1.StartTalkStreamRequest, v1.Message]
 	stopTalkStream  *connect.Client[v1.StopTalkStreamRequest, v1.StopTalkStreamResponse]
 	addAgent        *connect.Client[v1.AddAgentRequest, v1.AddAgentResponse]
+	removeAgent     *connect.Client[v1.RemoveAgentRequest, v1.RemoveAgentResponse]
+	updateAgent     *connect.Client[v1.UpdateAgentRequest, v1.UpdateAgentResponse]
 }
 
 // CreateTalk calls api.v1.TalkService.CreateTalk.
@@ -119,12 +139,24 @@ func (c *talkServiceClient) AddAgent(ctx context.Context, req *connect.Request[v
 	return c.addAgent.CallUnary(ctx, req)
 }
 
+// RemoveAgent calls api.v1.TalkService.RemoveAgent.
+func (c *talkServiceClient) RemoveAgent(ctx context.Context, req *connect.Request[v1.RemoveAgentRequest]) (*connect.Response[v1.RemoveAgentResponse], error) {
+	return c.removeAgent.CallUnary(ctx, req)
+}
+
+// UpdateAgent calls api.v1.TalkService.UpdateAgent.
+func (c *talkServiceClient) UpdateAgent(ctx context.Context, req *connect.Request[v1.UpdateAgentRequest]) (*connect.Response[v1.UpdateAgentResponse], error) {
+	return c.updateAgent.CallUnary(ctx, req)
+}
+
 // TalkServiceHandler is an implementation of the api.v1.TalkService service.
 type TalkServiceHandler interface {
 	CreateTalk(context.Context, *connect.Request[v1.CreateTalkRequest]) (*connect.Response[v1.CreateTalkResponse], error)
 	StartTalkStream(context.Context, *connect.Request[v1.StartTalkStreamRequest], *connect.ServerStream[v1.Message]) error
 	StopTalkStream(context.Context, *connect.Request[v1.StopTalkStreamRequest]) (*connect.Response[v1.StopTalkStreamResponse], error)
 	AddAgent(context.Context, *connect.Request[v1.AddAgentRequest]) (*connect.Response[v1.AddAgentResponse], error)
+	RemoveAgent(context.Context, *connect.Request[v1.RemoveAgentRequest]) (*connect.Response[v1.RemoveAgentResponse], error)
+	UpdateAgent(context.Context, *connect.Request[v1.UpdateAgentRequest]) (*connect.Response[v1.UpdateAgentResponse], error)
 }
 
 // NewTalkServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -158,6 +190,18 @@ func NewTalkServiceHandler(svc TalkServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(talkServiceMethods.ByName("AddAgent")),
 		connect.WithHandlerOptions(opts...),
 	)
+	talkServiceRemoveAgentHandler := connect.NewUnaryHandler(
+		TalkServiceRemoveAgentProcedure,
+		svc.RemoveAgent,
+		connect.WithSchema(talkServiceMethods.ByName("RemoveAgent")),
+		connect.WithHandlerOptions(opts...),
+	)
+	talkServiceUpdateAgentHandler := connect.NewUnaryHandler(
+		TalkServiceUpdateAgentProcedure,
+		svc.UpdateAgent,
+		connect.WithSchema(talkServiceMethods.ByName("UpdateAgent")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/api.v1.TalkService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case TalkServiceCreateTalkProcedure:
@@ -168,6 +212,10 @@ func NewTalkServiceHandler(svc TalkServiceHandler, opts ...connect.HandlerOption
 			talkServiceStopTalkStreamHandler.ServeHTTP(w, r)
 		case TalkServiceAddAgentProcedure:
 			talkServiceAddAgentHandler.ServeHTTP(w, r)
+		case TalkServiceRemoveAgentProcedure:
+			talkServiceRemoveAgentHandler.ServeHTTP(w, r)
+		case TalkServiceUpdateAgentProcedure:
+			talkServiceUpdateAgentHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -191,4 +239,12 @@ func (UnimplementedTalkServiceHandler) StopTalkStream(context.Context, *connect.
 
 func (UnimplementedTalkServiceHandler) AddAgent(context.Context, *connect.Request[v1.AddAgentRequest]) (*connect.Response[v1.AddAgentResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("api.v1.TalkService.AddAgent is not implemented"))
+}
+
+func (UnimplementedTalkServiceHandler) RemoveAgent(context.Context, *connect.Request[v1.RemoveAgentRequest]) (*connect.Response[v1.RemoveAgentResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("api.v1.TalkService.RemoveAgent is not implemented"))
+}
+
+func (UnimplementedTalkServiceHandler) UpdateAgent(context.Context, *connect.Request[v1.UpdateAgentRequest]) (*connect.Response[v1.UpdateAgentResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("api.v1.TalkService.UpdateAgent is not implemented"))
 }

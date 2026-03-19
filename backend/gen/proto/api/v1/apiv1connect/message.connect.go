@@ -42,6 +42,15 @@ const (
 	// MessageServiceListFavoriteMessagesProcedure is the fully-qualified name of the MessageService's
 	// ListFavoriteMessages RPC.
 	MessageServiceListFavoriteMessagesProcedure = "/api.v1.MessageService/ListFavoriteMessages"
+	// MessageServiceDiscardIdeaProcedure is the fully-qualified name of the MessageService's
+	// DiscardIdea RPC.
+	MessageServiceDiscardIdeaProcedure = "/api.v1.MessageService/DiscardIdea"
+	// MessageServiceRecycleIdeaProcedure is the fully-qualified name of the MessageService's
+	// RecycleIdea RPC.
+	MessageServiceRecycleIdeaProcedure = "/api.v1.MessageService/RecycleIdea"
+	// MessageServiceListRecycledIdeasProcedure is the fully-qualified name of the MessageService's
+	// ListRecycledIdeas RPC.
+	MessageServiceListRecycledIdeasProcedure = "/api.v1.MessageService/ListRecycledIdeas"
 )
 
 // MessageServiceClient is a client for the api.v1.MessageService service.
@@ -49,6 +58,9 @@ type MessageServiceClient interface {
 	SendMessage(context.Context, *connect.Request[v1.SendMessageRequest]) (*connect.Response[v1.SendMessageResponse], error)
 	ToggleFavorite(context.Context, *connect.Request[v1.ToggleFavoriteRequest]) (*connect.Response[v1.ToggleFavoriteResponse], error)
 	ListFavoriteMessages(context.Context, *connect.Request[v1.ListFavoriteMessagesRequest]) (*connect.Response[v1.ListFavoriteMessagesResponse], error)
+	DiscardIdea(context.Context, *connect.Request[v1.DiscardIdeaRequest]) (*connect.Response[v1.DiscardIdeaResponse], error)
+	RecycleIdea(context.Context, *connect.Request[v1.RecycleIdeaRequest]) (*connect.Response[v1.RecycleIdeaResponse], error)
+	ListRecycledIdeas(context.Context, *connect.Request[v1.ListRecycledIdeasRequest]) (*connect.Response[v1.ListRecycledIdeasResponse], error)
 }
 
 // NewMessageServiceClient constructs a client for the api.v1.MessageService service. By default, it
@@ -80,6 +92,24 @@ func NewMessageServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithSchema(messageServiceMethods.ByName("ListFavoriteMessages")),
 			connect.WithClientOptions(opts...),
 		),
+		discardIdea: connect.NewClient[v1.DiscardIdeaRequest, v1.DiscardIdeaResponse](
+			httpClient,
+			baseURL+MessageServiceDiscardIdeaProcedure,
+			connect.WithSchema(messageServiceMethods.ByName("DiscardIdea")),
+			connect.WithClientOptions(opts...),
+		),
+		recycleIdea: connect.NewClient[v1.RecycleIdeaRequest, v1.RecycleIdeaResponse](
+			httpClient,
+			baseURL+MessageServiceRecycleIdeaProcedure,
+			connect.WithSchema(messageServiceMethods.ByName("RecycleIdea")),
+			connect.WithClientOptions(opts...),
+		),
+		listRecycledIdeas: connect.NewClient[v1.ListRecycledIdeasRequest, v1.ListRecycledIdeasResponse](
+			httpClient,
+			baseURL+MessageServiceListRecycledIdeasProcedure,
+			connect.WithSchema(messageServiceMethods.ByName("ListRecycledIdeas")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -88,6 +118,9 @@ type messageServiceClient struct {
 	sendMessage          *connect.Client[v1.SendMessageRequest, v1.SendMessageResponse]
 	toggleFavorite       *connect.Client[v1.ToggleFavoriteRequest, v1.ToggleFavoriteResponse]
 	listFavoriteMessages *connect.Client[v1.ListFavoriteMessagesRequest, v1.ListFavoriteMessagesResponse]
+	discardIdea          *connect.Client[v1.DiscardIdeaRequest, v1.DiscardIdeaResponse]
+	recycleIdea          *connect.Client[v1.RecycleIdeaRequest, v1.RecycleIdeaResponse]
+	listRecycledIdeas    *connect.Client[v1.ListRecycledIdeasRequest, v1.ListRecycledIdeasResponse]
 }
 
 // SendMessage calls api.v1.MessageService.SendMessage.
@@ -105,11 +138,29 @@ func (c *messageServiceClient) ListFavoriteMessages(ctx context.Context, req *co
 	return c.listFavoriteMessages.CallUnary(ctx, req)
 }
 
+// DiscardIdea calls api.v1.MessageService.DiscardIdea.
+func (c *messageServiceClient) DiscardIdea(ctx context.Context, req *connect.Request[v1.DiscardIdeaRequest]) (*connect.Response[v1.DiscardIdeaResponse], error) {
+	return c.discardIdea.CallUnary(ctx, req)
+}
+
+// RecycleIdea calls api.v1.MessageService.RecycleIdea.
+func (c *messageServiceClient) RecycleIdea(ctx context.Context, req *connect.Request[v1.RecycleIdeaRequest]) (*connect.Response[v1.RecycleIdeaResponse], error) {
+	return c.recycleIdea.CallUnary(ctx, req)
+}
+
+// ListRecycledIdeas calls api.v1.MessageService.ListRecycledIdeas.
+func (c *messageServiceClient) ListRecycledIdeas(ctx context.Context, req *connect.Request[v1.ListRecycledIdeasRequest]) (*connect.Response[v1.ListRecycledIdeasResponse], error) {
+	return c.listRecycledIdeas.CallUnary(ctx, req)
+}
+
 // MessageServiceHandler is an implementation of the api.v1.MessageService service.
 type MessageServiceHandler interface {
 	SendMessage(context.Context, *connect.Request[v1.SendMessageRequest]) (*connect.Response[v1.SendMessageResponse], error)
 	ToggleFavorite(context.Context, *connect.Request[v1.ToggleFavoriteRequest]) (*connect.Response[v1.ToggleFavoriteResponse], error)
 	ListFavoriteMessages(context.Context, *connect.Request[v1.ListFavoriteMessagesRequest]) (*connect.Response[v1.ListFavoriteMessagesResponse], error)
+	DiscardIdea(context.Context, *connect.Request[v1.DiscardIdeaRequest]) (*connect.Response[v1.DiscardIdeaResponse], error)
+	RecycleIdea(context.Context, *connect.Request[v1.RecycleIdeaRequest]) (*connect.Response[v1.RecycleIdeaResponse], error)
+	ListRecycledIdeas(context.Context, *connect.Request[v1.ListRecycledIdeasRequest]) (*connect.Response[v1.ListRecycledIdeasResponse], error)
 }
 
 // NewMessageServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -137,6 +188,24 @@ func NewMessageServiceHandler(svc MessageServiceHandler, opts ...connect.Handler
 		connect.WithSchema(messageServiceMethods.ByName("ListFavoriteMessages")),
 		connect.WithHandlerOptions(opts...),
 	)
+	messageServiceDiscardIdeaHandler := connect.NewUnaryHandler(
+		MessageServiceDiscardIdeaProcedure,
+		svc.DiscardIdea,
+		connect.WithSchema(messageServiceMethods.ByName("DiscardIdea")),
+		connect.WithHandlerOptions(opts...),
+	)
+	messageServiceRecycleIdeaHandler := connect.NewUnaryHandler(
+		MessageServiceRecycleIdeaProcedure,
+		svc.RecycleIdea,
+		connect.WithSchema(messageServiceMethods.ByName("RecycleIdea")),
+		connect.WithHandlerOptions(opts...),
+	)
+	messageServiceListRecycledIdeasHandler := connect.NewUnaryHandler(
+		MessageServiceListRecycledIdeasProcedure,
+		svc.ListRecycledIdeas,
+		connect.WithSchema(messageServiceMethods.ByName("ListRecycledIdeas")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/api.v1.MessageService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case MessageServiceSendMessageProcedure:
@@ -145,6 +214,12 @@ func NewMessageServiceHandler(svc MessageServiceHandler, opts ...connect.Handler
 			messageServiceToggleFavoriteHandler.ServeHTTP(w, r)
 		case MessageServiceListFavoriteMessagesProcedure:
 			messageServiceListFavoriteMessagesHandler.ServeHTTP(w, r)
+		case MessageServiceDiscardIdeaProcedure:
+			messageServiceDiscardIdeaHandler.ServeHTTP(w, r)
+		case MessageServiceRecycleIdeaProcedure:
+			messageServiceRecycleIdeaHandler.ServeHTTP(w, r)
+		case MessageServiceListRecycledIdeasProcedure:
+			messageServiceListRecycledIdeasHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -164,4 +239,16 @@ func (UnimplementedMessageServiceHandler) ToggleFavorite(context.Context, *conne
 
 func (UnimplementedMessageServiceHandler) ListFavoriteMessages(context.Context, *connect.Request[v1.ListFavoriteMessagesRequest]) (*connect.Response[v1.ListFavoriteMessagesResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("api.v1.MessageService.ListFavoriteMessages is not implemented"))
+}
+
+func (UnimplementedMessageServiceHandler) DiscardIdea(context.Context, *connect.Request[v1.DiscardIdeaRequest]) (*connect.Response[v1.DiscardIdeaResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("api.v1.MessageService.DiscardIdea is not implemented"))
+}
+
+func (UnimplementedMessageServiceHandler) RecycleIdea(context.Context, *connect.Request[v1.RecycleIdeaRequest]) (*connect.Response[v1.RecycleIdeaResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("api.v1.MessageService.RecycleIdea is not implemented"))
+}
+
+func (UnimplementedMessageServiceHandler) ListRecycledIdeas(context.Context, *connect.Request[v1.ListRecycledIdeasRequest]) (*connect.Response[v1.ListRecycledIdeasResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("api.v1.MessageService.ListRecycledIdeas is not implemented"))
 }

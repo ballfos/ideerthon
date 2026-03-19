@@ -14,7 +14,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file proto/api/v1/talk.proto.
  */
 export const file_proto_api_v1_talk: GenFile = /*@__PURE__*/
-  fileDesc("Chdwcm90by9hcGkvdjEvdGFsay5wcm90bxIGYXBpLnYxIqMCCgRUYWxrEgoKAmlkGAEgASgJEhAKCG93bmVyX2lkGAIgASgJEg0KBXRvcGljGAMgASgJEi4KCmNyZWF0ZWRfYXQYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi4KCnVwZGF0ZWRfYXQYBSABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEiIKBnN0YXR1cxgGIAEoDjISLmFwaS52MS5UYWxrU3RhdHVzEhcKD3JlbWFpbmluZ19jb3VudBgHIAEoBRIyCg5sYXN0X2hlYXJ0YmVhdBgIIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASHQoGYWdlbnRzGAkgAygLMg0uYXBpLnYxLkFnZW50IioKBUFnZW50EgwKBG5hbWUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkiIgoRQ3JlYXRlVGFsa1JlcXVlc3QSDQoFdG9waWMYASABKAkiMAoSQ3JlYXRlVGFsa1Jlc3BvbnNlEhoKBHRhbGsYASABKAsyDC5hcGkudjEuVGFsayIpChZTdGFydFRhbGtTdHJlYW1SZXF1ZXN0Eg8KB3RhbGtfaWQYASABKAkiKAoVU3RvcFRhbGtTdHJlYW1SZXF1ZXN0Eg8KB3RhbGtfaWQYASABKAkiGAoWU3RvcFRhbGtTdHJlYW1SZXNwb25zZSJACg9BZGRBZ2VudFJlcXVlc3QSDwoHdGFsa19pZBgBIAEoCRIcCgVhZ2VudBgCIAEoCzINLmFwaS52MS5BZ2VudCISChBBZGRBZ2VudFJlc3BvbnNlKlsKClRhbGtTdGF0dXMSGwoXVEFMS19TVEFUVVNfVU5TUEVDSUZJRUQQABIXChNUQUxLX1NUQVRVU19SVU5OSU5HEAESFwoTVEFMS19TVEFUVVNfU1RPUFBFRBACMqgCCgtUYWxrU2VydmljZRJDCgpDcmVhdGVUYWxrEhkuYXBpLnYxLkNyZWF0ZVRhbGtSZXF1ZXN0GhouYXBpLnYxLkNyZWF0ZVRhbGtSZXNwb25zZRJECg9TdGFydFRhbGtTdHJlYW0SHi5hcGkudjEuU3RhcnRUYWxrU3RyZWFtUmVxdWVzdBoPLmFwaS52MS5NZXNzYWdlMAESTwoOU3RvcFRhbGtTdHJlYW0SHS5hcGkudjEuU3RvcFRhbGtTdHJlYW1SZXF1ZXN0Gh4uYXBpLnYxLlN0b3BUYWxrU3RyZWFtUmVzcG9uc2USPQoIQWRkQWdlbnQSFy5hcGkudjEuQWRkQWdlbnRSZXF1ZXN0GhguYXBpLnYxLkFkZEFnZW50UmVzcG9uc2VChQEKCmNvbS5hcGkudjFCCVRhbGtQcm90b1ABWjNnaXRodWIuY29tL2JhbGxmb3MvaWRlZXJ0aG9uL2dlbi9wcm90by9hcGkvdjE7YXBpdjGiAgNBWFiqAgZBcGkuVjHKAgZBcGlcVjHiAhJBcGlcVjFcR1BCTWV0YWRhdGHqAgdBcGk6OlYxYgZwcm90bzM", [file_google_protobuf_timestamp, file_proto_api_v1_message]);
+  fileDesc("Chdwcm90by9hcGkvdjEvdGFsay5wcm90bxIGYXBpLnYxIqMCCgRUYWxrEgoKAmlkGAEgASgJEhAKCG93bmVyX2lkGAIgASgJEg0KBXRvcGljGAMgASgJEi4KCmNyZWF0ZWRfYXQYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi4KCnVwZGF0ZWRfYXQYBSABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEiIKBnN0YXR1cxgGIAEoDjISLmFwaS52MS5UYWxrU3RhdHVzEhcKD3JlbWFpbmluZ19jb3VudBgHIAEoBRIyCg5sYXN0X2hlYXJ0YmVhdBgIIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASHQoGYWdlbnRzGAkgAygLMg0uYXBpLnYxLkFnZW50IioKBUFnZW50EgwKBG5hbWUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkiQQoRQ3JlYXRlVGFsa1JlcXVlc3QSDQoFdG9waWMYASABKAkSHQoGYWdlbnRzGAIgAygLMg0uYXBpLnYxLkFnZW50IjAKEkNyZWF0ZVRhbGtSZXNwb25zZRIaCgR0YWxrGAEgASgLMgwuYXBpLnYxLlRhbGsiKQoWU3RhcnRUYWxrU3RyZWFtUmVxdWVzdBIPCgd0YWxrX2lkGAEgASgJIigKFVN0b3BUYWxrU3RyZWFtUmVxdWVzdBIPCgd0YWxrX2lkGAEgASgJIhgKFlN0b3BUYWxrU3RyZWFtUmVzcG9uc2UiQAoPQWRkQWdlbnRSZXF1ZXN0Eg8KB3RhbGtfaWQYASABKAkSHAoFYWdlbnQYAiABKAsyDS5hcGkudjEuQWdlbnQiEgoQQWRkQWdlbnRSZXNwb25zZSI6ChJSZW1vdmVBZ2VudFJlcXVlc3QSDwoHdGFsa19pZBgBIAEoCRITCgthZ2VudF9pbmRleBgCIAEoBSIVChNSZW1vdmVBZ2VudFJlc3BvbnNlIlgKElVwZGF0ZUFnZW50UmVxdWVzdBIPCgd0YWxrX2lkGAEgASgJEhMKC2FnZW50X2luZGV4GAIgASgFEhwKBWFnZW50GAMgASgLMg0uYXBpLnYxLkFnZW50IhUKE1VwZGF0ZUFnZW50UmVzcG9uc2UqWwoKVGFsa1N0YXR1cxIbChdUQUxLX1NUQVRVU19VTlNQRUNJRklFRBAAEhcKE1RBTEtfU1RBVFVTX1JVTk5JTkcQARIXChNUQUxLX1NUQVRVU19TVE9QUEVEEAIyuAMKC1RhbGtTZXJ2aWNlEkMKCkNyZWF0ZVRhbGsSGS5hcGkudjEuQ3JlYXRlVGFsa1JlcXVlc3QaGi5hcGkudjEuQ3JlYXRlVGFsa1Jlc3BvbnNlEkQKD1N0YXJ0VGFsa1N0cmVhbRIeLmFwaS52MS5TdGFydFRhbGtTdHJlYW1SZXF1ZXN0Gg8uYXBpLnYxLk1lc3NhZ2UwARJPCg5TdG9wVGFsa1N0cmVhbRIdLmFwaS52MS5TdG9wVGFsa1N0cmVhbVJlcXVlc3QaHi5hcGkudjEuU3RvcFRhbGtTdHJlYW1SZXNwb25zZRI9CghBZGRBZ2VudBIXLmFwaS52MS5BZGRBZ2VudFJlcXVlc3QaGC5hcGkudjEuQWRkQWdlbnRSZXNwb25zZRJGCgtSZW1vdmVBZ2VudBIaLmFwaS52MS5SZW1vdmVBZ2VudFJlcXVlc3QaGy5hcGkudjEuUmVtb3ZlQWdlbnRSZXNwb25zZRJGCgtVcGRhdGVBZ2VudBIaLmFwaS52MS5VcGRhdGVBZ2VudFJlcXVlc3QaGy5hcGkudjEuVXBkYXRlQWdlbnRSZXNwb25zZUKFAQoKY29tLmFwaS52MUIJVGFsa1Byb3RvUAFaM2dpdGh1Yi5jb20vYmFsbGZvcy9pZGVlcnRob24vZ2VuL3Byb3RvL2FwaS92MTthcGl2MaICA0FYWKoCBkFwaS5WMcoCBkFwaVxWMeICEkFwaVxWMVxHUEJNZXRhZGF0YeoCB0FwaTo6VjFiBnByb3RvMw", [file_google_protobuf_timestamp, file_proto_api_v1_message]);
 
 /**
  * @generated from message api.v1.Talk
@@ -103,6 +103,11 @@ export type CreateTalkRequest = Message<"api.v1.CreateTalkRequest"> & {
    * @generated from field: string topic = 1;
    */
   topic: string;
+
+  /**
+   * @generated from field: repeated api.v1.Agent agents = 2;
+   */
+  agents: Agent[];
 };
 
 /**
@@ -212,6 +217,81 @@ export const AddAgentResponseSchema: GenMessage<AddAgentResponse> = /*@__PURE__*
   messageDesc(file_proto_api_v1_talk, 8);
 
 /**
+ * @generated from message api.v1.RemoveAgentRequest
+ */
+export type RemoveAgentRequest = Message<"api.v1.RemoveAgentRequest"> & {
+  /**
+   * @generated from field: string talk_id = 1;
+   */
+  talkId: string;
+
+  /**
+   * @generated from field: int32 agent_index = 2;
+   */
+  agentIndex: number;
+};
+
+/**
+ * Describes the message api.v1.RemoveAgentRequest.
+ * Use `create(RemoveAgentRequestSchema)` to create a new message.
+ */
+export const RemoveAgentRequestSchema: GenMessage<RemoveAgentRequest> = /*@__PURE__*/
+  messageDesc(file_proto_api_v1_talk, 9);
+
+/**
+ * @generated from message api.v1.RemoveAgentResponse
+ */
+export type RemoveAgentResponse = Message<"api.v1.RemoveAgentResponse"> & {
+};
+
+/**
+ * Describes the message api.v1.RemoveAgentResponse.
+ * Use `create(RemoveAgentResponseSchema)` to create a new message.
+ */
+export const RemoveAgentResponseSchema: GenMessage<RemoveAgentResponse> = /*@__PURE__*/
+  messageDesc(file_proto_api_v1_talk, 10);
+
+/**
+ * @generated from message api.v1.UpdateAgentRequest
+ */
+export type UpdateAgentRequest = Message<"api.v1.UpdateAgentRequest"> & {
+  /**
+   * @generated from field: string talk_id = 1;
+   */
+  talkId: string;
+
+  /**
+   * @generated from field: int32 agent_index = 2;
+   */
+  agentIndex: number;
+
+  /**
+   * @generated from field: api.v1.Agent agent = 3;
+   */
+  agent?: Agent;
+};
+
+/**
+ * Describes the message api.v1.UpdateAgentRequest.
+ * Use `create(UpdateAgentRequestSchema)` to create a new message.
+ */
+export const UpdateAgentRequestSchema: GenMessage<UpdateAgentRequest> = /*@__PURE__*/
+  messageDesc(file_proto_api_v1_talk, 11);
+
+/**
+ * @generated from message api.v1.UpdateAgentResponse
+ */
+export type UpdateAgentResponse = Message<"api.v1.UpdateAgentResponse"> & {
+};
+
+/**
+ * Describes the message api.v1.UpdateAgentResponse.
+ * Use `create(UpdateAgentResponseSchema)` to create a new message.
+ */
+export const UpdateAgentResponseSchema: GenMessage<UpdateAgentResponse> = /*@__PURE__*/
+  messageDesc(file_proto_api_v1_talk, 12);
+
+/**
  * @generated from enum api.v1.TalkStatus
  */
 export enum TalkStatus {
@@ -272,6 +352,22 @@ export const TalkService: GenService<{
     methodKind: "unary";
     input: typeof AddAgentRequestSchema;
     output: typeof AddAgentResponseSchema;
+  },
+  /**
+   * @generated from rpc api.v1.TalkService.RemoveAgent
+   */
+  removeAgent: {
+    methodKind: "unary";
+    input: typeof RemoveAgentRequestSchema;
+    output: typeof RemoveAgentResponseSchema;
+  },
+  /**
+   * @generated from rpc api.v1.TalkService.UpdateAgent
+   */
+  updateAgent: {
+    methodKind: "unary";
+    input: typeof UpdateAgentRequestSchema;
+    output: typeof UpdateAgentResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_proto_api_v1_talk, 0);

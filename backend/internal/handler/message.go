@@ -56,6 +56,7 @@ func (h *MessageHandler) SendMessage(
 		"createdAt":  now,
 		"talkId":     req.Msg.TalkId,
 		"isFavorite": false,
+		"replyToMessageId":   req.Msg.ReplyToMessageId,
 	}
 
 	// Save to Firestore: talks/{talkId}/messages/{messageId}
@@ -97,35 +98,59 @@ func (h *MessageHandler) ToggleFavorite(
 	ctx context.Context,
 	req *connect.Request[apiv1.ToggleFavoriteRequest],
 ) (*connect.Response[apiv1.ToggleFavoriteResponse], error) {
-	_, ok := middleware.GetUID(ctx)
+	uid, ok := middleware.GetUID(ctx)
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, fmt.Errorf("user not authenticated"))
 	}
 
 	docRef := h.firestore.Collection("talks").Doc(req.Msg.TalkId).Collection("messages").Doc(req.Msg.MessageId)
 
+	var isFavorite bool
 	err := h.firestore.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
 		doc, err := tx.Get(docRef)
 		if err != nil {
 			return err
 		}
 
-		isFavorite, _ := doc.Data()["isFavorite"].(bool)
-		return tx.Update(docRef, []firestore.Update{
-			{Path: "isFavorite", Value: !isFavorite},
-		})
+		data := doc.Data()
+		favoritedBy, _ := data["favoritedBy"].([]interface{})
+		
+		found := false
+		for _, u := range favoritedBy {
+			if s, ok := u.(string); ok && s == uid {
+				found = true
+				break
+			}
+		}
+
+		if found {
+			// Remove
+			return tx.Update(docRef, []firestore.Update{
+				{Path: "favoritedBy", Value: firestore.ArrayRemove(uid)},
+			})
+		} else {
+			// Add
+			return tx.Update(docRef, []firestore.Update{
+				{Path: "favoritedBy", Value: firestore.ArrayUnion(uid)},
+			})
+		}
 	})
 
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to toggle favorite: %v", err))
 	}
 
-	// 最終的な状態を取得して返す（トランザクション後）
-	doc, err := docRef.Get(ctx)
-	if err != nil {
-		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to fetch updated message: %v", err))
+	// 最終的な状態を再取得
+	updatedDoc, _ := docRef.Get(ctx)
+	updatedData := updatedDoc.Data()
+	updatedFavoritedBy, _ := updatedData["favoritedBy"].([]interface{})
+	isFavorite = false
+	for _, u := range updatedFavoritedBy {
+		if s, ok := u.(string); ok && s == uid {
+			isFavorite = true
+			break
+		}
 	}
-	isFavorite, _ := doc.Data()["isFavorite"].(bool)
 
 	return connect.NewResponse(&apiv1.ToggleFavoriteResponse{
 		IsFavorite: isFavorite,
@@ -142,10 +167,9 @@ func (h *MessageHandler) ListFavoriteMessages(
 	}
 
 	// CollectionGroup を使用してお気に入りを全件取得
-	// 注意: インデックス作成が必要な場合がありますが、エミュレータでは自動的に動作することが多いです
+	// 全ユーザー共通ではなく、ログイン中のユーザーが含まれるもののみ
 	iter := h.firestore.CollectionGroup("messages").
-		Where("uid", "==", uid).
-		Where("isFavorite", "==", true).
+		Where("favoritedBy", "array-contains", uid).
 		Documents(ctx)
 
 	docs, err := iter.GetAll()
@@ -160,6 +184,9 @@ func (h *MessageHandler) ListFavoriteMessages(
 		// ドキュメントパス talks/{talkId}/messages/{messageId} から talkId を取得
 		talkId := doc.Ref.Parent.Parent.ID
 
+		agentName, _ := data["agentName"].(string)
+		ideaName, _ := data["ideaName"].(string)
+
 		messages = append(messages, &apiv1.Message{
 			Id:         doc.Ref.ID,
 			Uid:        data["uid"].(string),
@@ -167,10 +194,113 @@ func (h *MessageHandler) ListFavoriteMessages(
 			CreatedAt:  timestamppb.New(createdAt),
 			IsFavorite: true,
 			TalkId:     talkId,
+			AgentName:  agentName,
+			IdeaName:   ideaName,
 		})
 	}
 
 	return connect.NewResponse(&apiv1.ListFavoriteMessagesResponse{
 		Messages: messages,
+	}), nil
+}
+
+func (h *MessageHandler) DiscardIdea(
+	ctx context.Context,
+	req *connect.Request[apiv1.DiscardIdeaRequest],
+) (*connect.Response[apiv1.DiscardIdeaResponse], error) {
+	docRef := h.firestore.Collection("talks").Doc(req.Msg.TalkId).Collection("messages").Doc(req.Msg.MessageId)
+
+	_, err := docRef.Update(ctx, []firestore.Update{
+		{Path: "isDiscarded", Value: true},
+	})
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to discard idea: %v", err))
+	}
+
+	return connect.NewResponse(&apiv1.DiscardIdeaResponse{}), nil
+}
+
+func (h *MessageHandler) RecycleIdea(
+	ctx context.Context,
+	req *connect.Request[apiv1.RecycleIdeaRequest],
+) (*connect.Response[apiv1.RecycleIdeaResponse], error) {
+	docRef := h.firestore.Collection("talks").Doc(req.Msg.TalkId).Collection("messages").Doc(req.Msg.MessageId)
+
+	var ideaName, ideaDetails string
+	err := h.firestore.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
+		doc, err := tx.Get(docRef)
+		if err != nil {
+			return err
+		}
+		data := doc.Data()
+		ideaName, _ = data["ideaName"].(string)
+		
+		// Extract from ideas list if present
+		if ideas, ok := data["ideas"].([]interface{}); ok && len(ideas) > 0 {
+			if firstIdea, ok := ideas[0].(map[string]interface{}); ok {
+				ideaDetails, _ = firstIdea["details"].(string)
+			}
+		}
+		// Fallback to text
+		if ideaDetails == "" {
+			ideaDetails, _ = data["text"].(string)
+		}
+
+		return tx.Update(docRef, []firestore.Update{
+			{Path: "isRecycled", Value: true},
+		})
+	})
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to recycle idea: %v", err))
+	}
+
+	// Add to global recycle box
+	if ideaName != "" {
+		_, _, _ = h.firestore.Collection("recycled_ideas").Add(ctx, map[string]interface{}{
+			"name":        ideaName,
+			"details":     ideaDetails,
+			"createdAt":   time.Now(),
+			"randomValue": time.Now().UnixNano() % 1000000, // For simple random shuffle
+		})
+	}
+
+	return connect.NewResponse(&apiv1.RecycleIdeaResponse{}), nil
+}
+
+func (h *MessageHandler) ListRecycledIdeas(
+	ctx context.Context,
+	req *connect.Request[apiv1.ListRecycledIdeasRequest],
+) (*connect.Response[apiv1.ListRecycledIdeasResponse], error) {
+	limit := int(req.Msg.Limit)
+	if limit <= 0 {
+		limit = 10
+	}
+
+	// Simple random: use current time to skip some or start at different point
+	// Firestore random is hard without specific tricks, but we'll just Grab newest for now or shuffle in app
+	iter := h.firestore.Collection("recycled_ideas").
+		OrderBy("createdAt", firestore.Desc).
+		Limit(limit).
+		Documents(ctx)
+
+	docs, err := iter.GetAll()
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to fetch recycled ideas: %v", err))
+	}
+
+	var ideas []*apiv1.RecycledIdea
+	for _, doc := range docs {
+		data := doc.Data()
+		created, _ := data["createdAt"].(time.Time)
+		ideas = append(ideas, &apiv1.RecycledIdea{
+			Id:        doc.Ref.ID,
+			Name:      data["name"].(string),
+			Details:   data["details"].(string),
+			CreatedAt: timestamppb.New(created),
+		})
+	}
+
+	return connect.NewResponse(&apiv1.ListRecycledIdeasResponse{
+		Ideas: ideas,
 	}), nil
 }

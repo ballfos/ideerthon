@@ -12,6 +12,8 @@ type Config struct {
 	AuthEmulatorHost      string
 	FirestoreEmulatorHost string
 	AllowedOrigin         string
+	VertexAIProjectID     string
+	VertexAILocation      string
 }
 
 func Load() *Config {
@@ -32,6 +34,8 @@ func Load() *Config {
 		ProjectID:             projectID,
 		AuthEmulatorHost:      os.Getenv("FIREBASE_AUTH_EMULATOR_HOST"),
 		FirestoreEmulatorHost: os.Getenv("FIRESTORE_EMULATOR_HOST"),
-		AllowedOrigin:         os.Getenv("ALLOWED_ORIGIN"), // Fallback in server logic if empty
+		AllowedOrigin:         os.Getenv("ALLOWED_ORIGIN"),
+		VertexAIProjectID:     os.Getenv("VERTEX_AI_PROJECT_ID"),
+		VertexAILocation:      os.Getenv("VERTEX_AI_LOCATION"),
 	}
 }

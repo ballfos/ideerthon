@@ -3,9 +3,8 @@ package handler
 import (
 	"context"
 	"fmt"
+	"sort"
 	"time"
-
-	"math/rand"
 
 	"cloud.google.com/go/firestore"
 	"connectrpc.com/connect"
@@ -20,11 +19,13 @@ import (
 type TalkHandler struct {
 	apiv1connect.UnimplementedTalkServiceHandler
 	firestore *firestore.Client
+	ai        *AIClient
 }
 
-func NewTalkHandler(fs *firestore.Client) *TalkHandler {
+func NewTalkHandler(fs *firestore.Client, ai *AIClient) *TalkHandler {
 	return &TalkHandler{
 		firestore: fs,
+		ai:        ai,
 	}
 }
 
@@ -40,12 +41,23 @@ func (h *TalkHandler) CreateTalk(
 	now := time.Now()
 	id := uuid.New().String()
 
+	// Extract agents from request
+	agents := make([]map[string]interface{}, 0, len(req.Msg.Agents))
+	for _, agent := range req.Msg.Agents {
+		agents = append(agents, map[string]interface{}{
+			"name":        agent.Name,
+			"description": agent.Description,
+		})
+	}
+
 	// Firestore data
 	data := map[string]interface{}{
 		"ownerId":   uid,
 		"topic":     req.Msg.Topic,
+		"status":    int64(apiv1.TalkStatus_TALK_STATUS_STOPPED),
 		"createdAt": now,
 		"updatedAt": now,
+		"agents":    agents,
 	}
 
 	// Save to Firestore
@@ -148,6 +160,8 @@ func (h *TalkHandler) StartTalkStream(
 		}
 	}()
 
+	// Cycle through agents
+	agentIdx := 0
 	for remainingCount > 0 {
 		// Wait for 4s with cancellation check
 		select {
@@ -156,42 +170,181 @@ func (h *TalkHandler) StartTalkStream(
 		case <-stopChan:
 			return nil
 		case <-time.After(4 * time.Second):
-			// Proceed to generate message
 		}
 
-		// Re-check status before proceeding
-		if remainingCount <= 0 {
-			break
+		// Refresh talk data to get latest summary and agents
+		doc, err := docRef.Get(ctx)
+		if err != nil {
+			return connect.NewError(connect.CodeInternal, fmt.Errorf("failed to refresh talk: %v", err))
+		}
+		data := doc.Data()
+		topic, _ := data["topic"].(string)
+		agentsData, _ := data["agents"].([]interface{})
+		whiteboard, _ := data["whiteboard"].(map[string]interface{})
+		if whiteboard == nil {
+			whiteboard = map[string]interface{}{
+				"title":   "未定",
+				"summary": "議論はこれから始まります。",
+				"ideas":   []interface{}{},
+			}
 		}
 
-		// Generate dummy message
-		text := generateDummyText()
+		// Cycle through agents
+		selectedAgent := agentsData[agentIdx%len(agentsData)].(map[string]interface{})
+		agentName, _ := selectedAgent["name"].(string)
+		agentDesc, _ := selectedAgent["description"].(string)
+
+		// Fetch recent messages for context
+		// We want: Recent 2 AI messages + Recent 1 Human message
+		msgIter := docRef.Collection("messages").OrderBy("createdAt", firestore.Desc).Limit(20).Documents(ctx)
+		msgDocs, err := msgIter.GetAll()
+
+		type Msg struct {
+			Sender string
+			Text   string
+			Time   time.Time
+		}
+		var aiMsgs []Msg
+		var humanMsgs []Msg
+
+		if err == nil {
+			for _, doc := range msgDocs {
+				m := doc.Data()
+				uid, _ := m["uid"].(string)
+				sender, _ := m["agentName"].(string)
+				if sender == "" {
+					sender = "ユーザー"
+				}
+				text, _ := m["text"].(string)
+				createdAt, _ := m["createdAt"].(time.Time)
+
+				if uid == "ai" {
+					if len(aiMsgs) < 2 {
+						aiMsgs = append(aiMsgs, Msg{Sender: sender, Text: text, Time: createdAt})
+					}
+				} else {
+					if len(humanMsgs) < 1 {
+						humanMsgs = append(humanMsgs, Msg{Sender: sender, Text: text, Time: createdAt})
+					}
+				}
+				if len(aiMsgs) >= 2 && len(humanMsgs) >= 1 {
+					break
+				}
+			}
+		}
+
+		// Combine and sort chronologically
+		var combined []Msg
+		combined = append(combined, aiMsgs...)
+		combined = append(combined, humanMsgs...)
+		sort.Slice(combined, func(i, j int) bool {
+			return combined[i].Time.Before(combined[j].Time)
+		})
+
+		// Extra context for replies
+		var replyContext string
+		var aiReplyInfo *ReplyContext
+		if len(msgDocs) > 0 {
+			latestMsg := msgDocs[0].Data()
+			replyID, _ := latestMsg["replyToMessageId"].(string)
+			if replyID != "" {
+				// Fetch direct reply target
+				replySnap, err := docRef.Collection("messages").Doc(replyID).Get(ctx)
+				if err == nil {
+					rd := replySnap.Data()
+					rText, _ := rd["text"].(string)
+					rSender, _ := rd["agentName"].(string)
+					if rSender == "" { rSender = "ユーザー" }
+					rTime, _ := rd["createdAt"].(time.Time)
+
+					aiReplyInfo = &ReplyContext{
+						ReplyTargetText:   rText,
+						ReplyTargetSender: rSender,
+					}
+
+					replyContext += fmt.Sprintf("\n--- REPLY TARGET ---\n[%s]: %s\n", rSender, rText)
+
+					// Fetch previous context of the reply target
+					prevIter := docRef.Collection("messages").
+						Where("createdAt", "<", rTime).
+						OrderBy("createdAt", firestore.Desc).
+						Limit(1).
+						Documents(ctx)
+					prevDocs, err := prevIter.GetAll()
+					if err == nil && len(prevDocs) > 0 {
+						pd := prevDocs[0].Data()
+						pText, _ := pd["text"].(string)
+						pSender, _ := pd["agentName"].(string)
+						if pSender == "" {
+							pSender = "ユーザー"
+						}
+						aiReplyInfo.PreviousContext = pText
+						replyContext = fmt.Sprintf("\n--- PRE-REPLY CONTEXT ---\n[%s]: %s", pSender, pText) + replyContext
+					}
+				}
+			}
+		}
+
+		recentContext := ""
+		for i, m := range combined {
+			msgText := m.Text
+			// Format the very last message specially if it's a reply
+			if i == len(combined)-1 && aiReplyInfo != nil {
+				msgText = fmt.Sprintf("「%s」に対して「%s」", aiReplyInfo.ReplyTargetText, m.Text)
+				aiReplyInfo.ReplyText = m.Text // Update the actual reply text for the refined system prompt
+			}
+			recentContext += fmt.Sprintf("[%s]: %s\n", m.Sender, msgText)
+		}
+
+		if replyContext != "" {
+			recentContext += "\n[IMPORTANT: The latest message is a reply to a previous discussion point. Focus your response based on this specific context:]"
+			recentContext += replyContext
+		}
+
+		// AI Response
+		aiRes, err := h.ai.GenerateResponse(ctx, agentName, agentDesc, topic, whiteboard, recentContext, aiReplyInfo)
+		if err != nil {
+			fmt.Printf("AI error: %v\n", err)
+			aiRes = map[string]interface{}{
+				"message": "申し訳ありません、考えがまとまりませんでした。",
+			}
+		}
+
+		messageText, _ := aiRes["message"].(string)
+		summaryText, _ := aiRes["summary"].(string)
+		ideas, _ := aiRes["ideas"].([]interface{})
+
 		msgID := uuid.New().String()
 		msgTime := time.Now()
 
-		// Select a random agent
-		selectedAgent := agentsData[rand.Intn(len(agentsData))].(map[string]interface{})
-		agentName, _ := selectedAgent["name"].(string)
-
 		msgData := map[string]interface{}{
-			"uid":       "ai", // System/AI UID
-			"text":      text,
+			"uid":       "ai",
+			"text":      messageText,
 			"createdAt": msgTime,
 			"talkId":    talkID,
 			"agentName": agentName,
+			"summary":   summaryText,
+			"ideas":     ideas,
 		}
 
-		// Save to Firestore
+		// Save the first idea's name for the idea map label
+		if len(ideas) > 0 {
+			if firstIdea, ok := ideas[0].(map[string]interface{}); ok {
+				if name, ok := firstIdea["name"].(string); ok {
+					msgData["ideaName"] = name
+				}
+			}
+		}
+
 		_, err = docRef.Collection("messages").Doc(msgID).Set(ctx, msgData)
 		if err != nil {
 			return connect.NewError(connect.CodeInternal, fmt.Errorf("failed to save reply message: %v", err))
 		}
 
-		// Send to stream
 		if err := stream.Send(&apiv1.Message{
 			Id:        msgID,
 			Uid:       "ai",
-			Text:      text,
+			Text:      messageText,
 			CreatedAt: timestamppb.New(msgTime),
 			TalkId:    talkID,
 			AgentName: agentName,
@@ -200,6 +353,41 @@ func (h *TalkHandler) StartTalkStream(
 		}
 
 		remainingCount--
+		agentIdx++
+
+		// Update whiteboard every turn since the AI now returns it
+		if summaryText != "" || ideas != nil {
+			h.ai.UpdateTalkWhiteboard(ctx, docRef, summaryText, ideas)
+		}
+
+		// Asynchronously generate and save embedding for the first idea's name (or summary)
+		textToEmbed := summaryText
+		if len(ideas) > 0 {
+			if firstIdea, ok := ideas[0].(map[string]interface{}); ok {
+				if name, ok := firstIdea["name"].(string); ok && name != "" {
+					textToEmbed = name
+				}
+			}
+		}
+
+		if textToEmbed != "" {
+			go func(mID string, text string) {
+				bgCtx := context.Background()
+				emb, err := h.ai.EmbedText(bgCtx, text)
+				if err != nil {
+					fmt.Printf("failed to embed summary: %v\n", err)
+					return
+				}
+
+				_, err = docRef.Collection("messages").Doc(mID).Update(bgCtx, []firestore.Update{
+					{Path: "embedding", Value: emb},
+				})
+				if err != nil {
+					fmt.Printf("failed to update message with embedding: %v\n", err)
+				}
+			}(msgID, textToEmbed)
+		}
+
 		_, _ = docRef.Update(ctx, []firestore.Update{
 			{Path: "remainingCount", Value: remainingCount},
 			{Path: "lastHeartbeat", Value: time.Now()},
@@ -263,11 +451,82 @@ func (h *TalkHandler) AddAgent(
 	return connect.NewResponse(&apiv1.AddAgentResponse{}), nil
 }
 
-func generateDummyText() string {
-	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	b := make([]byte, 20)
-	for i := range b {
-		b[i] = charset[rand.Intn(len(charset))]
+func (h *TalkHandler) RemoveAgent(ctx context.Context, req *connect.Request[apiv1.RemoveAgentRequest]) (*connect.Response[apiv1.RemoveAgentResponse], error) {
+	talkID := req.Msg.TalkId
+	idx := int(req.Msg.AgentIndex)
+
+	docRef := h.firestore.Collection("talks").Doc(talkID)
+	docSnap, err := docRef.Get(ctx)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("talk not found"))
 	}
-	return string(b)
+
+	var agents []interface{}
+	if data, ok := docSnap.Data()["agents"].([]interface{}); ok {
+		agents = data
+	}
+
+	if idx < 0 || idx >= len(agents) {
+		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("invalid agent index"))
+	}
+
+	// Remove at index
+	agents = append(agents[:idx], agents[idx+1:]...)
+
+	_, err = docRef.Update(ctx, []firestore.Update{
+		{
+			Path:  "agents",
+			Value: agents,
+		},
+	})
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to remove agent: %v", err))
+	}
+
+	return connect.NewResponse(&apiv1.RemoveAgentResponse{}), nil
 }
+
+func (h *TalkHandler) UpdateAgent(ctx context.Context, req *connect.Request[apiv1.UpdateAgentRequest]) (*connect.Response[apiv1.UpdateAgentResponse], error) {
+	talkID := req.Msg.TalkId
+	idx := int(req.Msg.AgentIndex)
+	agent := req.Msg.Agent
+
+	if agent == nil || agent.Name == "" {
+		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("agent name is required"))
+	}
+
+	docRef := h.firestore.Collection("talks").Doc(talkID)
+	docSnap, err := docRef.Get(ctx)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("talk not found"))
+	}
+
+	var agents []interface{}
+	if data, ok := docSnap.Data()["agents"].([]interface{}); ok {
+		agents = data
+	}
+
+	if idx < 0 || idx >= len(agents) {
+		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("invalid agent index"))
+	}
+
+	// Update at index
+	agents[idx] = map[string]interface{}{
+		"name":        agent.Name,
+		"description": agent.Description,
+	}
+
+	_, err = docRef.Update(ctx, []firestore.Update{
+		{
+			Path:  "agents",
+			Value: agents,
+		},
+	})
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to update agent: %v", err))
+	}
+
+	return connect.NewResponse(&apiv1.UpdateAgentResponse{}), nil
+}
+
+

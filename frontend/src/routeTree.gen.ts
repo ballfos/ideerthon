@@ -16,6 +16,7 @@ import { Route as authLoginRouteImport } from './routes/(auth)/login'
 import { Route as AuthenticatedTalksNewRouteImport } from './routes/_authenticated/talks.new'
 import { Route as AuthenticatedTalksTalkIdRouteImport } from './routes/_authenticated/talks.$talkId'
 import { Route as AuthenticatedLayoutTalksRouteImport } from './routes/_authenticated/_layout.talks'
+import { Route as AuthenticatedLayoutRecycleRouteImport } from './routes/_authenticated/_layout.recycle'
 import { Route as AuthenticatedLayoutHomeRouteImport } from './routes/_authenticated/_layout.home'
 import { Route as AuthenticatedLayoutFavoritesRouteImport } from './routes/_authenticated/_layout.favorites'
 
@@ -54,6 +55,12 @@ const AuthenticatedLayoutTalksRoute =
     path: '/talks',
     getParentRoute: () => AuthenticatedLayoutRoute,
   } as any)
+const AuthenticatedLayoutRecycleRoute =
+  AuthenticatedLayoutRecycleRouteImport.update({
+    id: '/recycle',
+    path: '/recycle',
+    getParentRoute: () => AuthenticatedLayoutRoute,
+  } as any)
 const AuthenticatedLayoutHomeRoute = AuthenticatedLayoutHomeRouteImport.update({
   id: '/home',
   path: '/home',
@@ -71,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof authLoginRoute
   '/favorites': typeof AuthenticatedLayoutFavoritesRoute
   '/home': typeof AuthenticatedLayoutHomeRoute
+  '/recycle': typeof AuthenticatedLayoutRecycleRoute
   '/talks': typeof AuthenticatedLayoutTalksRoute
   '/talks/$talkId': typeof AuthenticatedTalksTalkIdRoute
   '/talks/new': typeof AuthenticatedTalksNewRoute
@@ -80,6 +88,7 @@ export interface FileRoutesByTo {
   '/login': typeof authLoginRoute
   '/favorites': typeof AuthenticatedLayoutFavoritesRoute
   '/home': typeof AuthenticatedLayoutHomeRoute
+  '/recycle': typeof AuthenticatedLayoutRecycleRoute
   '/talks': typeof AuthenticatedLayoutTalksRoute
   '/talks/$talkId': typeof AuthenticatedTalksTalkIdRoute
   '/talks/new': typeof AuthenticatedTalksNewRoute
@@ -92,6 +101,7 @@ export interface FileRoutesById {
   '/_authenticated/_layout': typeof AuthenticatedLayoutRouteWithChildren
   '/_authenticated/_layout/favorites': typeof AuthenticatedLayoutFavoritesRoute
   '/_authenticated/_layout/home': typeof AuthenticatedLayoutHomeRoute
+  '/_authenticated/_layout/recycle': typeof AuthenticatedLayoutRecycleRoute
   '/_authenticated/_layout/talks': typeof AuthenticatedLayoutTalksRoute
   '/_authenticated/talks/$talkId': typeof AuthenticatedTalksTalkIdRoute
   '/_authenticated/talks/new': typeof AuthenticatedTalksNewRoute
@@ -103,6 +113,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/favorites'
     | '/home'
+    | '/recycle'
     | '/talks'
     | '/talks/$talkId'
     | '/talks/new'
@@ -112,6 +123,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/favorites'
     | '/home'
+    | '/recycle'
     | '/talks'
     | '/talks/$talkId'
     | '/talks/new'
@@ -123,6 +135,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_layout'
     | '/_authenticated/_layout/favorites'
     | '/_authenticated/_layout/home'
+    | '/_authenticated/_layout/recycle'
     | '/_authenticated/_layout/talks'
     | '/_authenticated/talks/$talkId'
     | '/_authenticated/talks/new'
@@ -185,6 +198,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLayoutTalksRouteImport
       parentRoute: typeof AuthenticatedLayoutRoute
     }
+    '/_authenticated/_layout/recycle': {
+      id: '/_authenticated/_layout/recycle'
+      path: '/recycle'
+      fullPath: '/recycle'
+      preLoaderRoute: typeof AuthenticatedLayoutRecycleRouteImport
+      parentRoute: typeof AuthenticatedLayoutRoute
+    }
     '/_authenticated/_layout/home': {
       id: '/_authenticated/_layout/home'
       path: '/home'
@@ -205,12 +225,14 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedLayoutRouteChildren {
   AuthenticatedLayoutFavoritesRoute: typeof AuthenticatedLayoutFavoritesRoute
   AuthenticatedLayoutHomeRoute: typeof AuthenticatedLayoutHomeRoute
+  AuthenticatedLayoutRecycleRoute: typeof AuthenticatedLayoutRecycleRoute
   AuthenticatedLayoutTalksRoute: typeof AuthenticatedLayoutTalksRoute
 }
 
 const AuthenticatedLayoutRouteChildren: AuthenticatedLayoutRouteChildren = {
   AuthenticatedLayoutFavoritesRoute: AuthenticatedLayoutFavoritesRoute,
   AuthenticatedLayoutHomeRoute: AuthenticatedLayoutHomeRoute,
+  AuthenticatedLayoutRecycleRoute: AuthenticatedLayoutRecycleRoute,
   AuthenticatedLayoutTalksRoute: AuthenticatedLayoutTalksRoute,
 }
 
