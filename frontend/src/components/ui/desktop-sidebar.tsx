@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Home, List, Star, MessagesSquare, RefreshCcw } from "lucide-react";
 import { cn } from "#/utils/ui/cn";
+import { Home, List, Star, MessagesSquare, RefreshCcw } from "lucide-react";
 
 export function DesktopSidebar() {
   return (
@@ -34,10 +34,10 @@ export function DesktopSidebar() {
 }
 
 function SidebarItem({ 
-  to, 
-  params, 
   icon, 
-  label 
+  label, 
+  params, 
+  to 
 }: { 
   to: string; 
   params?: any;

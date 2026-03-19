@@ -2,6 +2,7 @@
 import { render, screen } from "@testing-library/react"
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import "@testing-library/jest-dom/vitest"
+
 import { LatestTopics } from "@/components/ui/latest-topics"
 import { useTalks } from "@/features/talks"
 
@@ -20,13 +21,13 @@ describe("LatestTopics Component", () => {
   })
 
   it("読み込み中の場合は『読み込み中...』が表示されること", () => {
-    vi.mocked(useTalks).mockReturnValue({ talks: [], loading: true, error: null })
+    vi.mocked(useTalks).mockReturnValue({ error: null, loading: true, talks: [] })
     render(<LatestTopics />)
     expect(screen.getByText(/読み込み中/)).toBeInTheDocument()
   })
 
   it("トーク履歴が空の場合は『履歴がまだありません』とボタンが表示されること", () => {
-    vi.mocked(useTalks).mockReturnValue({ talks: [], loading: false, error: null })
+    vi.mocked(useTalks).mockReturnValue({ error: null, loading: false, talks: [] })
     render(<LatestTopics />)
     expect(screen.getByText(/履歴がまだありません/)).toBeInTheDocument()
     expect(screen.getByText(/トークをはじめる/)).toBeInTheDocument()
@@ -34,10 +35,10 @@ describe("LatestTopics Component", () => {
 
   it("トーク履歴がある場合は、最新のトピック名が表示されること", () => {
     const mockTalks = [
-      { id: "talk-1", topic: "テストトピック1", updatedAt: { seconds: 1710831600, nanoseconds: 0 } },
-      { id: "talk-2", topic: "テストトピック2", updatedAt: { seconds: 1710831600, nanoseconds: 0 } }
+      { id: "talk-1", topic: "テストトピック1", updatedAt: { nanoseconds: 0, seconds: 1710831600 } },
+      { id: "talk-2", topic: "テストトピック2", updatedAt: { nanoseconds: 0, seconds: 1710831600 } }
     ]
-    vi.mocked(useTalks).mockReturnValue({ talks: mockTalks as any, loading: false, error: null })
+    vi.mocked(useTalks).mockReturnValue({ error: null, loading: false, talks: mockTalks as any })
     
     render(<LatestTopics />)
     

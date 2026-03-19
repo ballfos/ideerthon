@@ -1,2 +1,2 @@
 export * from "./types";
-export * from "./useTalks";
+export * from "./use-talk";

@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
 import { collection, query, where, orderBy, onSnapshot } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { useEffect, useState } from "react";
+
 import { useAuth } from "@/features/auth";
+import { db } from "@/lib/firebase";
+
 import type { Talk } from "./types";
 
 export const useTalks = () => {
@@ -50,8 +52,8 @@ export const useTalks = () => {
             }
         );
 
-        return () => unsubscribe();
+        return () => { unsubscribe(); };
     }, [user]);
 
-    return { talks, loading, error };
+    return { error, loading, talks };
 };

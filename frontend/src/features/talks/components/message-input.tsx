@@ -1,7 +1,7 @@
-import * as React from "react";
+import { Button } from "#/components/ui/button";
 import { cn } from "#/utils/ui/cn";
 import { SendHorizontal, X, Reply } from "lucide-react";
-import { Button } from "#/components/ui/button";
+import * as React from "react";
 
 export interface MessageInputProps {
     value: string;
@@ -14,13 +14,13 @@ export interface MessageInputProps {
 }
 
 export function MessageInput({
-    value,
+    className,
+    onCancelReply,
     onChange,
     onSend,
     placeholder = "メッセージを入力...",
-    className,
     replyInfo,
-    onCancelReply,
+    value,
 }: MessageInputProps) {
     const [isComposing, setIsComposing] = React.useState(false);
 
@@ -65,14 +65,14 @@ export function MessageInput({
                 <textarea
                     rows={1}
                     value={value}
-                    onChange={(e) => onChange(e.target.value)}
+                    onChange={(e) => { onChange(e.target.value); }}
                     onKeyDown={handleKeyDown}
-                    onCompositionStart={() => setIsComposing(true)}
-                    onCompositionEnd={() => setIsComposing(false)}
+                    onCompositionStart={() => { setIsComposing(true); }}
+                    onCompositionEnd={() => { setIsComposing(false); }}
                     placeholder={placeholder}
                     maxLength={100}
                     className="w-full resize-none rounded-2xl border-2 border-[#d5cba1] bg-white px-4 py-2.5 text-sm font-bold text-[#7a6446] placeholder-[#c2baa6] focus:border-[#4b9635] focus:outline-none transition-colors"
-                    style={{ minHeight: "44px", maxHeight: "120px" }}
+                    style={{ maxHeight: "120px", minHeight: "44px" }}
                 />
                 <div className="absolute bottom-[-14px] right-2 text-[9px] font-black text-[#a3967d] opacity-50">
                     {value.length}/100

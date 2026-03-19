@@ -9,11 +9,11 @@ export interface TalkTabsProps {
     className?: string;
 }
 
-export function TalkTabs({ activeTab, onTabChange, className }: TalkTabsProps) {
+export function TalkTabs({ activeTab, className, onTabChange }: TalkTabsProps) {
     const tabs = [
-        { value: "chat" as const, label: "チャット", icon: <MessageCircle className="h-5 w-5" /> },
-        { value: "map" as const, label: "あいでぃあ村", icon: <Network className="h-5 w-5" /> },
-        { value: "members" as const, label: "メンバー", icon: <Users className="h-5 w-5" /> },
+        { icon: <MessageCircle className="h-5 w-5" />, label: "チャット", value: "chat" as const },
+        { icon: <Network className="h-5 w-5" />, label: "あいでぃあ村", value: "map" as const },
+        { icon: <Users className="h-5 w-5" />, label: "メンバー", value: "members" as const },
     ];
 
     return (
@@ -21,7 +21,7 @@ export function TalkTabs({ activeTab, onTabChange, className }: TalkTabsProps) {
             {tabs.map((tab) => (
                 <button
                     key={tab.value}
-                    onClick={() => onTabChange(tab.value)}
+                    onClick={() => { onTabChange(tab.value); }}
                     className={cn(
                         "flex flex-1 items-center justify-center gap-2 py-3 transition-all active:scale-95",
                         activeTab === tab.value

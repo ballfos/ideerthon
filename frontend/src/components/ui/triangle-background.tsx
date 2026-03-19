@@ -3,9 +3,9 @@
 function RoundedEquilateralTriangle({
     cx,
     cy,
-    sideLength,
     fill,
     rotation,
+    sideLength,
 }: {
     cx: number
     cy: number

@@ -1,8 +1,9 @@
 // @vitest-environment happy-dom
 import { render, screen, cleanup } from "@testing-library/react"
-import { describe, it, expect } from "vitest"
-import "@testing-library/jest-dom/vitest"
 import fc from "fast-check"
+import "@testing-library/jest-dom/vitest"
+import { describe, it, expect } from "vitest"
+
 import { Button } from "@/components/ui/button"
 
 describe("Button Component Property-Based Tests", () => {

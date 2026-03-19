@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
 import type { GuideStep } from '#/components/ui/page-guide';
+
+import { createContext, useContext, useState, type ReactNode } from 'react';
 
 interface GuideContextType {
   steps: GuideStep[];
@@ -12,7 +13,7 @@ export function GuideProvider({ children }: { children: ReactNode }) {
   const [steps, setSteps] = useState<GuideStep[]>([]);
 
   return (
-    <GuideContext.Provider value={{ steps, setSteps }}>
+    <GuideContext.Provider value={{ setSteps, steps }}>
       {children}
     </GuideContext.Provider>
   );

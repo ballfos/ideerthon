@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect } from "react";
-import { User, LogOut } from "lucide-react";
 import { useNavigate, useRouter } from "@tanstack/react-router";
+import { User, LogOut } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+
 import { useAuth, signOut } from "@/features/auth";
 
 export const UserMenu = () => {
@@ -18,7 +19,7 @@ export const UserMenu = () => {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => { document.removeEventListener("mousedown", handleClickOutside); };
   }, []);
 
   const handleLogout = async () => {
@@ -38,7 +39,7 @@ export const UserMenu = () => {
   return (
     <div className="relative" ref={menuRef}>
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => { setIsOpen(!isOpen); }}
         className="flex h-10 w-10 overflow-hidden items-center justify-center rounded-full bg-white/20 text-white transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white border-2 border-transparent hover:border-white/50 shadow-sm"
         aria-label="ユーザーメニューを開く"
       >

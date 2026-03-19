@@ -3,24 +3,25 @@ import {
   useNavigate,
   useRouter,
 } from "@tanstack/react-router";
-import { useAuth, signInWithGoogle } from "@/features/auth";
-import { Button } from "@/components/ui/button";
-import { TriangleBackground } from "@/components/ui/triangle-background";
 import { LogIn, Waves } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { Button } from "@/components/ui/button";
+import { TriangleBackground } from "@/components/ui/triangle-background";
+import { useAuth, signInWithGoogle } from "@/features/auth";
+
 export const Route = createFileRoute("/(auth)/login")({
+  component: RouteComponent,
   validateSearch: (search: Record<string, unknown>): { redirect?: string } => {
     return {
       redirect:
         typeof search.redirect === "string" ? search.redirect : undefined,
     };
   },
-  component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { user, loading } = useAuth();
+  const { loading, user } = useAuth();
   const search = Route.useSearch();
   const redirectUrl = search.redirect || "/";
   const navigate = useNavigate();

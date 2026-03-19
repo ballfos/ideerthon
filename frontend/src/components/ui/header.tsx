@@ -1,5 +1,5 @@
-import * as React from "react";
 import { cn } from "#/utils/ui/cn";
+import * as React from "react";
 
 export interface HeaderProps extends React.HTMLAttributes<HTMLHeadingElement> {
   title?: string;
@@ -11,11 +11,11 @@ export interface HeaderProps extends React.HTMLAttributes<HTMLHeadingElement> {
 
 export function Header({
   className,
+  helpGuide,
+  leftAction,
   title = "あいでぃあ村",
   titleClassName,
   userAction,
-  leftAction,
-  helpGuide,
   ...props
 }: HeaderProps) {
   return (

@@ -1,11 +1,13 @@
-import React, { createContext, useEffect, useState } from "react";
 import { type User, onAuthStateChanged } from "firebase/auth";
+import React, { createContext, useEffect, useState } from "react";
+
 import { auth } from "@/lib/firebase";
+
 import { type AuthContext as RouterAuthContext } from "./context";
 
 export const AuthReactContext = createContext<RouterAuthContext>({
-  user: null,
   loading: true,
+  user: null,
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -25,11 +27,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       },
     );
 
-    return () => unsubscribe();
+    return () => { unsubscribe(); };
   }, []);
 
   return (
-    <AuthReactContext.Provider value={{ user, loading }}>
+    <AuthReactContext.Provider value={{ loading, user }}>
       {children}
     </AuthReactContext.Provider>
   );

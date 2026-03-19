@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import { cn } from '#/utils/ui/cn';
 import * as d3 from 'd3';
 import { Trash2, RefreshCcw, Sparkles, HelpCircle } from 'lucide-react';
-import { cn } from '#/utils/ui/cn';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 
 interface NodeData {
     id: string;
@@ -21,26 +21,26 @@ interface LinkData {
 }
 
 interface IdeaMapProps {
-    messages: Array<{
+    messages: {
         id: string;
         text: string;
         agentName?: string;
         ideaName?: string;
-        ideas?: Array<{ name: string; details: string }>;
+        ideas?: { name: string; details: string }[];
         embedding?: number[];
         isDiscarded?: boolean;
         isRecycled?: boolean;
-    }>;
+    }[];
     onJumpToChat?: (messageId: string) => void;
     onDiscardIdea?: (messageId: string) => void;
     onRecycleIdea?: (messageId: string) => void;
 }
 
-const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat, onDiscardIdea, onRecycleIdea }) => {
+const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onDiscardIdea, onJumpToChat, onRecycleIdea }) => {
     const svgRef = useRef<SVGSVGElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [selectedNode, setSelectedNode] = useState<NodeData | null>(null);
-    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+    const [dimensions, setDimensions] = useState({ height: 0, width: 0 });
     const [isOverTrash, setIsOverTrash] = useState(false);
     const [isOverRecycle, setIsOverRecycle] = useState(false);
     const [showRecycleHelp, setShowRecycleHelp] = useState(false);
@@ -64,10 +64,10 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat, onDiscardIdea
         return messages
             .filter(m => m.embedding && m.embedding.length > 0 && !m.isDiscarded && !m.isRecycled)
             .map(m => ({
-                id: m.id,
-                label: m.ideaName || m.agentName || "アイデア",
                 description: (m.ideas && m.ideas.length > 0) ? m.ideas[0].details : m.text,
                 embedding: m.embedding!,
+                id: m.id,
+                label: m.ideaName || m.agentName || "アイデア",
             }));
     }, [messages]);
 
@@ -94,9 +94,9 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat, onDiscardIdea
                 const similarity = cosineSimilarity(nodes[i].embedding, nodes[j].embedding);
                 if (similarity >= threshold) {
                     links.push({
+                        similarity: similarity,
                         source: nodes[i].id,
-                        target: nodes[j].id,
-                        similarity: similarity
+                        target: nodes[j].id
                     });
                 }
             }
@@ -111,7 +111,7 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat, onDiscardIdea
         const k = kCount;
         // Simple K-means
         let centroids = nodes.slice(0, k).map(n => [...n.embedding]);
-        let assignment = new Array(nodes.length).fill(-1);
+        const assignment = new Array(nodes.length).fill(-1);
 
         for (let iter = 0; iter < 10; iter++) {
             let changed = false;
@@ -150,12 +150,12 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat, onDiscardIdea
 
     const getClusterParams = (clusterId: number) => {
         const palettes = [
-            { bg: '#e8f5e9', border: '#a5d6a7', text: '#2e7d32', hover: '#c8e6c9', label: 'Tech Woods' }, // Green
-            { bg: '#fffde7', border: '#fff59d', text: '#f9a825', hover: '#fff9c4', label: 'Amber Plaza' }, // Yellow
-            { bg: '#f3e5f5', border: '#ce93d8', text: '#7b1fa2', hover: '#e1bee7', label: 'Indigo Hill' }, // Purple
-            { bg: '#e1f5fe', border: '#81d4fa', text: '#0277bd', hover: '#b3e5fc', label: 'River Side' }, // Blue
-            { bg: '#fff3e0', border: '#ffcc80', text: '#ef6c00', hover: '#ffe0b2', label: 'Orange Grove' }, // Orange
-            { bg: '#f1f8e9', border: '#c5e1a5', text: '#558b2f', hover: '#dcedc8', label: 'Leafy Square' }, // Lime
+            { bg: '#e8f5e9', border: '#a5d6a7', hover: '#c8e6c9', label: 'Tech Woods', text: '#2e7d32' }, // Green
+            { bg: '#fffde7', border: '#fff59d', hover: '#fff9c4', label: 'Amber Plaza', text: '#f9a825' }, // Yellow
+            { bg: '#f3e5f5', border: '#ce93d8', hover: '#e1bee7', label: 'Indigo Hill', text: '#7b1fa2' }, // Purple
+            { bg: '#e1f5fe', border: '#81d4fa', hover: '#b3e5fc', label: 'River Side', text: '#0277bd' }, // Blue
+            { bg: '#fff3e0', border: '#ffcc80', hover: '#ffe0b2', label: 'Orange Grove', text: '#ef6c00' }, // Orange
+            { bg: '#f1f8e9', border: '#c5e1a5', hover: '#dcedc8', label: 'Leafy Square', text: '#558b2f' }, // Lime
         ];
         return palettes[clusterId % palettes.length] || palettes[0];
     };
@@ -163,21 +163,21 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat, onDiscardIdea
     useEffect(() => {
         if (!containerRef.current) return;
         const resizeObserver = new ResizeObserver((entries) => {
-            for (let entry of entries) {
+            for (const entry of entries) {
                 setDimensions({
-                    width: entry.contentRect.width,
-                    height: entry.contentRect.height
+                    height: entry.contentRect.height,
+                    width: entry.contentRect.width
                 });
             }
         });
         resizeObserver.observe(containerRef.current);
-        return () => resizeObserver.disconnect();
+        return () => { resizeObserver.disconnect(); };
     }, []);
 
     useEffect(() => {
         if (!svgRef.current || dimensions.width === 0 || nodes.length === 0) return;
 
-        const { width, height } = dimensions;
+        const { height, width } = dimensions;
 
         const svg = d3.select(svgRef.current)
             .attr('viewBox', [0, 0, width, height]);
@@ -267,16 +267,16 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat, onDiscardIdea
 
         node.on('mouseover', (_event, d) => {
             link.style('stroke-opacity', l => {
-                const sId = typeof l.source === 'string' ? l.source : (l.source as NodeData).id;
-                const tId = typeof l.target === 'string' ? l.target : (l.target as NodeData).id;
+                const sId = typeof l.source === 'string' ? l.source : (l.source).id;
+                const tId = typeof l.target === 'string' ? l.target : (l.target).id;
                 return (sId === d.id || tId === d.id) ? 0.2 : 0;
             });
 
             const connectedNodeIds = new Set<string>();
             connectedNodeIds.add(d.id);
             calculatedLinks.forEach(l => {
-                const sId = typeof l.source === 'string' ? l.source : (l.source as NodeData).id;
-                const tId = typeof l.target === 'string' ? l.target : (l.target as NodeData).id;
+                const sId = typeof l.source === 'string' ? l.source : (l.source).id;
+                const tId = typeof l.target === 'string' ? l.target : (l.target).id;
                 if (sId === d.id) connectedNodeIds.add(tId);
                 if (tId === d.id) connectedNodeIds.add(sId);
             });
@@ -468,7 +468,7 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat, onDiscardIdea
                         <div className="md:hidden absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-[#e8eed2] rounded-full" />
 
                         <button
-                            onClick={() => setSelectedNode(null)}
+                            onClick={() => { setSelectedNode(null); }}
                             className="self-end p-2 hover:bg-[#fcfaf2] rounded-full transition-colors mb-4 border-2 border-transparent hover:border-[#d5cba1]"
                         >
                             <svg className="w-5 h-5 text-[#a3967d]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -505,7 +505,7 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onJumpToChat, onDiscardIdea
 
                             {onJumpToChat && (
                                 <button
-                                    onClick={() => onJumpToChat(selectedNode.id)}
+                                    onClick={() => { onJumpToChat(selectedNode.id); }}
                                     className="mt-6 w-full flex items-center justify-center gap-2 py-3 px-6 bg-[#7a6446] text-white rounded-2xl font-black text-sm hover:bg-[#5a4a35] transition-all border-b-4 border-[#3a2a15] active:translate-y-[2px] active:border-b-2 shadow-sm"
                                 >
                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

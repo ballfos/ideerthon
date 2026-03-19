@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
-import { X, ChevronRight, ChevronLeft, HelpCircle } from "lucide-react";
+import { useGuide } from "#/features/guide/guide-context";
 import { cn } from "#/utils/ui/cn";
 import { motion, AnimatePresence } from "framer-motion";
-import { useGuide } from "@/features/guide/GuideContext";
+import { X, ChevronRight, ChevronLeft, HelpCircle } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 
 export interface GuideStep {
@@ -17,10 +17,10 @@ interface PageGuideProps {
     onClose?: () => void;
 }
 
-export function PageGuide({ steps: propSteps, onClose }: PageGuideProps) {
+export function PageGuide({ onClose, steps: propSteps }: PageGuideProps) {
     const { steps: contextSteps } = useGuide();
     const steps = propSteps || contextSteps;
-    
+
     const [isOpen, setIsOpen] = useState(false);
     const [currentStep, setCurrentStep] = useState(0);
     const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
@@ -33,10 +33,10 @@ export function PageGuide({ steps: propSteps, onClose }: PageGuideProps) {
 
     const updateTargetRect = useCallback(() => {
         if (!isOpen || !steps[currentStep]) return;
-        
+
         const step = steps[currentStep];
         const element = document.getElementById(step.targetId);
-        
+
         if (element) {
             const rect = element.getBoundingClientRect();
             setTargetRect(rect);
@@ -45,10 +45,10 @@ export function PageGuide({ steps: propSteps, onClose }: PageGuideProps) {
             const width = window.innerWidth;
             const height = window.innerHeight;
             const bubbleWidth = Math.min(320, width - 40);
-            
+
             let top: number | string = 'auto';
             let bottom: number | string = 'auto';
-            let left: number | string = Math.max(20, Math.min(width - bubbleWidth - 20, rect.left + (rect.width / 2) - (bubbleWidth / 2)));
+            const left: number | string = Math.max(20, Math.min(width - bubbleWidth - 20, rect.left + (rect.width / 2) - (bubbleWidth / 2)));
 
             if (rect.bottom + 250 > height && rect.top > 250) {
                 // Not enough space below, and enough space above: show above
@@ -56,17 +56,17 @@ export function PageGuide({ steps: propSteps, onClose }: PageGuideProps) {
             } else if (rect.bottom + 250 > height) {
                 // Not enough space below AND above: center vertically
                 top = '50%';
-                setBubbleStyle({ top, left, width: bubbleWidth, transform: 'translateY(-50%)' });
+                setBubbleStyle({ left, top, transform: 'translateY(-50%)', width: bubbleWidth });
                 return;
             } else {
                 // Show below
                 top = rect.bottom + 20;
             }
-            
-            setBubbleStyle({ top, bottom, left, width: bubbleWidth });
+
+            setBubbleStyle({ bottom, left, top, width: bubbleWidth });
         } else {
             setTargetRect(null);
-            setBubbleStyle({ top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 300 });
+            setBubbleStyle({ left: '50%', top: '50%', transform: 'translate(-50%, -50%)', width: 300 });
         }
     }, [isOpen, currentStep, steps]);
 
@@ -77,10 +77,10 @@ export function PageGuide({ steps: propSteps, onClose }: PageGuideProps) {
             if (element) {
                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
-            
+
             updateTargetRect();
             const timer = setInterval(updateTargetRect, 100); // Periodic update to handle layout shifts
-            return () => clearInterval(timer);
+            return () => { clearInterval(timer); };
         }
     }, [isOpen, currentStep, steps, updateTargetRect]);
 
@@ -108,7 +108,7 @@ export function PageGuide({ steps: propSteps, onClose }: PageGuideProps) {
         <>
             {/* Help Trigger Button */}
             <button
-                onClick={() => setIsOpen(true)}
+                onClick={() => { setIsOpen(true); }}
                 className="flex items-center justify-center h-10 w-10 rounded-full bg-white border-2 border-[#d5cba1] text-[#7a6446] hover:bg-[#ffcb05] hover:border-[#ffcb05] hover:text-white transition-all active:scale-90 shadow-sm"
                 title="ヘルプを表示"
             >
@@ -120,7 +120,7 @@ export function PageGuide({ steps: propSteps, onClose }: PageGuideProps) {
                     {isOpen && (
                         <div className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none">
                             {/* Dimmed Background with Hole */}
-                            <motion.div 
+                            <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
@@ -159,7 +159,7 @@ export function PageGuide({ steps: propSteps, onClose }: PageGuideProps) {
                                             <X size={20} />
                                         </button>
                                     </div>
-                                    
+
                                     <p className="text-sm font-bold text-[#a3967d] leading-relaxed mb-6">
                                         {steps[currentStep].description}
                                     </p>
@@ -167,8 +167,8 @@ export function PageGuide({ steps: propSteps, onClose }: PageGuideProps) {
                                     <div className="flex items-center justify-between mt-auto">
                                         <div className="flex gap-1">
                                             {steps.map((_, i) => (
-                                                <div 
-                                                    key={i} 
+                                                <div
+                                                    key={i}
                                                     className={cn(
                                                         "h-2 w-2 rounded-full transition-all",
                                                         i === currentStep ? "bg-[#ffcb05] w-4" : "bg-[#f9f1c8]"
@@ -178,14 +178,14 @@ export function PageGuide({ steps: propSteps, onClose }: PageGuideProps) {
                                         </div>
                                         <div className="flex gap-2">
                                             {currentStep > 0 && (
-                                                <button 
+                                                <button
                                                     onClick={handlePrev}
                                                     className="p-2 rounded-xl bg-[#fcfaf2] border-2 border-[#d5cba1] text-[#7a6446] hover:bg-[#f9f1c8]"
                                                 >
                                                     <ChevronLeft size={20} />
                                                 </button>
                                             )}
-                                            <button 
+                                            <button
                                                 onClick={handleNext}
                                                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#ffcb05] text-[#7a6446] font-black shadow-sm active:translate-y-1 transition-all"
                                             >
@@ -197,7 +197,7 @@ export function PageGuide({ steps: propSteps, onClose }: PageGuideProps) {
 
                                     {/* Arrow (pointing to target) */}
                                     {targetRect && (
-                                        <div 
+                                        <div
                                             className={cn(
                                                 "absolute w-6 h-6 bg-white border-t-4 border-l-4 border-[#ffcb05] rotate-45",
                                                 bubbleStyle.bottom !== 'auto' ? "-bottom-3 left-1/2 -ml-3 rotate-[225deg]" : "-top-3 left-1/2 -ml-3"
@@ -209,7 +209,7 @@ export function PageGuide({ steps: propSteps, onClose }: PageGuideProps) {
                         </div>
                     )}
                 </AnimatePresence>
-            , document.body)}
+                , document.body)}
         </>
     );
 }

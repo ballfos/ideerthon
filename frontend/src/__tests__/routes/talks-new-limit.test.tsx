@@ -2,6 +2,7 @@
 import { render, screen, fireEvent } from "@testing-library/react"
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import "@testing-library/jest-dom/vitest"
+
 import { RouteComponent } from "@/routes/_authenticated/talks.new"
 
 // モックを hoisted で定義
@@ -16,11 +17,11 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
   return {
     ...actual,
     createFileRoute: () => () => ({
-      useSearch: mockUseSearch,
       useNavigate: () => mockNavigate,
+      useSearch: mockUseSearch,
     }),
-    useNavigate: () => mockNavigate,
     Link: ({ children }: any) => <div>{children}</div>,
+    useNavigate: () => mockNavigate,
   }
 })
 
@@ -35,27 +36,27 @@ vi.mock("@/lib/api", () => ({
 }))
 
 vi.mock("@/features/guide/GuideContext", () => ({
-  useGuide: () => ({ steps: [], setSteps: mockSetSteps }),
+  useGuide: () => ({ setSteps: mockSetSteps, steps: [] }),
 }))
 
 // その他の UI コンポーネントをモック
 vi.mock("lucide-react", () => ({
-  Plus: () => <span />, Loader2: () => <span />, ArrowLeft: () => <span />,
-  Trash2: () => <span />, ChevronDown: () => <span />, ChevronUp: () => <span />,
-  User: () => <span />, HelpCircle: () => <span />,
-  MessageSquare: () => <span />, Lightbulb: () => <span />, Leaf: () => <span />,
+  ArrowLeft: () => <span />, ChevronDown: () => <span />, ChevronUp: () => <span />,
+  HelpCircle: () => <span />, Leaf: () => <span />, Lightbulb: () => <span />,
+  Loader2: () => <span />, MessageSquare: () => <span />,
+  Plus: () => <span />, Trash2: () => <span />, User: () => <span />,
 }))
 vi.mock("@/components/ui/page-guide", () => ({ PageGuide: () => <div /> }))
 vi.mock("#/components/ui/page-guide", () => ({ PageGuide: () => <div /> }))
 vi.mock("@/features/talks/components/agent-selector", () => ({
-  AgentCard: () => <div />,
-  AGENT_PRESETS: [{ id: 'engineer', name: '若手エンジニア', description: 'desc' }]
+  AGENT_PRESETS: [{ description: 'desc', id: 'engineer', name: '若手エンジニア' }],
+  AgentCard: () => <div />
 }))
 
 describe("TalksNew テーマ文字数検証 (100文字)", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockUseSearch.mockReturnValue({ topic: "", presets: "engineer", custom: "" })
+    mockUseSearch.mockReturnValue({ custom: "", presets: "engineer", topic: "" })
   })
 
   it("テーマ入力の maxLength が 100 で、カウント表示も 100 であること", () => {

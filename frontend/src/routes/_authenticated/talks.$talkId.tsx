@@ -1,5 +1,20 @@
+import type { TabValue } from "#/features/talks/components/talk-tabs";
+
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState, useRef } from "react";
+import { DesktopSidebar } from "#/components/ui/desktop-sidebar";
+import { PageGuide } from "#/components/ui/page-guide";
+import { useAuth } from "#/features/auth/use-auth";
+import { useGuide } from "#/features/guide/guide-context";
+import IdeaMap from "#/features/talks/components/idea-map";
+import { MessageBubble } from "#/features/talks/components/message-bubble";
+import { MessageInput } from "#/features/talks/components/message-input";
+import { TalkControlToggle } from "#/features/talks/components/talk-control-toggle";
+import { TalkTabs } from "#/features/talks/components/talk-tabs";
+import { TalkTopBar } from "#/features/talks/components/talk-top-bar";
+import { TalkStatus } from "#/gen/proto/api/v1/talk_pb";
+import { talkClient } from "#/lib/api";
+import { messageClient } from "#/lib/api";
+import { db } from "#/lib/firebase";
 import {
   collection,
   query,
@@ -8,25 +23,11 @@ import {
   Timestamp,
   doc,
 } from "firebase/firestore";
-import { db } from "#/lib/firebase";
-import { TalkTopBar } from "#/features/talks/components/talk-top-bar";
-import { MessageBubble } from "#/features/talks/components/message-bubble";
-import { TalkTabs } from "#/features/talks/components/talk-tabs";
-import type { TabValue } from "#/features/talks/components/talk-tabs";
-import { MessageInput } from "#/features/talks/components/message-input";
-import { useTalks } from "@/features/talks";
-import { DesktopSidebar } from "#/components/ui/desktop-sidebar";
-import { TalkControlToggle } from "#/features/talks/components/talk-control-toggle";
-import { TalkStatus } from "#/gen/proto/api/v1/talk_pb";
 import { Plus, User, Loader2, Pencil, Trash2, X } from "lucide-react";
-import { AgentCard, type AgentPreset } from "@/features/talks/components/agent-selector";
-import { talkClient } from "#/lib/api";
+import { useEffect, useState, useRef } from "react";
 
-import { messageClient } from "#/lib/api";
-import { useAuth } from "#/features/auth/useAuth";
-import IdeaMap from "#/features/talks/components/idea-map";
-import { useGuide } from "@/features/guide/GuideContext";
-import { PageGuide } from "#/components/ui/page-guide";
+import { useTalks } from "@/features/talks";
+import { AgentCard, type AgentPreset } from "@/features/talks/components/agent-selector";
 
 export const Route = createFileRoute("/_authenticated/talks/$talkId")({
   component: RouteComponent,
@@ -36,7 +37,7 @@ function RouteComponent() {
   const { talkId } = Route.useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { talks, loading: talksLoading } = useTalks();
+  const { loading: talksLoading, talks } = useTalks();
   const [activeTab, setActiveTab] = useState<TabValue>("chat");
   const [inputText, setInputText] = useState("");
   const [replyTo, setReplyTo] = useState<{
@@ -49,12 +50,12 @@ function RouteComponent() {
     TalkStatus.UNSPECIFIED,
   );
   const [agents, setAgents] = useState<
-    Array<{ name: string; description: string }>
+    { name: string; description: string }[]
   >([]);
   const [newAgent, setNewAgent] = useState<AgentPreset>({
+    description: "",
     id: "new",
     name: "",
-    description: "",
   });
   const [isAddingAgent, setIsAddingAgent] = useState(false);
   const [isAddCardOpen, setIsAddCardOpen] = useState(false);
@@ -73,45 +74,45 @@ function RouteComponent() {
     if (activeTab === 'chat') {
       newSteps = [
         {
+          description: 'ここを「実行中」にすると、AIメンバーがあなたの投げかけに反応し始めます。',
           targetId: 'talk-control',
-          title: 'トークの開始・停止',
-          description: 'ここを「実行中」にすると、AIメンバーがあなたの投げかけに反応し始めます。'
+          title: 'トークの開始・停止'
         },
         {
+          description: 'AIたちとの会話が表示されます。吹き出しをリプライして深掘りすることもできます！',
           targetId: 'chat-scroll-area',
-          title: 'チャット画面',
-          description: 'AIたちとの会話が表示されます。吹き出しをリプライして深掘りすることもできます！'
+          title: 'チャット画面'
         },
         {
+          description: 'あなたの考えを入力して送信しましょう。AIがすぐに答えてくれます。',
           targetId: 'message-input-zone',
-          title: 'メッセージ入力',
-          description: 'あなたの考えを入力して送信しましょう。AIがすぐに答えてくれます。'
+          title: 'メッセージ入力'
         }
       ];
     } else if (activeTab === 'members') {
       newSteps = [
         {
+          description: '現在のAIメンバーの役割を確認したり、新しい役割（エンジニア、詩人など）を村に招待したりできます。',
           targetId: 'members-list',
-          title: 'メンバー管理',
-          description: '現在のAIメンバーの役割を確認したり、新しい役割（エンジニア、詩人など）を村に招待したりできます。'
+          title: 'メンバー管理'
         }
       ];
     } else if (activeTab === 'map') {
       newSteps = [
         {
+          description: '会話の中で出た「アイデア」が自動的にここにまとまります。全体像を眺めるのに最適です。',
           targetId: 'whiteboard-container',
-          title: 'ホワイトボード',
-          description: '会話の中で出た「アイデア」が自動的にここにまとまります。全体像を眺めるのに最適です。'
+          title: 'ホワイトボード'
         }
       ];
     }
 
     setSteps(newSteps);
-    return () => setSteps([]);
+    return () => { setSteps([]); };
   }, [setSteps, activeTab]);
 
   const [messages, setMessages] = useState<
-    Array<{
+    {
       id: string;
       text: string;
       uid: string;
@@ -122,9 +123,9 @@ function RouteComponent() {
       agentName?: string;
       ideaName?: string;
       replyToMessageId?: string;
-      ideas?: Array<{ name: string; details: string }>;
+      ideas?: { name: string; details: string }[];
       embedding?: number[];
-    }>
+    }[]
   >([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -174,7 +175,7 @@ function RouteComponent() {
           }, 3000);
         }
       }, 500);
-      return () => clearTimeout(timer);
+      return () => { clearTimeout(timer); };
     }
 
     // ハッシュがない場合のみ最下部へスクロール
@@ -186,16 +187,16 @@ function RouteComponent() {
   // パソコン画面判定 (451px以上)
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 451);
   useEffect(() => {
-    const handleResize = () => setIsDesktop(window.innerWidth >= 451);
+    const handleResize = () => { setIsDesktop(window.innerWidth >= 451); };
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    return () => { window.removeEventListener("resize", handleResize); };
   }, []);
 
   // talkId が "none" の場合、最新のトークがあれば遷移させる (モバイルのみ)
   // パソコンの場合は "none" のままにして空白を表示する
   useEffect(() => {
     if (talkId === "none" && !talksLoading && talks.length > 0 && !isDesktop) {
-      navigate({ to: "/talks/$talkId", params: { talkId: talks[0].id } });
+      navigate({ params: { talkId: talks[0].id }, to: "/talks/$talkId" });
     }
   }, [talkId, talks, talksLoading, isDesktop, navigate]);
 
@@ -225,7 +226,7 @@ function RouteComponent() {
       },
     );
 
-    return () => unsubscribe();
+    return () => { unsubscribe(); };
   }, [talkId]);
 
   useEffect(() => {
@@ -249,21 +250,21 @@ function RouteComponent() {
           const isFavorite = user ? favoritedBy.includes(user.uid) : false;
 
           return {
+            agentName: data.agentName,
+            createdAt: {
+              nanoseconds: createdAt?.nanoseconds || 0,
+              seconds: createdAt?.seconds || 0,
+            },
+            embedding: data.embedding,
             id: doc.id,
+            ideaName: data.ideaName,
+            ideas: data.ideas as { name: string; details: string }[],
+            isDiscarded: !!data.isDiscarded,
+            isFavorite,
+            isRecycled: !!data.isRecycled,
+            replyToMessageId: data.replyToMessageId,
             text: data.text,
             uid: data.uid,
-            createdAt: {
-              seconds: createdAt?.seconds || 0,
-              nanoseconds: createdAt?.nanoseconds || 0,
-            },
-            isFavorite,
-            isDiscarded: !!data.isDiscarded,
-            isRecycled: !!data.isRecycled,
-            agentName: data.agentName,
-            ideaName: data.ideaName,
-            replyToMessageId: data.replyToMessageId,
-            ideas: data.ideas as Array<{ name: string; details: string }>,
-            embedding: data.embedding,
           };
         });
         setMessages(newMessages);
@@ -273,7 +274,7 @@ function RouteComponent() {
       },
     );
 
-    return () => unsubscribe();
+    return () => { unsubscribe(); };
   }, [talkId]);
 
 
@@ -301,9 +302,9 @@ function RouteComponent() {
     if (!inputText.trim() || talkId === "none") return;
     try {
       await messageClient.sendMessage({
+        replyToMessageId: replyTo?.id || "",
         talkId,
         text: inputText,
-        replyToMessageId: replyTo?.id || "",
       });
       setInputText("");
       setReplyTo(null);
@@ -320,8 +321,8 @@ function RouteComponent() {
     if (talkId === "none") return;
     try {
       await messageClient.toggleFavorite({
-        talkId,
         messageId,
+        talkId,
       });
     } catch (err) {
       console.error("Failed to toggle favorite:", err);
@@ -333,13 +334,13 @@ function RouteComponent() {
     setIsAddingAgent(true);
     try {
       await talkClient.addAgent({
-        talkId,
         agent: {
-          name: newAgent.name,
           description: newAgent.description,
+          name: newAgent.name,
         },
+        talkId,
       });
-      setNewAgent({ id: "new", name: "", description: "" });
+      setNewAgent({ description: "", id: "new", name: "" });
       setIsAddCardOpen(false);
     } catch (err) {
       console.error("Failed to add agent:", err);
@@ -353,8 +354,8 @@ function RouteComponent() {
     if (!window.confirm("このメンバーを村から送り返しますか？")) return;
     try {
       await talkClient.removeAgent({
-        talkId,
         agentIndex: index,
+        talkId,
       });
     } catch (err) {
       console.error("Failed to remove agent:", err);
@@ -363,16 +364,16 @@ function RouteComponent() {
   };
 
   const handleUpdateAgent = async () => {
-    if (!editingAgent || !editingAgent.name.trim()) return;
+    if (!editingAgent?.name.trim()) return;
     setIsUpdatingAgent(true);
     try {
       await talkClient.updateAgent({
-        talkId,
-        agentIndex: editingAgent.index,
         agent: {
-          name: editingAgent.name,
           description: editingAgent.description,
+          name: editingAgent.name,
         },
+        agentIndex: editingAgent.index,
+        talkId,
       });
       setEditingAgent(null);
     } catch (err) {
@@ -385,7 +386,7 @@ function RouteComponent() {
 
   const handleDiscardIdea = async (messageId: string) => {
     try {
-      await messageClient.discardIdea({ talkId, messageId });
+      await messageClient.discardIdea({ messageId, talkId });
     } catch (err) {
       console.error("Failed to discard idea:", err);
     }
@@ -393,7 +394,7 @@ function RouteComponent() {
 
   const handleRecycleIdea = async (messageId: string) => {
     try {
-      await messageClient.recycleIdea({ talkId, messageId });
+      await messageClient.recycleIdea({ messageId, talkId });
     } catch (err) {
       console.error("Failed to recycle idea:", err);
     }
@@ -441,7 +442,7 @@ function RouteComponent() {
     try {
       await talkClient.deleteTalk({ talkId: id });
       if (id === talkId) {
-        navigate({ to: "/talks/$talkId", params: { talkId: "none" } });
+        navigate({ params: { talkId: "none" }, to: "/talks/$talkId" });
       }
     } catch (err) {
       console.error("Failed to delete talk:", err);
@@ -511,8 +512,8 @@ function RouteComponent() {
                 helpGuide={<PageGuide steps={useGuide().steps} />}
                 onDelete={() => {
                   const syntheticEvent = {
-                    preventDefault: () => {},
-                    stopPropagation: () => {},
+                    preventDefault: () => { },
+                    stopPropagation: () => { },
                   } as React.MouseEvent;
                   handleDeleteTalk(syntheticEvent, talkId);
                 }}
@@ -557,22 +558,22 @@ function RouteComponent() {
                             replyTo={
                               replyTarget
                                 ? {
-                                    id: replyTarget.id,
-                                    text: replyTarget.ideaName
-                                      ? `【${replyTarget.ideaName}】 ${replyTarget.text}`
-                                      : replyTarget.text,
-                                    sender: replyTarget.agentName || "ユーザー",
-                                  }
+                                  id: replyTarget.id,
+                                  sender: replyTarget.agentName || "ユーザー",
+                                  text: replyTarget.ideaName
+                                    ? `【${replyTarget.ideaName}】 ${replyTarget.text}`
+                                    : replyTarget.text,
+                                }
                                 : null
                             }
                             onReply={() =>
-                              setReplyTo({
+                              { setReplyTo({
                                 id: msg.id,
+                                sender: msg.agentName || "ユーザー",
                                 text: msg.ideaName
                                   ? `【${msg.ideaName}】 ${msg.text}`
                                   : msg.text,
-                                sender: msg.agentName || "ユーザー",
-                              })
+                              }); }
                             }
                           />
                         );
@@ -615,7 +616,7 @@ function RouteComponent() {
                                           メンバーを編集
                                         </h4>
                                         <button
-                                          onClick={() => setEditingAgent(null)}
+                                          onClick={() => { setEditingAgent(null); }}
                                           className="text-[#a3967d] hover:text-[#7a6446]"
                                         >
                                           <X className="h-4 w-4" />
@@ -630,10 +631,10 @@ function RouteComponent() {
                                             type="text"
                                             value={editingAgent.name}
                                             onChange={(e) =>
-                                              setEditingAgent({
+                                              { setEditingAgent({
                                                 ...editingAgent,
                                                 name: e.target.value,
-                                              })
+                                              }); }
                                             }
                                             className="w-full bg-[#fcfaf2] rounded-xl px-4 py-2 text-sm font-bold border-2 border-[#d5cba1] focus:outline-none focus:border-[#ffcb05] transition-colors"
                                           />
@@ -645,10 +646,10 @@ function RouteComponent() {
                                           <textarea
                                             value={editingAgent.description}
                                             onChange={(e) =>
-                                              setEditingAgent({
+                                              { setEditingAgent({
                                                 ...editingAgent,
                                                 description: e.target.value,
-                                              })
+                                              }); }
                                             }
                                             rows={2}
                                             className="w-full bg-[#fcfaf2] rounded-xl px-4 py-2 text-sm font-bold border-2 border-[#d5cba1] focus:outline-none focus:border-[#ffcb05] transition-colors resize-none"
@@ -683,12 +684,12 @@ function RouteComponent() {
                                           <div className="flex items-center gap-1 shrink-0">
                                             <button
                                               onClick={() =>
-                                                setEditingAgent({
-                                                  index: i,
-                                                  name: agent.name,
+                                                { setEditingAgent({
                                                   description:
                                                     agent.description,
-                                                })
+                                                  index: i,
+                                                  name: agent.name,
+                                                }); }
                                               }
                                               className="p-1.5 text-[#a3967d] hover:text-[#7a6446] hover:bg-[#f9f1c8] rounded-lg transition-colors"
                                               title="編集"
@@ -732,13 +733,13 @@ function RouteComponent() {
                           <AgentCard
                             agent={newAgent}
                             isOpen={isAddCardOpen}
-                            onToggle={() => setIsAddCardOpen(!isAddCardOpen)}
+                            onToggle={() => { setIsAddCardOpen(!isAddCardOpen); }}
                             onRemove={() => { }}
                             onUpdate={(field: keyof AgentPreset, value: string) =>
-                              setNewAgent({ ...newAgent, [field]: value })
+                              { setNewAgent({ ...newAgent, [field]: value }); }
                             }
                             onApplyPreset={(preset: AgentPreset) =>
-                              setNewAgent({ ...preset, id: "new" })
+                              { setNewAgent({ ...preset, id: "new" }); }
                             }
                             showRemove={false}
                           />
@@ -786,7 +787,7 @@ function RouteComponent() {
                         onChange={setInputText}
                         onSend={handleSend}
                         replyInfo={replyTo}
-                        onCancelReply={() => setReplyTo(null)}
+                        onCancelReply={() => { setReplyTo(null); }}
                       />
                     </div>
                   </div>

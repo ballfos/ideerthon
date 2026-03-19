@@ -1,15 +1,16 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { getCurrentUser } from "@/features/auth";
+import { GuideProvider } from "#/features/guide/guide-context";
 import { motion } from "motion/react";
-import { GuideProvider } from "@/features/guide/GuideContext";
+
+import { getCurrentUser } from "@/features/auth";
 
 // 角丸の正三角形（おにぎり型）をSVGポリゴンで描画するコンポーネント
 function RoundedEquilateralTriangle({
   cx,
   cy,
-  sideLength,
   fill,
   rotation,
+  sideLength,
 }: {
   cx: number
   cy: number
@@ -40,16 +41,17 @@ export const Route = createFileRoute("/_authenticated")({
 
     if (!user) {
       throw redirect({
-        to: "/login",
         search: {
           redirect: location.href,
         },
+        to: "/login",
       });
     }
 
     // 取得したユーザー情報をcontextとして下層に流すことも可能
     return { user };
   },
+  component: RouteComponent,
   pendingComponent: () => (
     <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-white p-4 font-sans">
       {/* 動的生成の角丸の巨大な正三角形（おにぎり型）背景 */}
@@ -73,7 +75,7 @@ export const Route = createFileRoute("/_authenticated")({
           <motion.span
             className="text-3xl"
             animate={{ rotate: [-10, 10, -10] }}
-            transition={{ repeat: Infinity, duration: 1, ease: "easeInOut" }}
+            transition={{ duration: 1, ease: "easeInOut", repeat: Infinity }}
           >
             🌱
           </motion.span>
@@ -82,7 +84,6 @@ export const Route = createFileRoute("/_authenticated")({
       </div>
     </div>
   ),
-  component: RouteComponent,
 });
 
 function RouteComponent() {

@@ -1,16 +1,17 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useTalks } from '@/features/talks'
-import { useGuide } from '@/features/guide/GuideContext'
-import { useEffect } from 'react'
+import { useGuide } from '#/features/guide/guide-context'
 import { talkClient } from '#/lib/api'
 import { Trash2 } from 'lucide-react'
+import { useEffect } from 'react'
+
+import { useTalks } from '@/features/talks'
 
 export const Route = createFileRoute('/_authenticated/_layout/talks')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const { talks, loading, error } = useTalks()
+  const { error, loading, talks } = useTalks()
   const { setSteps } = useGuide()
 
   const handleDeleteTalk = async (e: React.MouseEvent, id: string) => {
@@ -28,12 +29,12 @@ function RouteComponent() {
   useEffect(() => {
     setSteps([
       {
+        description: 'これまでの議論の記録がここに並びます。タップすると続きから始められます。',
         targetId: 'talk-history-list',
-        title: 'トーク履歴',
-        description: 'これまでの議論の記録がここに並びます。タップすると続きから始められます。'
+        title: 'トーク履歴'
       }
     ])
-    return () => setSteps([])
+    return () => { setSteps([]); }
   }, [setSteps])
 
   if (loading) return <div className="p-4">読み込み中...</div>

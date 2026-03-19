@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { talkClient } from '#/lib/api';
 import { TalkStatus } from '#/gen/proto/api/v1/talk_pb';
-import { Play, Square, Loader2 } from 'lucide-react';
+import { talkClient } from '#/lib/api';
 import { cn } from '#/utils/ui/cn';
+import { Play, Square, Loader2 } from 'lucide-react';
+import { useState } from 'react';
 
 interface TalkControlToggleProps {
     talkId: string;
@@ -10,7 +10,7 @@ interface TalkControlToggleProps {
     className?: string;
 }
 
-export function TalkControlToggle({ talkId, status, className }: TalkControlToggleProps) {
+export function TalkControlToggle({ className, status, talkId }: TalkControlToggleProps) {
     const [loading, setLoading] = useState(false);
     const isRunning = status === TalkStatus.RUNNING;
 

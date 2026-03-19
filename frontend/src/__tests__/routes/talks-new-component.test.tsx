@@ -1,22 +1,23 @@
 // @vitest-environment happy-dom
-import { render, screen, fireEvent } from "@testing-library/react"
+import { render, screen } from "@testing-library/react"
 import { describe, it, expect, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
+
 import { AgentCard } from "@/features/talks/components/agent-selector"
 
 // 最小限のモック
 vi.mock("lucide-react", () => ({
-  User: () => <span />,
-  Trash2: () => <span />,
   ChevronDown: () => <span />,
   ChevronUp: () => <span />,
+  Trash2: () => <span />,
+  User: () => <span />,
 }))
 
 describe("AgentCard バリデーションテスト", () => {
   const mockAgent = {
+    description: 'テスト用の役割説明です。',
     id: 'test-agent',
-    name: 'テストエージェント',
-    description: 'テスト用の役割説明です。'
+    name: 'テストエージェント'
   }
 
   it("名前と役割に正しい maxLength が設定されていること", () => {
