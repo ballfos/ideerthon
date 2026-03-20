@@ -118,6 +118,7 @@ export function MessageInput({
                     variant="yellow"
                     onClick={onSend}
                     disabled={!value.trim()}
+                    aria-label="送信"
                     className="h-11 w-11 shrink-0 rounded-full"
                 >
                     <SendHorizontal className="h-5 w-5" />

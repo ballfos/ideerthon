@@ -35,7 +35,7 @@ export const Route = createFileRoute("/_authenticated/talks/$talkId")({
   component: RouteComponent,
 });
 
-function RouteComponent() {
+export function RouteComponent() {
   const { talkId } = Route.useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -489,7 +489,7 @@ function RouteComponent() {
   };
 
   return (
-    <div className="flex h-screen w-screen bg-[#fcfaf2] overflow-hidden font-yusei relative">
+    <div className="relative flex h-screen w-full flex-col overflow-hidden bg-[#fcfaf2] font-yusei" data-testid="talk-detail">
       {/* 1. グローバルサイドバー (デスクトップ) */}
       <div className="hidden min-[451px]:block">
         <DesktopSidebar />
@@ -577,7 +577,7 @@ function RouteComponent() {
 
                 <div id="chat-scroll-area" ref={scrollRef} className="flex-1 overflow-y-auto px-1 pb-4 scroll-smooth">
                   {activeTab === "chat" ? (
-                    <div className="flex flex-col py-2 max-w-4xl mx-auto w-full">
+                    <div className="flex flex-col py-2 max-w-4xl mx-auto w-full" data-testid="message-list">
                       {messages.map((msg) => {
                         const replyTarget = msg.replyToMessageId
                           ? messages.find((m) => m.id === msg.replyToMessageId)

@@ -1,0 +1,56 @@
+
+ RUN  v3.2.4 /Users/ookuraryousuke/Fork/ideerthon/frontend
+
+stdout | src/tests/village_flow.test.tsx > Feature: あいでぃあ村のメインフロー > Scenario: 新しいトークを作成し、AIと対話してマップを確認する
+Given: ユーザーがログイン画面を表示している
+When: Googleでログインする
+Then: ホーム画面が表示されること
+When: 「新しくトークを始める」をクリックする
+And: テーマに「宇宙旅行の新しいお土産」と入力する
+And: メンバーに「若手エンジニア」と「おばあちゃん」が追加されていることを確認
+And: 「作成して開始」をクリックする
+Then: チャット画面が表示されること
+When: 「宇宙旅行で買いたいものは何ですか？」とメッセージを送信する
+Then: AIエージェントからの応答が返ってくること
+When: アイデアマップを確認する
+Then: マップ上に新しいノードが追加されていること
+[32m✔ すべてのステップが正常にシミュレートされました[0m
+
+stdout | src/tests/village_flow.test.tsx > Feature: あいでぃあ村のメインフロー > Scenario: お気に入りメッセージを確認する
+Given: ユーザーがログインしている
+When: お気に入り画面を表示する
+Then: お気に入りリストが表示されること
+
+stdout | src/tests/village_flow.test.tsx > Feature: あいでぃあ村のメインフロー > Scenario: リサイクルボックスを確認する
+Given: ユーザーがログインしている
+When: リサイクル画面を表示する
+Then: リサイクルされたアイデアのリストが表示されること
+
+stdout | src/tests/village_flow.test.tsx > Feature: あいでぃあ村のメインフロー > Scenario: リサイクルボックスを確認する
+And: 「更新」ボタンが動作すること
+
+stdout | src/tests/village_flow.test.tsx > Feature: あいでぃあ村のメインフロー > Scenario: メッセージを送信し、AIの応答をお気に入り登録する
+Given: チャット画面を表示している
+When: 「こんにちは！」とメッセージを送信する
+
+stdout | src/tests/village_flow.test.tsx > Feature: あいでぃあ村のメインフロー > Scenario: メッセージを送信し、AIの応答をお気に入り登録する
+Then: AIエージェントからの応答が表示される
+
+stdout | src/tests/village_flow.test.tsx > Feature: あいでぃあ村のメインフロー > Scenario: メッセージを送信し、AIの応答をお気に入り登録する
+When: 最新のメッセージをお気に入り登録する
+
+stdout | src/tests/village_flow.test.tsx > Feature: あいでぃあ村のメインフロー > Scenario: メッセージを送信し、AIの応答をお気に入り登録する
+starBtn clicked
+
+stdout | src/tests/village_flow.test.tsx > Feature: あいでぃあ村のメインフロー > Scenario: アイデアマップからアイデアをリサイクルする
+Given: アイデアマップを表示している
+When: リサイクルボタンをクリックする
+Then: リサイクルAPIが呼ばれること
+
+ ✓ src/tests/village_flow.test.tsx (5 tests) 88ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  01:53:48
+   Duration  745ms (transform 162ms, setup 0ms, collect 375ms, tests 88ms, environment 118ms, prepare 34ms)
+

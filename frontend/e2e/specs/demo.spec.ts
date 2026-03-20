@@ -36,9 +36,65 @@ test('あいでぃあ村：トーク作成フローのデモ', async ({ page, co
   // 7. 送信ボタンの状態確認（活性化しているはず）
   const submitBtn = page.getByRole('button', { name: /村へ向かう!!/i });
   await expect(submitBtn).toBeEnabled();
+  await submitBtn.click();
 
-  // 8. 少し停止（ユーザーが確認できるように）
+  // 8. チャット画面でのインタラクション
+  console.log('--- チャット操作のデモ ---');
+  await page.waitForTimeout(3000); // ロード待ち
+  
+  const chatInput = page.getByPlaceholder(/メッセージを入力.../i);
+  await expect(chatInput).toBeVisible();
+  await chatInput.fill('こんにちは！おすすめのお土産を教えてください。');
+  await page.waitForTimeout(1000);
+  
+  const sendBtn = page.getByRole('button', { name: '送信' });
+  await sendBtn.click();
+  console.log('メッセージを送信しました。');
+  
+  // AIの応答を待つ
+  await page.waitForTimeout(5000);
+  
+  // お気に入り登録（最後のメッセージのスターボタンを探す）
+  const starButtons = page.locator('button:has(svg.lucide-star)');
+  if (await starButtons.count() > 0) {
+    await starButtons.last().click();
+    console.log('メッセージをお気に入り登録しました。');
+    await page.waitForTimeout(1000);
+  }
+
+  // 9. アイデアマップの操作
+  console.log('--- アイデアマップのデモ ---');
+  const mapTab = page.getByText('あいでぃあ村');
+  await mapTab.click();
   await page.waitForTimeout(2000);
   
-  console.log('✅ デモンストレーションが完了しました。');
+  // マップ上のノードをクリック（SVG要素なのでテキストベースで探す）
+  const node = page.locator('g.node').first();
+  if (await node.isVisible()) {
+    await node.click();
+    console.log('マップ上のアイデアを選択しました。');
+    await page.waitForTimeout(1000);
+    
+    // サイドバーのリサイクルボタンをクリック
+    const recycleBtn = page.getByRole('button', { name: /リサイクル/i });
+    if (await recycleBtn.isVisible()) {
+      await recycleBtn.click();
+      console.log('アイデアをリサイクルしました。');
+      await page.waitForTimeout(1500);
+    }
+  }
+
+  // 10. お気に入り画面の確認
+  console.log('--- お気に入り画面の確認 ---');
+  await page.goto('http://localhost:3000/favorites');
+  await expect(page.getByText('お気に入りメッセージ')).toBeVisible();
+  await page.waitForTimeout(1500);
+
+  // 11. リサイクルボックスの確認
+  console.log('--- リサイクルボックスの確認 ---');
+  await page.goto('http://localhost:3000/recycle');
+  await expect(page.getByText('リサイクルボックス')).toBeVisible();
+  await page.waitForTimeout(1500);
+  
+  console.log('✅ 全てのデモンストレーションが完了しました。');
 });

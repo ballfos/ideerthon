@@ -11,7 +11,7 @@ export const Route = createFileRoute('/_authenticated/_layout/recycle')({
     component: RecyclePage,
 })
 
-function RecyclePage() {
+export function RecyclePage() {
     const [recycledIdeas, setRecycledIdeas] = useState<RecycledIdea[]>([])
     const [loading, setLoading] = useState(true)
     const { setSteps } = useGuide()

@@ -9,7 +9,7 @@ export const Route = createFileRoute('/_authenticated/_layout/favorites')({
     component: FavoritesPage,
 })
 
-function FavoritesPage() {
+export function FavoritesPage() {
     const [favorites, setFavorites] = useState<Message[]>([])
     const [loading, setLoading] = useState(true)
     const { setSteps } = useGuide()
