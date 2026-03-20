@@ -48,25 +48,27 @@ function RecyclePage() {
 
     return (
         <div className="p-4 max-w-6xl mx-auto min-h-screen font-yusei">
-            <div className="mb-8 flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-black tracking-widest text-[#5a4a35] flex items-center gap-3">
-                        <Box className="text-[#a48862]" size={36} />
-                        リサイクルボックス
+            <div className="mb-2 flex flex-col gap-1">
+                <div className="min-w-0">
+                    <h1 className="text-3xl font-black tracking-widest text-[#5a4a35] flex items-center gap-3 flex-wrap">
+                        <Box className="text-[#a48862] shrink-0" size={36} />
+                        <span className="truncate">リサイクルボックス</span>
                     </h1>
-                    <p className="mt-2 text-[#8e8571] font-bold text-sm">
+                    <p className="mt-1 text-[#8e8571] font-bold text-xs leading-relaxed">
                         誰かが手放したアイデアの「かけら」たちが集まる場所です。
                     </p>
                 </div>
-                <Button
-                    variant="yellow"
-                    disabled={recycledIdeas.length == 0}
-                    onClick={() => { void fetchRecycled(); }}
-                    className="flex items-center gap-2 rounded-2xl shadow-md"
-                >
-                    <RefreshCcw size={18} className={loading ? "animate-spin" : ""} />
-                    まぜる
-                </Button>
+                <div className="flex justify-end mt-2">
+                    <Button
+                        variant="yellow"
+                        disabled={recycledIdeas.length == 0}
+                        onClick={() => { void fetchRecycled(); }}
+                        className="flex items-center gap-2 rounded-2xl shadow-md w-fit"
+                    >
+                        <RefreshCcw size={18} className={loading ? "animate-spin" : ""} />
+                        更新
+                    </Button>
+                </div>
             </div>
 
             {loading && recycledIdeas.length === 0 ? (
@@ -83,12 +85,12 @@ function RecyclePage() {
                     {recycledIdeas.map((idea) => (
                         <div
                             key={idea.id}
-                            className="group relative flex flex-col md:flex-row md:items-center bg-white border-t-[2px] border-b-[8px] border-x-[3px] border-[#d5cba1] rounded-[24px] p-6 gap-4 shadow-sm transition-all duration-100 hover:brightness-[1.02] hover:translate-x-1"
+                            className="group relative flex flex-col md:flex-row md:items-center bg-white border-t-[2px] border-b-[8px] border-x-[3px] border-[#d5cba1] rounded-[24px] p-6 gap-4 shadow-sm transition-all duration-100"
                             style={{
                                 boxShadow: '0 4px 0 0 #d5cba1'
                             }}
                         >
-                            <div className="absolute -top-3 -left-3 h-10 w-10 bg-yellow-400 rounded-full flex items-center justify-center border-4 border-white shadow-md rotate-12 scale-0 group-hover:scale-100 transition-transform z-10">
+                            <div className="absolute -top-3 -left-3 h-10 w-10 bg-yellow-400 rounded-full flex items-center justify-center border-4 border-white shadow-md rotate-12 hidden z-10">
                                 <Sparkles className="text-white fill-current" size={20} />
                             </div>
 

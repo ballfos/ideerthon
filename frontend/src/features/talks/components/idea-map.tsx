@@ -363,12 +363,6 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onDiscardIdea, onJumpToChat
         <div ref={containerRef} className="w-full h-full relative flex flex-row overflow-hidden font-sans bg-[#fcfaf2]/50">
             {/* Main Village Area */}
             <div className="flex-1 relative">
-                {/* <div className="absolute top-4 left-4 md:top-6 md:left-6 z-10 pointer-events-none">
-                    <h1 className="text-2xl md:text-4xl font-black text-[#7a6446] tracking-tight">
-                        あいでぃあ村
-                    </h1>
-                    <p className="hidden md:block text-[#a3967d] text-[10px] font-black uppercase tracking-widest mt-1 italic">Knowledge Community & Innovation Map</p>
-                </div> */}
 
                 <div className="absolute top-3 right-3 md:top-6 md:right-6 z-20 flex flex-row items-start gap-2 md:gap-4 pointer-events-none">
                     {/* リサイクルボックス */}
@@ -486,24 +480,12 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onDiscardIdea, onJumpToChat
                             {selectedNode.label}
                         </h2>
 
-                        <span className="text-[10px] font-black uppercase tracking-widest text-[#c2baa6] mb-8 block">
-                            Village ID: {selectedNode.id}
-                        </span>
 
                         <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
                             <p className="text-[#5a4a35] leading-relaxed text-lg font-bold">
                                 {selectedNode.description}
                             </p>
 
-                            <div className="mt-12 p-6 rounded-[24px] bg-[#f9f1c8]/50 border-2 border-[#d5cba1]">
-                                <h3 className="text-[10px] font-black text-[#a3967d] uppercase tracking-widest mb-4">Innovation Vector</h3>
-                                <div className="grid grid-cols-5 gap-2 opacity-60">
-                                    {selectedNode.embedding.slice(0, 15).map((val, i) => (
-
-                                        <div key={i} className="h-1 rounded-full bg-[#d5cba1]" style={{ width: `${Math.max(10, Math.min(100, Math.abs(val) * 1000))}%` }} />
-                                    ))}
-                                </div>
-                            </div>
 
                             {onJumpToChat && (
                                 <button
@@ -553,9 +535,6 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onDiscardIdea, onJumpToChat
                             </div>
                         </div>
 
-                        <div className="mt-auto pt-8 border-t border-[#fcfaf2] text-[10px] font-black text-[#c2baa6] italic uppercase tracking-tighter">
-                            Powered by D3.js Force Simulation
-                        </div>
                     </div>
                 </div>
             )}
