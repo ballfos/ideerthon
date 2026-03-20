@@ -108,7 +108,11 @@ export function RouteComponent() {
     setIsSubmitting(true)
     try {
       const response = await talkClient.createTalk({
-        agents: selectedAgents.map(a => ({ description: a.description, name: a.name })),
+        agents: selectedAgents.map(a => ({ 
+          description: a.description, 
+          name: a.name,
+          icon: a.icon || "" 
+        })),
         topic
       })
 

@@ -1,61 +1,73 @@
 import { cn } from '#/utils/ui/cn'
-import { User, Trash2, ChevronDown, ChevronUp, Pencil } from 'lucide-react'
-import React from 'react'
+import { Trash2, Pencil, ChevronDown, ChevronUp } from "lucide-react";
+import React from "react";
+import { AgentIcon } from "./agent-icons";
 
 export interface AgentPreset {
   id: string;
   name: string;
   description: string;
+  icon?: string;
 }
 
 export const AGENT_PRESETS: AgentPreset[] = [
   {
     description: '最新技術が大好き。実現可能性やシステム化の視点から、現実的でスマートなアイデアを提案します。',
     id: 'engineer',
-    name: '若手エンジニア'
+    name: '若手エンジニア',
+    icon: 'monitor'
   },
   {
     description: 'トレンドに敏感でスマホネイティブ。大人の常識を無視した、直感的なアイデアを提案します。',
     id: 'gen-z',
-    name: '女子高生'
+    name: '女子高生',
+    icon: 'cake-slice'
   },
   {
     description: 'ユーザー体験（UX）が最優先。使いやすさや、人の感情・美しさに寄り添うアイデアを提案します。',
     id: 'designer',
-    name: 'デザイナー'
+    name: 'デザイナー',
+    icon: 'brush'
   },
   {
     description: 'コスパと実用性の鬼。日常生活のリアルな不便さや、生活者の視点から地に足のついたアイデアを提案します。',
     id: 'housewife',
-    name: 'おばちゃん'
+    name: 'おばちゃん',
+    icon: 'candy'
   },
   {
     description: 'バズと売上が正義。「誰にどう届けるか」「どうやってバズらせるか」というビジネスと集客の視点でアイデアを広げます。',
     id: 'marketer',
-    name: '敏腕マーケター'
+    name: '敏腕マーケター',
+    icon: 'calculator'
   },
   {
     description: '陽気でグローバルな視点から、ぶっ飛んだアイデアを提案します。',
     id: 'american-tom',
-    name: 'アメリカ人トム'
+    name: 'アメリカ人トム',
+    icon: 'hamburger'
   },
   {
     description: '事業化できるかが全て。「それで儲かるの？」「競合は？」と、ビジネスモデルとスケールの視点から鋭く突っ込みます。',
     id: 'investor',
-    name: '辛口ベンチャーキャピタル'
+    name: '辛口ベンチャーキャピタル',
+    icon: 'building'
   },
   {
     description: '純粋な好奇心のかたまり。複雑なことを嫌い、「それって面白いの？」「ゲームみたいにしよう！」と無邪気なアイデアを提案します。',
     id: 'kid',
-    name: '小学生'
+    name: '小学生',
+    icon: 'smile'
   }, {
     description: '豊富な知恵と深い共感力。ゆったりした時の流れの中で、物事の本質や人の心の機微を捉えた温かいアイデアを提案します。',
     id: 'grandma',
-    name: 'おばあちゃん'
+    name: 'おばあちゃん',
+    icon: 'heart'
   }, {
     description: '最強のアイデアマン。あらゆる視点から斬新かつ共感性の高い最高のアイデアを提案します。',
     id: 'idea-deer',
-    name: 'アイディアー🦌'
+    name: 'アイディアー🦌',
+    icon: '🦌'
   },
 ]
 
@@ -96,10 +108,12 @@ export const AgentCard: React.FC<AgentCardProps> = ({
         onClick={onToggle}
       >
         <div className="flex items-center gap-4 min-w-0">
-          <div className="h-10 w-10 shrink-0 rounded-full bg-[#f9f1c8] border-2 border-[#d5cba1] flex items-center justify-center text-[#7a6446]">
-            <User className="h-6 w-6" />
+          <div className="flex-shrink-0">
+            <div className="h-12 w-12 rounded-2xl bg-[#f9f1c8] border-2 border-[#e8eed2] flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+              <AgentIcon iconName={agent.icon} size={24} />
+            </div>
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="font-black text-[#7a6446] truncate">{agent.name}</p>
             <p className="text-[10px] text-[#a3967d] font-bold uppercase tracking-wider truncate max-w-[200px]">{agent.description}</p>
           </div>

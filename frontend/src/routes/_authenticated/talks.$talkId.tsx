@@ -50,7 +50,7 @@ function RouteComponent() {
     TalkStatus.UNSPECIFIED,
   );
   const [agents, setAgents] = useState<
-    { name: string; description: string }[]
+    { name: string; description: string; icon?: string }[]
   >([]);
   const [newAgent, setNewAgent] = useState<AgentPreset>({
     description: "",
@@ -122,6 +122,8 @@ function RouteComponent() {
       isRecycled?: boolean;
       agentName?: string;
       ideaName?: string;
+      agentIcon?: string;
+      summary?: string;
       replyToMessageId?: string;
       ideas?: { name: string; details: string }[];
       embedding?: number[];
@@ -215,7 +217,7 @@ function RouteComponent() {
           const data = snapshot.data();
           setTopic((data.topic as string | undefined) ?? "");
           setTalkStatus((data.status as TalkStatus | undefined) ?? TalkStatus.STOPPED);
-          setAgents((data.agents as { name: string; description: string }[] | undefined) ?? []);
+          setAgents((data.agents as { name: string; description: string; icon?: string }[] | undefined) ?? []);
         } else {
           setTopic("トークが見つかりません");
         }
@@ -251,18 +253,20 @@ function RouteComponent() {
 
           return {
             agentName: data.agentName as string | undefined,
+            agentIcon: data.agentIcon as string | undefined,
+            ideaName: data.ideaName as string | undefined,
             createdAt: {
               nanoseconds: createdAt.nanoseconds,
               seconds: createdAt.seconds,
             },
             embedding: data.embedding as number[] | undefined,
             id: doc.id,
-            ideaName: data.ideaName as string | undefined,
             ideas: data.ideas as { name: string; details: string }[] | undefined,
             isDiscarded: !!data.isDiscarded,
             isFavorite,
             isRecycled: !!data.isRecycled,
             replyToMessageId: data.replyToMessageId as string | undefined,
+            summary: data.summary as string | undefined,
             text: data.text as string,
             uid: data.uid as string,
           };
@@ -337,6 +341,7 @@ function RouteComponent() {
         agent: {
           description: newAgent.description,
           name: newAgent.name,
+          icon: newAgent.icon || "",
         },
         talkId,
       });
@@ -560,6 +565,7 @@ function RouteComponent() {
                             isFavorite={msg.isFavorite}
                             onToggleFavorite={() => { void handleToggleFavorite(msg.id); }}
                             agentName={msg.agentName}
+                            agentIcon={msg.agentIcon || agents.find(a => a.name === msg.agentName)?.icon}
                             replyTo={
                               replyTarget
                                 ? {

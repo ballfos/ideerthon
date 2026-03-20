@@ -23,7 +23,7 @@ export const ICON_MAP: Record<string, LucideIcon> = {
   "hamburger": Hamburger,
   "building": Building,
   "smile": Smile,
-  "heart": Heart, 
+  "heart": Heart, // Cane の代わり
   "crown": Crown,
 };
 

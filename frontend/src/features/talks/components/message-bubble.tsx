@@ -2,6 +2,7 @@ import { cn } from "#/utils/ui/cn";
 import { motion, useAnimation, type PanInfo } from "framer-motion";
 import { Star } from "lucide-react";
 import * as React from "react";
+import { AgentIcon } from "./agent-icons";
 
 export interface MessageBubbleProps {
     id: string; // メッセージID
@@ -14,12 +15,14 @@ export interface MessageBubbleProps {
     onReply?: () => void;
     replyTo?: { id: string; text: string; sender: string } | null;
     agentName?: string;
+    agentIcon?: string;
     className?: string;
     style?: React.CSSProperties;
 }
 
 export function MessageBubble({
     agentName,
+    agentIcon,
     avatar,
     className,
     content,
@@ -98,11 +101,11 @@ export function MessageBubble({
             >
                 {/* アバター（他人の場合のみ表示） */}
                 {!isOwn && (
-                    <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-[#d5cba1] bg-white shadow-sm">
+                    <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-[#d5cba1] bg-white shadow-sm flex items-center justify-center">
                         {avatar ? (
                             <img src={avatar} alt="Avatar" className="h-full w-full object-cover" />
                         ) : (
-                            <div className="h-full w-full bg-[#f9f1c8]" />
+                            <AgentIcon iconName={agentIcon} agentName={agentName} size={24} />
                         )}
                     </div>
                 )}
