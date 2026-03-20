@@ -147,8 +147,10 @@ func (h *TalkHandler) StartTalkStream(
 		return connect.NewError(connect.CodeInternal, fmt.Errorf("failed to update talk status: %w", err))
 	}
 
-	// Channel to signal STOPPED status from snapshot listener
-	stopChan := make(chan struct{})
+	// Channel and Context to signal STOPPED status from snapshot listener
+	streamCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
 	go func() {
 		iter := docRef.Snapshots(ctx)
 		defer iter.Stop()
@@ -162,7 +164,7 @@ func (h *TalkHandler) StartTalkStream(
 			}
 			s, _ := snap.Data()["status"].(int64)
 			if s == int64(apiv1.TalkStatus_TALK_STATUS_STOPPED) {
-				close(stopChan)
+				cancel()
 				return
 			}
 		}
@@ -173,15 +175,13 @@ func (h *TalkHandler) StartTalkStream(
 	for remainingCount > 0 {
 		// Wait for 4s with cancellation check
 		select {
-		case <-ctx.Done():
-			return nil
-		case <-stopChan:
+		case <-streamCtx.Done():
 			return nil
 		case <-time.After(4 * time.Second):
 		}
 
 		// Refresh talk data to get latest summary and agents
-		doc, err := docRef.Get(ctx)
+		doc, err := docRef.Get(streamCtx)
 		if err != nil {
 			return connect.NewError(connect.CodeInternal, fmt.Errorf("failed to refresh talk: %w", err))
 		}
@@ -230,7 +230,7 @@ func (h *TalkHandler) StartTalkStream(
 
 		// Fetch recent messages for context
 		// We want: Recent 2 AI messages + Recent 1 Human message
-		msgIter := docRef.Collection("messages").OrderBy("createdAt", firestore.Desc).Limit(20).Documents(ctx)
+		msgIter := docRef.Collection("messages").OrderBy("createdAt", firestore.Desc).Limit(20).Documents(streamCtx)
 		msgDocs, err := msgIter.GetAll()
 
 		type Msg struct {
@@ -284,7 +284,7 @@ func (h *TalkHandler) StartTalkStream(
 			if replyID != "" {
 				// Fetch direct reply target
 				var rs *firestore.DocumentSnapshot
-				rs, err = docRef.Collection("messages").Doc(replyID).Get(ctx)
+				rs, err = docRef.Collection("messages").Doc(replyID).Get(streamCtx)
 				if err == nil {
 					rd := rs.Data()
 					rText, _ := rd["text"].(string)
@@ -306,7 +306,7 @@ func (h *TalkHandler) StartTalkStream(
 						Where("createdAt", "<", rTime).
 						OrderBy("createdAt", firestore.Desc).
 						Limit(1).
-						Documents(ctx)
+						Documents(streamCtx)
 					var prevDocs []*firestore.DocumentSnapshot
 					prevDocs, err = prevIter.GetAll()
 					if err == nil && len(prevDocs) > 0 {
@@ -340,8 +340,11 @@ func (h *TalkHandler) StartTalkStream(
 		}
 
 		// AI Response
-		aiRes, err := h.ai.GenerateResponse(ctx, agentName, agentDesc, topic, whiteboard, recentContext, aiReplyInfo)
+		aiRes, err := h.ai.GenerateResponse(streamCtx, agentName, agentDesc, topic, whiteboard, recentContext, aiReplyInfo)
 		if err != nil {
+			if streamCtx.Err() != nil {
+				return nil
+			}
 			fmt.Printf("AI error: %v\n", err)
 			aiRes = map[string]interface{}{
 				"message": "申し訳ありません、考えがまとまりませんでした。",
@@ -375,7 +378,7 @@ func (h *TalkHandler) StartTalkStream(
 			}
 		}
 
-		_, err = docRef.Collection("messages").Doc(msgID).Set(ctx, msgData)
+		_, err = docRef.Collection("messages").Doc(msgID).Set(streamCtx, msgData)
 		if err != nil {
 			return connect.NewError(connect.CodeInternal, fmt.Errorf("failed to save reply message: %w", err))
 		}
@@ -430,7 +433,7 @@ func (h *TalkHandler) StartTalkStream(
 			}(msgID, textToEmbed)
 		}
 
-		_, _ = docRef.Update(ctx, []firestore.Update{
+		_, _ = docRef.Update(streamCtx, []firestore.Update{
 			{Path: "remainingCount", Value: remainingCount},
 			{Path: "lastHeartbeat", Value: time.Now()},
 		})

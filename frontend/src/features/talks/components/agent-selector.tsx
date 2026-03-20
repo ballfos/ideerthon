@@ -42,7 +42,7 @@ export const AGENT_PRESETS: AgentPreset[] = [
     icon: 'calculator'
   },
   {
-    description: '陽気でグローバルな視点から、ぶっ飛んだアイデアを提案します。',
+    description: '陽気でグローバルな視点から、日本語でぶっ飛んだアイデアを提案します。',
     id: 'american-tom',
     name: 'アメリカ人トム',
     icon: 'hamburger'
