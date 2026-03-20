@@ -62,7 +62,7 @@ vi.mock("@/components/ui/page-guide", () => ({ PageGuide: () => <div /> }))
 vi.mock("#/components/ui/page-guide", () => ({ PageGuide: () => <div /> }))
 
 vi.mock("@/features/talks/components/agent-selector", () => ({
-  AGENT_PRESETS: [{ description: 'desc', id: 'engineer', name: '若手エンジニア' }],
+  AGENT_PRESETS: [{ description: 'desc', id: 'engineer', name: '若手エンジニア', icon: 'monitor' }],
   AgentCard: ({ agent, onToggle }: { agent: { name: string }; onToggle: () => void }) => <div onClick={onToggle}>{agent.name}</div>
 }))
 

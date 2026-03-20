@@ -26,6 +26,7 @@ message Talk {
 message Agent {
   string name = 1;
   string description = 2;
+  string icon = 3;
 }
 
 message CreateTalkRequest {

@@ -34,6 +34,7 @@ type Message struct {
 	IdeaName      string                 `protobuf:"bytes,8,opt,name=idea_name,json=ideaName,proto3" json:"idea_name,omitempty"`
 	IsDiscarded   bool                   `protobuf:"varint,9,opt,name=is_discarded,json=isDiscarded,proto3" json:"is_discarded,omitempty"`
 	IsRecycled    bool                   `protobuf:"varint,10,opt,name=is_recycled,json=isRecycled,proto3" json:"is_recycled,omitempty"`
+	AgentIcon     string                 `protobuf:"bytes,11,opt,name=agent_icon,json=agentIcon,proto3" json:"agent_icon,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -136,6 +137,13 @@ func (x *Message) GetIsRecycled() bool {
 		return x.IsRecycled
 	}
 	return false
+}
+
+func (x *Message) GetAgentIcon() string {
+	if x != nil {
+		return x.AgentIcon
+	}
+	return ""
 }
 
 type SendMessageRequest struct {
@@ -754,7 +762,7 @@ var File_proto_api_v1_message_proto protoreflect.FileDescriptor
 
 const file_proto_api_v1_message_proto_rawDesc = "" +
 	"\n" +
-	"\x1aproto/api/v1/message.proto\x12\x06api.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xb4\x02\n" +
+	"\x1aproto/api/v1/message.proto\x12\x06api.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xd3\x02\n" +
 	"\aMessage\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x10\n" +
 	"\x03uid\x18\x02 \x01(\tR\x03uid\x12\x12\n" +
@@ -770,7 +778,9 @@ const file_proto_api_v1_message_proto_rawDesc = "" +
 	"\fis_discarded\x18\t \x01(\bR\visDiscarded\x12\x1f\n" +
 	"\vis_recycled\x18\n" +
 	" \x01(\bR\n" +
-	"isRecycled\"p\n" +
+	"isRecycled\x12\x1d\n" +
+	"\n" +
+	"agent_icon\x18\v \x01(\tR\tagentIcon\"p\n" +
 	"\x12SendMessageRequest\x12\x17\n" +
 	"\atalk_id\x18\x01 \x01(\tR\x06talkId\x12\x12\n" +
 	"\x04text\x18\x02 \x01(\tR\x04text\x12-\n" +

@@ -183,6 +183,7 @@ type Agent struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	Icon          string                 `protobuf:"bytes,3,opt,name=icon,proto3" json:"icon,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -227,6 +228,13 @@ func (x *Agent) GetName() string {
 func (x *Agent) GetDescription() string {
 	if x != nil {
 		return x.Description
+	}
+	return ""
+}
+
+func (x *Agent) GetIcon() string {
+	if x != nil {
+		return x.Icon
 	}
 	return ""
 }
@@ -819,10 +827,11 @@ const file_proto_api_v1_talk_proto_rawDesc = "" +
 	"\x06status\x18\x06 \x01(\x0e2\x12.api.v1.TalkStatusR\x06status\x12'\n" +
 	"\x0fremaining_count\x18\a \x01(\x05R\x0eremainingCount\x12A\n" +
 	"\x0elast_heartbeat\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\rlastHeartbeat\x12%\n" +
-	"\x06agents\x18\t \x03(\v2\r.api.v1.AgentR\x06agents\"=\n" +
+	"\x06agents\x18\t \x03(\v2\r.api.v1.AgentR\x06agents\"Q\n" +
 	"\x05Agent\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\"P\n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x12\n" +
+	"\x04icon\x18\x03 \x01(\tR\x04icon\"P\n" +
 	"\x11CreateTalkRequest\x12\x14\n" +
 	"\x05topic\x18\x01 \x01(\tR\x05topic\x12%\n" +
 	"\x06agents\x18\x02 \x03(\v2\r.api.v1.AgentR\x06agents\"6\n" +

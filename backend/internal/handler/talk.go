@@ -52,6 +52,7 @@ func (h *TalkHandler) CreateTalk(
 		agents = append(agents, map[string]interface{}{
 			"name":        agent.Name,
 			"description": agent.Description,
+			"icon":        agent.Icon,
 		})
 	}
 
@@ -200,6 +201,32 @@ func (h *TalkHandler) StartTalkStream(
 		selectedAgent := agentsData[agentIdx%len(agentsData)].(map[string]interface{})
 		agentName, _ := selectedAgent["name"].(string)
 		agentDesc, _ := selectedAgent["description"].(string)
+		agentIcon, _ := selectedAgent["icon"].(string)
+		if agentIcon == "" {
+			// Fallback: match by name for existing talks
+			switch agentName {
+			case "若手エンジニア":
+				agentIcon = "monitor"
+			case "女子高生":
+				agentIcon = "cake-slice"
+			case "デザイナー":
+				agentIcon = "brush"
+			case "おばちゃん":
+				agentIcon = "candy"
+			case "敏腕マーケター":
+				agentIcon = "calculator"
+			case "アメリカ人トム":
+				agentIcon = "hamburger"
+			case "辛口ベンチャーキャピタル":
+				agentIcon = "building"
+			case "小学生":
+				agentIcon = "smile"
+			case "おばあちゃん":
+				agentIcon = "heart"
+			case "アイディアー🦌":
+				agentIcon = "crown"
+			}
+		}
 
 		// Fetch recent messages for context
 		// We want: Recent 2 AI messages + Recent 1 Human message
@@ -334,6 +361,7 @@ func (h *TalkHandler) StartTalkStream(
 			"createdAt": msgTime,
 			"talkId":    talkID,
 			"agentName": agentName,
+			"agentIcon": agentIcon,
 			"summary":   summaryText,
 			"ideas":     ideas,
 		}
@@ -359,6 +387,7 @@ func (h *TalkHandler) StartTalkStream(
 			CreatedAt: timestamppb.New(msgTime),
 			TalkId:    talkID,
 			AgentName: agentName,
+			AgentIcon: agentIcon,
 		}); err != nil {
 			return err
 		}
@@ -456,7 +485,7 @@ func (h *TalkHandler) AddAgent(
 	_, err := docRef.Update(ctx, []firestore.Update{
 		{
 			Path:  "agents",
-			Value: firestore.ArrayUnion(map[string]interface{}{"name": agent.Name, "description": agent.Description}),
+			Value: firestore.ArrayUnion(map[string]interface{}{"name": agent.Name, "description": agent.Description, "icon": agent.Icon}),
 		},
 	})
 	if err != nil {
@@ -531,6 +560,7 @@ func (h *TalkHandler) UpdateAgent(ctx context.Context, req *connect.Request[apiv
 	agents[idx] = map[string]interface{}{
 		"name":        agent.Name,
 		"description": agent.Description,
+		"icon":        agent.Icon,
 	}
 
 	_, err = docRef.Update(ctx, []firestore.Update{

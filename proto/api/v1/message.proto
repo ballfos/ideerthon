@@ -15,6 +15,7 @@ message Message {
   string idea_name = 8;
   bool is_discarded = 9;
   bool is_recycled = 10;
+  string agent_icon = 11;
 }
 
 message SendMessageRequest {
