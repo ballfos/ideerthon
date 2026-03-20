@@ -62,7 +62,7 @@ func (a *AIClient) GenerateResponse(ctx context.Context, name, role, topic strin
 	whiteboardText := string(whiteboardJSON)
 
 	systemInstruction := fmt.Sprintf(`あなたは%sです。%s
-必ず「共有ホワイトボード」の文脈を踏まえて発言してください。
+必ず「要約」と「アイデア」の文脈を踏まえて発言してください。
 
 【出力形式（JSONのみ）】
 {
