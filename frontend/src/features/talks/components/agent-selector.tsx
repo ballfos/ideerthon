@@ -109,7 +109,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({
       >
         <div className="flex items-center gap-4 min-w-0">
           <div className="flex-shrink-0">
-            <div className="h-12 w-12 rounded-2xl bg-[#f9f1c8] border-2 border-[#e8eed2] flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+            <div className="h-12 w-12 rounded-full bg-[#f9f1c8] border-2 border-[#e8eed2] flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
               <AgentIcon iconName={agent.icon} size={24} />
             </div>
           </div>

@@ -105,7 +105,7 @@ export function MessageBubble({
             >
                 {/* アバター（他人の場合のみ表示） */}
                 {!isOwn && (
-                    <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-[#d5cba1] bg-white shadow-sm flex items-center justify-center">
+                    <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-[#d5cba1] bg-[#f9f1c8] shadow-sm flex items-center justify-center">
                         {avatar ? (
                             <img src={avatar} alt="Avatar" className="h-full w-full object-cover" />
                         ) : (

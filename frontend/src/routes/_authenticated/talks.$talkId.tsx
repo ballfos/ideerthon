@@ -7,6 +7,7 @@ import { useAuth } from "#/features/auth/use-auth";
 import { useGuide } from "#/features/guide/guide-context";
 import IdeaMap from "#/features/talks/components/idea-map";
 import { MessageBubble } from "#/features/talks/components/message-bubble";
+import { AgentIcon } from "#/features/talks/components/agent-icons";
 import { MessageInput } from "#/features/talks/components/message-input";
 import { TalkControlToggle } from "#/features/talks/components/talk-control-toggle";
 import { TalkTabs } from "#/features/talks/components/talk-tabs";
@@ -64,6 +65,7 @@ function RouteComponent() {
     index: number;
     name: string;
     description: string;
+    icon?: string;
   } | null>(null);
   const [isUpdatingAgent, setIsUpdatingAgent] = useState(false);
   const { setSteps } = useGuide();
@@ -406,6 +408,7 @@ function RouteComponent() {
         agent: {
           description: editingAgent.description,
           name: editingAgent.name,
+          icon: editingAgent.icon || "",
         },
         agentIndex: editingAgent.index,
         talkId,
@@ -654,9 +657,12 @@ function RouteComponent() {
                                   {isEditing ? (
                                     <div className="space-y-4">
                                       <div className="flex items-center justify-between">
-                                        <h4 className="text-xs font-black text-[#7a6446] uppercase tracking-wider">
-                                          メンバーを編集
-                                        </h4>
+                                         <h4 className="text-xs font-black text-[#7a6446] uppercase tracking-wider flex items-center gap-2">
+                                           <div className="h-6 w-6 shrink-0 rounded-full bg-[#f9f1c8] border-2 border-[#d5cba1] flex items-center justify-center">
+                                             <AgentIcon iconName={editingAgent.icon} agentName={editingAgent.name} size={14} />
+                                           </div>
+                                           メンバーを編集
+                                         </h4>
                                         <button
                                           onClick={() => { setEditingAgent(null); }}
                                           className="text-[#a3967d] hover:text-[#7a6446]"
@@ -718,7 +724,7 @@ function RouteComponent() {
                                   ) : (
                                     <div className="flex items-start gap-3">
                                       <div className="h-10 w-10 shrink-0 rounded-full bg-[#f9f1c8] border-2 border-[#d5cba1] flex items-center justify-center text-[#7a6446]">
-                                        <User className="h-6 w-6" />
+                                        <AgentIcon iconName={agent.icon} agentName={agent.name} size={24} />
                                       </div>
                                       <div className="flex-1 min-w-0">
                                         <div className="flex items-center justify-between gap-2">
@@ -731,6 +737,7 @@ function RouteComponent() {
                                                 setEditingAgent({
                                                   description:
                                                     agent.description,
+                                                  icon: agent.icon,
                                                   index: i,
                                                   name: agent.name,
                                                 });
