@@ -9,7 +9,7 @@ on:
 env:
   PROJECT_ID: ideerthon
   REGION: asia-northeast2
-  VERTEX_REGITON: asia-northeast1
+  VERTEX_REGITON: global
   SERVICE_NAME: ideerthon
 
 jobs:

@@ -206,16 +206,21 @@ func (a *AIClient) EmbedText(ctx context.Context, text string) ([]float32, error
 	}
 }
 func (a *AIClient) GenerateEmoji(ctx context.Context, topic string) (string, error) {
-	// Try Lite first for emoji as it's separate from main quota usually
-	models := []string{"gemini-2.5-flash", "gemini-2.5-flash-lite"}
+	if topic == "" {
+		fmt.Printf("GenerateEmoji received empty topic\n")
+		return "🦌", nil
+	}
 
-	systemInstruction := "与えられたお題に最もふさわしい絵文字を【一つだけ】出力してください。説明や装飾は一切不要です。"
-	prompt := fmt.Sprintf("お題: %s", topic)
+	// Based on logs, gemini-2.5-flash is valid but uses 'thinking' which consumes tokens.
+	// gemini-2.5-flash-lite returned 404 in asia-northeast1.
+	models := []string{"gemini-2.5-flash-lite", "gemini-2.5-flash"}
+	instruction := "与えられたお題に最もふさわしい絵文字を【一つだけ】出力してください。説明や装飾は一切不要です。"
+	fullPrompt := fmt.Sprintf("%s\nお題: %s", instruction, topic)
 
 	config := &genai.GenerateContentConfig{
-		Temperature:       genai.Ptr(float32(1.0)),
-		MaxOutputTokens:   10,
-		SystemInstruction: &genai.Content{Parts: []*genai.Part{{Text: systemInstruction}}},
+		Temperature: genai.Ptr(float32(1.0)),
+		// Significantly increase tokens to accommodate 'thinking' (thoughtsTokenCount can be > 1000)
+		MaxOutputTokens: 2048,
 		SafetySettings: []*genai.SafetySetting{
 			{Category: "HARM_CATEGORY_HATE_SPEECH", Threshold: "BLOCK_NONE"},
 			{Category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", Threshold: "BLOCK_NONE"},
@@ -226,7 +231,7 @@ func (a *AIClient) GenerateEmoji(ctx context.Context, topic string) (string, err
 
 	for _, model := range models {
 		for i := 0; i < 3; i++ {
-			resp, err := a.client.Models.GenerateContent(ctx, model, []*genai.Content{{Parts: []*genai.Part{{Text: prompt}}, Role: "user"}}, config)
+			resp, err := a.client.Models.GenerateContent(ctx, model, []*genai.Content{{Parts: []*genai.Part{{Text: fullPrompt}}, Role: "user"}}, config)
 			if err != nil {
 				if strings.Contains(err.Error(), "429") || strings.Contains(err.Error(), "RESOURCE_EXHAUSTED") {
 					fmt.Printf("Emoji generation rate limit reached for %s. Retrying in 1s... (attempt %d/3)\n", model, i+1)
@@ -238,21 +243,19 @@ func (a *AIClient) GenerateEmoji(ctx context.Context, topic string) (string, err
 					}
 				}
 				fmt.Printf("Emoji generation error for %s: %v, topic: %s\n", model, err, topic)
-				break // Switch to next model
+				break
 			}
 
-			if len(resp.Candidates) == 0 {
-				fmt.Printf("Emoji generation returned no candidates for %s. Topic: %s\n", model, topic)
-				break // Switch to next model
-			}
-			if len(resp.Candidates[0].Content.Parts) == 0 {
-				fmt.Printf("Emoji generation candidate had no parts for %s. Topic: %s, FinishReason: %s\n", model, topic, resp.Candidates[0].FinishReason)
-				break // Switch to next model
+			if len(resp.Candidates) == 0 || len(resp.Candidates[0].Content.Parts) == 0 {
+				respJSON, _ := json.Marshal(resp)
+				fmt.Printf("Emoji generation returned no candidates for %s. Topic: %s. Resp: %s\n", model, topic, string(respJSON))
+				break
 			}
 
 			emoji := strings.TrimSpace(resp.Text())
 			if emoji == "" {
-				break
+				// If response text is empty but call succeeded (maybe just thinking?), skip to next model or retry
+				continue
 			}
 			// Ensure it's not too long (just in case)
 			if len([]rune(emoji)) > 5 {
