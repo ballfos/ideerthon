@@ -28,6 +28,7 @@ import { useEffect, useState, useRef } from "react";
 
 import { useTalks } from "@/features/talks";
 import { AgentCard, type AgentPreset } from "@/features/talks/components/agent-selector";
+import { getStampById } from "#/features/talks/constants/stamps";
 
 export const Route = createFileRoute("/_authenticated/talks/$talkId")({
   component: RouteComponent,
@@ -314,6 +315,35 @@ function RouteComponent() {
     } catch (err) {
       console.error("Failed to send message:", err);
       alert("メッセージの送信に失敗しました");
+    }
+  };
+
+  const handleSendStamp = async (stampId: string) => {
+    if (talkId === "none") return;
+
+    const stamp = getStampById(stampId);
+    if (!stamp) return;
+
+    let targetMessageId = replyTo?.id;
+    if (!targetMessageId && messages.length > 0) {
+      targetMessageId = messages[messages.length - 1].id;
+    }
+
+    if (!targetMessageId) return;
+
+    try {
+      await messageClient.sendMessage({
+        replyToMessageId: targetMessageId,
+        talkId,
+        text: stamp.prompt,
+      });
+      setReplyTo(null);
+
+      // 自動で返信開始
+      handleStartTalk();
+    } catch (err) {
+      console.error("Failed to send stamp:", err);
+      alert("スタンプの送信に失敗しました");
     }
   };
 
@@ -787,6 +817,7 @@ function RouteComponent() {
                         value={inputText}
                         onChange={setInputText}
                         onSend={() => { void handleSend(); }}
+                        onSendStamp={(name) => { void handleSendStamp(name); }}
                         replyInfo={replyTo}
                         onCancelReply={() => { setReplyTo(null); }}
                       />

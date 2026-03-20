@@ -2,6 +2,7 @@ import { cn } from "#/utils/ui/cn";
 import { motion, useAnimation, type PanInfo } from "framer-motion";
 import { Star } from "lucide-react";
 import * as React from "react";
+import { getStampByPrompt } from "../constants/stamps";
 
 export interface MessageBubbleProps {
     id: string; // メッセージID
@@ -32,6 +33,9 @@ export function MessageBubble({
     timestamp,
     ...props
 }: MessageBubbleProps) {
+    const stamp = getStampByPrompt(content);
+    const isStamp = !!stamp;
+
     const controls = useAnimation();
     const [longPressTimer, setLongPressTimer] = React.useState<ReturnType<typeof setTimeout> | null>(null);
     const [isMobile, setIsMobile] = React.useState(false);
@@ -111,14 +115,20 @@ export function MessageBubble({
                 <div className="flex max-w-[75%] flex-col gap-1">
                     <div
                         className={cn(
-                            "relative rounded-2xl px-4 py-3 text-sm font-bold tracking-tight shadow-sm border-2 whitespace-pre-wrap",
-                            isOwn
-                                ? "bg-[#e2f7d5] border-[#b8e6a0] text-[#4b9635] rounded-br-none"
-                                : "bg-white border-[#d5cba1] text-[#7a6446] rounded-bl-none"
+                            "relative rounded-2xl text-sm font-bold tracking-tight whitespace-pre-wrap transition-all",
+                            isStamp ? "bg-transparent border-none shadow-none p-0" : cn(
+                                "shadow-sm border-2 px-4 py-3",
+                                isOwn
+                                    ? "bg-[#e2f7d5] border-[#b8e6a0] text-[#4b9635] rounded-br-none"
+                                    : "bg-white border-[#d5cba1] text-[#7a6446] rounded-bl-none"
+                            )
                         )}
                     >
                         {agentName && (
-                            <div className="mb-1 text-[10px] font-black text-[#a3967d] uppercase tracking-tighter">
+                            <div className={cn(
+                                "mb-1 text-[10px] font-black uppercase tracking-tighter",
+                                isStamp ? "text-[#a3967d]/80" : "text-[#a3967d]"
+                            )}>
                                 {agentName}
                             </div>
                         )}
@@ -138,7 +148,8 @@ export function MessageBubble({
                                 }}
                                 className={cn(
                                     "mb-2 w-full text-left p-2 rounded-lg border-l-4 border-[#ffcb05] transition-all hover:bg-black/5",
-                                    isOwn ? "bg-black/5" : "bg-[#fcfaf2]"
+                                    isOwn ? "bg-black/5" : "bg-[#fcfaf2]",
+                                    isStamp && "max-w-[180px] bg-white/80 border-2 border-[#d5cba1] shadow-sm"
                                 )}
                             >
                                 <div className="text-[9px] font-black text-[#a3967d] uppercase tracking-tighter mb-0.5">
@@ -150,7 +161,20 @@ export function MessageBubble({
                             </button>
                         )}
 
-                        {content}
+                        {isStamp ? (
+                            <div className={cn(
+                                "flex flex-col",
+                                isOwn ? "items-end" : "items-start"
+                            )}>
+                                <img
+                                    src={stamp.path}
+                                    alt={stamp.name}
+                                    className="h-auto w-48 rounded-xl shadow-md border-4 border-white object-contain hover:scale-105 transition-transform cursor-pointer"
+                                />
+                            </div>
+                        ) : (
+                            content
+                        )}
 
                         {/* お気に入りボタン（ホバーまたはお気に入り時に表示） */}
                         <button
