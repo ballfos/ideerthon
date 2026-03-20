@@ -107,15 +107,6 @@ function RouteComponent() {
           )}
         </div>
 
-        <div className="mt-2 text-center text-xs font-bold text-gray-400">
-          <p>
-            ログインすることで、利用規約と
-            <br />
-            プライバシーポリシーに同意した
-            <br />
-            ものとみなされます。
-          </p>
-        </div>
       </div>
     </div>
   );
