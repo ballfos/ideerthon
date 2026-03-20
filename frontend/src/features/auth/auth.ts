@@ -63,6 +63,16 @@ export const signOut = async (): Promise<void> => {
 export const getCurrentUser = (): Promise<
   import("firebase/auth").User | null
 > => {
+  // E2E Mock Bypass
+  if (typeof window !== "undefined" && localStorage.getItem("e2e-auth-bypass") === "true") {
+    return Promise.resolve({
+      displayName: "あいでぃあ村民(E2E)",
+      email: "e2e@example.com",
+      photoURL: "https://api.dicebear.com/7.x/avataaars/svg?seed=e2e",
+      uid: "e2e-test-user-id",
+    } as import("firebase/auth").User);
+  }
+
   return new Promise((resolve, reject) => {
     const unsubscribe = auth.onAuthStateChanged(
       (user) => {
