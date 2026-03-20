@@ -45,9 +45,10 @@ interface AgentIconProps {
   agentName?: string;
   className?: string;
   size?: number;
+  "data-testid"?: string;
 }
 
-export function AgentIcon({ iconName, agentName, className, size = 20 }: AgentIconProps) {
+export function AgentIcon({ iconName, agentName, className, size = 20, ...props }: AgentIconProps) {
   const resolvedIconName = iconName || (agentName ? NAME_TO_ICON_MAP[agentName] : undefined);
   
   if (resolvedIconName && /\p{Emoji}/u.test(resolvedIconName) && !ICON_MAP[resolvedIconName.toLowerCase()]) {
@@ -55,6 +56,7 @@ export function AgentIcon({ iconName, agentName, className, size = 20 }: AgentIc
       <span 
         className={cn("flex items-center justify-center font-normal leading-none select-none", className)}
         style={{ fontSize: size * 0.9 }}
+        {...props}
       >
         {resolvedIconName}
       </span>
@@ -64,8 +66,8 @@ export function AgentIcon({ iconName, agentName, className, size = 20 }: AgentIc
   const IconComponent = resolvedIconName ? ICON_MAP[resolvedIconName.toLowerCase()] : null;
 
   if (IconComponent) {
-    return <IconComponent className={cn("text-[#7a6446]", className)} size={size} />;
+    return <IconComponent className={cn("text-[#7a6446]", className)} size={size} {...props} />;
   }
 
-  return <User className={cn("text-[#7a6446]", className)} size={size} />;
+  return <User className={cn("text-[#7a6446]", className)} size={size} {...props} />;
 }

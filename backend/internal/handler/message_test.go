@@ -56,3 +56,42 @@ func TestMessageHandler_SendMessage(t *testing.T) {
 		t.Errorf("Expected text in firestore 'Hello from test', got '%v'", doc.Data()["text"])
 	}
 }
+
+func FuzzSendMessage(f *testing.F) {
+	ctx := context.Background()
+	// エミュレータ用の Firestore クライアント
+	client, err := firestore.NewClient(ctx, "ideerthon", option.WithoutAuthentication())
+	if err != nil {
+		f.Skip("Firestore emulator not available")
+	}
+	defer client.Close()
+
+	h := NewMessageHandler(client)
+	// UID をコンテキストにセット
+	ctx = context.WithValue(ctx, middleware.UIDKey, "fuzz-user")
+
+	// シードコーパスの追加
+	f.Add("test-talk", "hello", "")
+	f.Add("", "text", "")
+	f.Add("talk", "", "")
+
+	f.Fuzz(func(t *testing.T, talkID string, text string, replyTo string) {
+		req := connect.NewRequest(&apiv1.SendMessageRequest{
+			TalkId:           talkID,
+			Text:             text,
+			ReplyToMessageId: replyTo,
+		})
+
+		_, err := h.SendMessage(ctx, req)
+
+		// バリデーションエラーが期待されるケース
+		if talkID == "" || text == "" {
+			if err == nil {
+				t.Error("Expected error for empty talkID or text, but got nil")
+			}
+			return
+		}
+
+		// それ以外の場合、少なくともパニックを起こしてはならない
+	})
+}
