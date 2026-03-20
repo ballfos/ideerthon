@@ -207,7 +207,7 @@ func (a *AIClient) EmbedText(ctx context.Context, text string) ([]float32, error
 }
 // GenerateEmoji はお題に合わせた絵文字を一つ生成します。
 func (a *AIClient) GenerateEmoji(ctx context.Context, topic string) (string, error) {
-	modelName := "gemini-2.5-flash-lite"
+	modelName := "gemini-2.5-flash"
 
 	systemInstruction := "与えられたお題に最もふさわしい絵文字を【一つだけ】出力してください。説明や装飾は一切不要です。"
 	prompt := fmt.Sprintf("お題: %s", topic)
@@ -222,7 +222,7 @@ func (a *AIClient) GenerateEmoji(ctx context.Context, topic string) (string, err
 	if err != nil {
 		fmt.Printf("Emoji generation error for %s: %v\n", modelName, err)
 		// Fallback to flash if lite fails or not available
-		resp, err = a.client.Models.GenerateContent(ctx, "gemini-2.5-flash", []*genai.Content{{Parts: []*genai.Part{{Text: prompt}}, Role: "user"}}, config)
+		resp, err = a.client.Models.GenerateContent(ctx, "gemini-2.5-flash-lite", []*genai.Content{{Parts: []*genai.Part{{Text: prompt}}, Role: "user"}}, config)
 		if err != nil {
 			fmt.Printf("Emoji generation fallback error: %v\n", err)
 			return "🦌", nil // Defaut fallack
