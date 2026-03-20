@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { LatestTopics, RecommendedTopics } from '#/components/ui/latest-topics'
 import { useGuide } from '#/features/guide/guide-context'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 export const Route = createFileRoute('/_authenticated/_layout/home')({
   component: RouteComponent,
@@ -9,6 +9,20 @@ export const Route = createFileRoute('/_authenticated/_layout/home')({
 
 function RouteComponent() {
   const { setSteps } = useGuide()
+
+  // 鹿の画像のバリエーション (ユーザー提供の計5枚)
+  const deerImages = [
+    "/images/deer_1.png",
+    "/images/deer_2.jpg",
+    "/images/deer_3.jpg",
+    "/images/deer_4.jpg",
+    "/images/deer_5.jpg",
+  ];
+
+  // コンポーネントのマウント時にランダムに画像を選択
+  const [selectedDeerImage] = useState(() => 
+    deerImages[Math.floor(Math.random() * deerImages.length)]
+  );
 
   useEffect(() => {
     setSteps([
@@ -31,7 +45,7 @@ function RouteComponent() {
       {/* コンパクトな横長画像 */}
       <div className="mx-auto w-full max-w-[440px] overflow-hidden rounded-[24px] shadow-lg border-[3px] border-white aspect-[16/9]">
         <img
-          src="/images/deer_wide.png"
+          src={selectedDeerImage}
           alt="Peaceful deer in the forest"
           className="h-full w-full object-cover"
         />
