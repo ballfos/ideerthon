@@ -170,14 +170,14 @@ export function MessageBubble({
                         </button>
 
                         {/* 吹き出しのしっぽ（角から自然に生えるように座標と回転を指定） */}
-                        <div
+                        {/* <div
                             className={cn(
-                                "absolute bottom-[-7px] h-3 w-3 bg-inherit border-inherit",
+                                "absolute bottom-[0.5px] h-3 w-3 bg-inherit border-inherit",
                                 isOwn
-                                    ? "right-0 rotate-45 border-r-2 border-b-2"
-                                    : "left-0 rotate-[-45deg] border-l-2 border-b-2"
+                                    ? "right-[8px] rotate-[-45deg] border-r-2 border-b-2"
+                                    : "left-[-8px] rotate-[45deg] border-l-2 border-b-2"
                             )}
-                        />
+                        /> */}
                     </div>
 
                     {/* タイムスタンプ */}
