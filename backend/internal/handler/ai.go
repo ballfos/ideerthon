@@ -205,9 +205,9 @@ func (a *AIClient) EmbedText(ctx context.Context, text string) ([]float32, error
 		return res.Embeddings[0].Values, nil
 	}
 }
-// GenerateEmoji はお題に合わせた絵文字を一つ生成します。
 func (a *AIClient) GenerateEmoji(ctx context.Context, topic string) (string, error) {
-	modelName := "gemini-2.5-flash"
+	// Try Lite first for emoji as it's separate from main quota usually
+	models := []string{"gemini-2.5-flash", "gemini-2.5-flash-lite"}
 
 	systemInstruction := "与えられたお題に最もふさわしい絵文字を【一つだけ】出力してください。説明や装飾は一切不要です。"
 	prompt := fmt.Sprintf("お題: %s", topic)
@@ -216,29 +216,52 @@ func (a *AIClient) GenerateEmoji(ctx context.Context, topic string) (string, err
 		Temperature:       genai.Ptr(float32(1.0)),
 		MaxOutputTokens:   10,
 		SystemInstruction: &genai.Content{Parts: []*genai.Part{{Text: systemInstruction}}},
+		SafetySettings: []*genai.SafetySetting{
+			{Category: "HARM_CATEGORY_HATE_SPEECH", Threshold: "BLOCK_NONE"},
+			{Category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", Threshold: "BLOCK_NONE"},
+			{Category: "HARM_CATEGORY_HARASSMENT", Threshold: "BLOCK_NONE"},
+			{Category: "HARM_CATEGORY_DANGEROUS_CONTENT", Threshold: "BLOCK_NONE"},
+		},
 	}
 
-	resp, err := a.client.Models.GenerateContent(ctx, modelName, []*genai.Content{{Parts: []*genai.Part{{Text: prompt}}, Role: "user"}}, config)
-	if err != nil {
-		fmt.Printf("Emoji generation error for %s: %v\n", modelName, err)
-		// Fallback to flash if lite fails or not available
-		resp, err = a.client.Models.GenerateContent(ctx, "gemini-2.5-flash", []*genai.Content{{Parts: []*genai.Part{{Text: prompt}}, Role: "user"}}, config)
-		if err != nil {
-			fmt.Printf("Emoji generation fallback error: %v\n", err)
-			return "🦌", nil // Defaut fallack
+	for _, model := range models {
+		for i := 0; i < 3; i++ {
+			resp, err := a.client.Models.GenerateContent(ctx, model, []*genai.Content{{Parts: []*genai.Part{{Text: prompt}}, Role: "user"}}, config)
+			if err != nil {
+				if strings.Contains(err.Error(), "429") || strings.Contains(err.Error(), "RESOURCE_EXHAUSTED") {
+					fmt.Printf("Emoji generation rate limit reached for %s. Retrying in 1s... (attempt %d/3)\n", model, i+1)
+					select {
+					case <-time.After(1 * time.Second):
+						continue
+					case <-ctx.Done():
+						return "🦌", nil
+					}
+				}
+				fmt.Printf("Emoji generation error for %s: %v, topic: %s\n", model, err, topic)
+				break // Switch to next model
+			}
+
+			if len(resp.Candidates) == 0 {
+				fmt.Printf("Emoji generation returned no candidates for %s. Topic: %s\n", model, topic)
+				break // Switch to next model
+			}
+			if len(resp.Candidates[0].Content.Parts) == 0 {
+				fmt.Printf("Emoji generation candidate had no parts for %s. Topic: %s, FinishReason: %s\n", model, topic, resp.Candidates[0].FinishReason)
+				break // Switch to next model
+			}
+
+			emoji := strings.TrimSpace(resp.Text())
+			if emoji == "" {
+				break
+			}
+			// Ensure it's not too long (just in case)
+			if len([]rune(emoji)) > 5 {
+				emoji = string([]rune(emoji)[0:1])
+			}
+			return emoji, nil
 		}
 	}
 
-	if len(resp.Candidates) == 0 || len(resp.Candidates[0].Content.Parts) == 0 {
-		fmt.Printf("Emoji generation returned no candidates\n")
-		return "🦌", nil
-	}
-
-	emoji := strings.TrimSpace(resp.Text())
-	// Ensure it's not too long (just in case)
-	if len([]rune(emoji)) > 5 {
-		emoji = string([]rune(emoji)[0:1])
-	}
-
-	return emoji, nil
+	return "🦌", nil
 }
+
