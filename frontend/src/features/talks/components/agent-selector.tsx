@@ -67,7 +67,7 @@ export const AGENT_PRESETS: AgentPreset[] = [
     description: '最強のアイデアマン。あらゆる視点から斬新かつ共感性の高い最高のアイデアを提案します。',
     id: 'idea-deer',
     name: 'アイディアー🦌',
-    icon: 'crown'
+    icon: '🦌'
   },
 ]
 

@@ -224,7 +224,7 @@ func (h *TalkHandler) StartTalkStream(
 			case "おばあちゃん":
 				agentIcon = "heart"
 			case "アイディアー🦌":
-				agentIcon = "crown"
+				agentIcon = "🦌"
 			}
 		}
 

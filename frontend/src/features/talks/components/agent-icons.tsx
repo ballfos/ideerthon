@@ -37,7 +37,7 @@ export const NAME_TO_ICON_MAP: Record<string, string> = {
   "辛口ベンチャーキャピタル": "building",
   "小学生": "smile",
   "おばあちゃん": "heart",
-  "アイディアー🦌": "crown",
+  "アイディアー🦌": "🦌",
 };
 
 interface AgentIconProps {
@@ -49,6 +49,18 @@ interface AgentIconProps {
 
 export function AgentIcon({ iconName, agentName, className, size = 20 }: AgentIconProps) {
   const resolvedIconName = iconName || (agentName ? NAME_TO_ICON_MAP[agentName] : undefined);
+  
+  if (resolvedIconName && /\p{Emoji}/u.test(resolvedIconName) && !ICON_MAP[resolvedIconName.toLowerCase()]) {
+    return (
+      <span 
+        className={cn("flex items-center justify-center font-normal leading-none select-none", className)}
+        style={{ fontSize: size * 0.9 }}
+      >
+        {resolvedIconName}
+      </span>
+    );
+  }
+
   const IconComponent = resolvedIconName ? ICON_MAP[resolvedIconName.toLowerCase()] : null;
 
   if (IconComponent) {
