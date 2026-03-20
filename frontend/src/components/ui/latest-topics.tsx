@@ -159,10 +159,10 @@ function TopicZone({ borderColor, title, topics, zoneBg, zoneBorder }: TopicZone
 
               {/* テキスト部分 */}
               <div className="flex flex-col overflow-hidden flex-1 min-w-0">
-                <span className="text-lg font-black tracking-wider text-[#5a4a35] truncate leading-tight group-active:text-white">
+                <span className="text-lg font-black tracking-wider text-[#5a4a35] line-clamp-2 leading-tight group-active:text-white">
                   {topic.title}
                 </span>
-                <span className="text-xs font-bold text-gray-500 truncate mt-0.5 group-active:text-white">
+                <span className="text-xs font-bold text-gray-500 line-clamp-1 mt-0.5 group-active:text-white">
                   {topic.description}
                 </span>
               </div>
