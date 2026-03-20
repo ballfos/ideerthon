@@ -384,7 +384,7 @@ const IdeaMap: React.FC<IdeaMapProps> = ({ messages, onDiscardIdea, onJumpToChat
                                 <div className="flex items-start gap-2">
                                     <Sparkles className="text-[#ffcb05] flex-shrink-0" size={18} />
                                     <p className="text-[11px] font-black text-[#7a6446] leading-relaxed">
-                                        リサイクルしたアイデアは自分の一覧から削除され、「リサイクルボックス」に入ることで村の全員が共有できるようになります。
+                                        リサイクルしたアイデアは自分の一覧から削除され、「リサイクルボックス」に入ることで他のユーザーに共有できるようになります。
                                     </p>
                                 </div>
                                 <div className="absolute -top-2 right-4 w-4 h-4 bg-white border-t-2 border-l-2 border-[#ffcb05] rotate-45" />

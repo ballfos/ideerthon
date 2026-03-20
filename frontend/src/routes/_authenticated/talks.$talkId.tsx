@@ -767,7 +767,7 @@ function RouteComponent() {
                                               title="削除"
                                               type="button"
                                             >
-                                              <Trash2 className="h-3.5 w-3.5" />
+                                              <X className="h-3.5 w-3.5" />
                                             </button>
                                           </div>
                                         </div>

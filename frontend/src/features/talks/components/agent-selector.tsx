@@ -1,5 +1,5 @@
 import { cn } from '#/utils/ui/cn'
-import { Trash2, Pencil, ChevronDown, ChevronUp } from "lucide-react";
+import { X, Pencil, ChevronDown, ChevronUp } from "lucide-react";
 import React from "react";
 import { AgentIcon } from "./agent-icons";
 
@@ -125,7 +125,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({
               onClick={(e) => { e.stopPropagation(); onRemove() }}
               className="p-2 hover:bg-red-50 text-[#c2baa6] hover:text-red-400 rounded-xl transition-colors"
             >
-              <Trash2 className="h-4 w-4" />
+              <X className="h-4 w-4" />
             </button>
           )}
           <div className="text-[#a3967d]">

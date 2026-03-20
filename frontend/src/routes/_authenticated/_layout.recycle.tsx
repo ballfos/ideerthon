@@ -19,7 +19,7 @@ function RecyclePage() {
     useEffect(() => {
         setSteps([
             {
-                description: 'ここには、村の誰かが手放したアイデアの「かけら」が流れてきます。自分では思いつかないような意外なヒントが見つかるかもしれません！',
+                description: 'ここには、他のユーザーが手放したアイデアの「かけら」が流れてきます。自分では思いつかないような意外なヒントが見つかるかもしれません！',
                 targetId: 'recycle-list',
                 title: 'リサイクルボックス'
             }
