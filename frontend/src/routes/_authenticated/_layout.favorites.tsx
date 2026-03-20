@@ -49,8 +49,8 @@ function FavoritesPage() {
     return (
         <div className="p-4 max-w-4xl mx-auto min-h-screen font-yusei">
             <div className="mb-8 font-yusei">
-                <h1 className="text-3xl font-black tracking-widest text-[#5a4a35] flex items-center gap-3">
-                    <Star className="fill-current text-[#ffcb05]" size={36} />
+                <h1 className="text-2xl sm:text-3xl font-black tracking-widest text-[#5a4a35] flex items-center gap-2 sm:gap-3">
+                    <Star className="fill-current text-[#ffcb05] shrink-0" size={36} />
                     お気に入りメッセージ
                 </h1>
             </div>
