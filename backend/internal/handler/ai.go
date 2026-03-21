@@ -13,9 +13,10 @@ import (
 
 // AIGenerator はAIによる応答生成とホワイトボード更新のインターフェースです。
 type AIGenerator interface {
-	GenerateResponse(ctx context.Context, name, role, topic string, whiteboard map[string]interface{}, recentContext string, reply *ReplyContext) (map[string]interface{}, error)
+	GenerateResponse(ctx context.Context, name, role, topic string, whiteboard map[string]interface{}, recentContext string, userInstruction string, reply *ReplyContext) (map[string]interface{}, error)
 	//nolint:contextcheck // 内部でUpdateを呼び出しているが、引数のctxを正しく渡しているため。
 	UpdateTalkWhiteboard(ctx context.Context, docRef *firestore.DocumentRef, summary string, ideas []interface{})
+	GenerateEmoji(ctx context.Context, topic string) (string, error)
 	EmbedText(ctx context.Context, text string) ([]float32, error)
 }
 
@@ -55,14 +56,14 @@ func (a *AIClient) Close() error {
 }
 
 // GenerateResponse は Gemini モデルを使用して対話の応答を生成します。
-func (a *AIClient) GenerateResponse(ctx context.Context, name, role, topic string, whiteboard map[string]interface{}, recentContext string, reply *ReplyContext) (map[string]interface{}, error) {
+func (a *AIClient) GenerateResponse(ctx context.Context, name, role, topic string, whiteboard map[string]interface{}, recentContext string, userInstruction string, reply *ReplyContext) (map[string]interface{}, error) {
 	modelName := "gemini-2.5-flash"
 
 	whiteboardJSON, _ := json.MarshalIndent(whiteboard, "", "  ")
 	whiteboardText := string(whiteboardJSON)
 
 	systemInstruction := fmt.Sprintf(`あなたは%sです。%s
-必ず「共有ホワイトボード」の文脈を踏まえて発言してください。
+必ず「要約」と「アイデア」の文脈を踏まえて発言してください。
 
 【出力形式（JSONのみ）】
 {
@@ -120,6 +121,10 @@ func (a *AIClient) GenerateResponse(ctx context.Context, name, role, topic strin
 
 	if reply != nil {
 		prompt += fmt.Sprintf("\n【特定のリプライ先】\n対象発言: %s (%s)\nさらに遡った文脈: %s\n", reply.ReplyTargetText, reply.ReplyTargetSender, reply.PreviousContext)
+	}
+
+	if userInstruction != "" {
+		prompt += fmt.Sprintf("\n【最重要指示】\n%s\n\n※ 上記の指示に則った回答を必ずしてください。\n", userInstruction)
 	}
 
 	prompt += "\n上記の文脈を踏まえて、あなたの役割として発言し、今回の発言内容に基づいたJSON（message, summary, ideas）を出力してください。\n既存のアイデアと重複しない、全く新しい切り口のアイデアを提案してください。"
@@ -204,3 +209,66 @@ func (a *AIClient) EmbedText(ctx context.Context, text string) ([]float32, error
 		return res.Embeddings[0].Values, nil
 	}
 }
+func (a *AIClient) GenerateEmoji(ctx context.Context, topic string) (string, error) {
+	if topic == "" {
+		fmt.Printf("GenerateEmoji received empty topic\n")
+		return "🦌", nil
+	}
+
+	// Based on logs, gemini-2.5-flash is valid but uses 'thinking' which consumes tokens.
+	// gemini-2.5-flash-lite returned 404 in asia-northeast1.
+	models := []string{"gemini-2.5-flash-lite", "gemini-2.5-flash"}
+	instruction := "与えられたお題に最もふさわしい絵文字を【一つだけ】出力してください。説明や装飾は一切不要です。"
+	fullPrompt := fmt.Sprintf("%s\nお題: %s", instruction, topic)
+
+	config := &genai.GenerateContentConfig{
+		Temperature: genai.Ptr(float32(1.0)),
+		// Significantly increase tokens to accommodate 'thinking' (thoughtsTokenCount can be > 1000)
+		MaxOutputTokens: 2048,
+		SafetySettings: []*genai.SafetySetting{
+			{Category: "HARM_CATEGORY_HATE_SPEECH", Threshold: "BLOCK_NONE"},
+			{Category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", Threshold: "BLOCK_NONE"},
+			{Category: "HARM_CATEGORY_HARASSMENT", Threshold: "BLOCK_NONE"},
+			{Category: "HARM_CATEGORY_DANGEROUS_CONTENT", Threshold: "BLOCK_NONE"},
+		},
+	}
+
+	for _, model := range models {
+		for i := 0; i < 3; i++ {
+			resp, err := a.client.Models.GenerateContent(ctx, model, []*genai.Content{{Parts: []*genai.Part{{Text: fullPrompt}}, Role: "user"}}, config)
+			if err != nil {
+				if strings.Contains(err.Error(), "429") || strings.Contains(err.Error(), "RESOURCE_EXHAUSTED") {
+					fmt.Printf("Emoji generation rate limit reached for %s. Retrying in 1s... (attempt %d/3)\n", model, i+1)
+					select {
+					case <-time.After(1 * time.Second):
+						continue
+					case <-ctx.Done():
+						return "🦌", nil
+					}
+				}
+				fmt.Printf("Emoji generation error for %s: %v, topic: %s\n", model, err, topic)
+				break
+			}
+
+			if len(resp.Candidates) == 0 || len(resp.Candidates[0].Content.Parts) == 0 {
+				respJSON, _ := json.Marshal(resp)
+				fmt.Printf("Emoji generation returned no candidates for %s. Topic: %s. Resp: %s\n", model, topic, string(respJSON))
+				break
+			}
+
+			emoji := strings.TrimSpace(resp.Text())
+			if emoji == "" {
+				// If response text is empty but call succeeded (maybe just thinking?), skip to next model or retry
+				continue
+			}
+			// Ensure it's not too long (just in case)
+			if len([]rune(emoji)) > 5 {
+				emoji = string([]rune(emoji)[0:1])
+			}
+			return emoji, nil
+		}
+	}
+
+	return "🦌", nil
+}
+

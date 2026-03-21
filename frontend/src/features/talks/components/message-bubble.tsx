@@ -190,7 +190,7 @@ export function MessageBubble({
                                 isOwn ? "left-[-8px]" : "right-[-8px]",
                                 isFavorite
                                     ? "text-[#ffcb05] scale-110 opacity-100"
-                                    : "text-[#c2baa6] opacity-0 group-hover:opacity-100 hover:text-[#7a6446]"
+                                    : "text-[#c2baa6] opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:text-[#7a6446]"
                             )}
                         >
                             <Star className={cn("h-5 w-5", isFavorite && "fill-current")} />

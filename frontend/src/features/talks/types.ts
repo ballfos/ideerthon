@@ -5,4 +5,5 @@ export interface Talk {
     ownerId: string;
     topic: string;
     updatedAt: Timestamp;
+    emojiIcon?: string;
 }

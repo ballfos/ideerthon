@@ -159,10 +159,10 @@ function TopicZone({ borderColor, title, topics, zoneBg, zoneBorder }: TopicZone
 
               {/* テキスト部分 */}
               <div className="flex flex-col overflow-hidden flex-1 min-w-0">
-                <span className="text-lg font-black tracking-wider text-[#5a4a35] truncate leading-tight group-active:text-white">
+                <span className="text-lg font-black tracking-wider text-[#5a4a35] line-clamp-2 leading-tight group-active:text-white">
                   {topic.title}
                 </span>
-                <span className="text-xs font-bold text-gray-500 truncate mt-0.5 group-active:text-white">
+                <span className="text-xs font-bold text-gray-500 line-clamp-1 mt-0.5 group-active:text-white">
                   {topic.description}
                 </span>
               </div>
@@ -217,8 +217,8 @@ export function LatestTopics() {
   // 最新3件を表示するように変換
   const latestTalks: Topic[] = talks.slice(0, 3).map((talk) => ({
     description: `${new Date(talk.updatedAt.seconds * 1000).toLocaleString('ja-JP')} に更新`,
-    icon: (props) => <MessageSquare {...props} className="text-[#8c662d]" />,
-    iconBg: 'bg-[#fcfaf2]',
+    icon: () => talk.emojiIcon ? <span className="text-xl leading-none">{talk.emojiIcon}</span> : <MessageSquare className="text-[#8c662d] h-5 w-5" />,
+    iconBg: talk.emojiIcon ? 'bg-transparent border-0' : 'bg-[#fcfaf2]',
     id: talk.id,
     title: talk.topic || '無題のトーク',
     type: 'latest'

@@ -8,3 +8,11 @@
   --font-yusei: "Yusei Magic";
   --font-mplus: "M PLUS Rounded 1c";
 }
+
+#__firebase-hosting-emulator-warning__ {
+  display: none !important;
+}
+
+.firebase-emulator-warning {
+  display: none !important;
+}

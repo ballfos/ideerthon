@@ -82,6 +82,7 @@ type Talk struct {
 	RemainingCount int32                  `protobuf:"varint,7,opt,name=remaining_count,json=remainingCount,proto3" json:"remaining_count,omitempty"`
 	LastHeartbeat  *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=last_heartbeat,json=lastHeartbeat,proto3" json:"last_heartbeat,omitempty"`
 	Agents         []*Agent               `protobuf:"bytes,9,rep,name=agents,proto3" json:"agents,omitempty"`
+	EmojiIcon      string                 `protobuf:"bytes,10,opt,name=emoji_icon,json=emojiIcon,proto3" json:"emoji_icon,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -177,6 +178,13 @@ func (x *Talk) GetAgents() []*Agent {
 		return x.Agents
 	}
 	return nil
+}
+
+func (x *Talk) GetEmojiIcon() string {
+	if x != nil {
+		return x.EmojiIcon
+	}
+	return ""
 }
 
 type Agent struct {
@@ -815,7 +823,7 @@ var File_proto_api_v1_talk_proto protoreflect.FileDescriptor
 
 const file_proto_api_v1_talk_proto_rawDesc = "" +
 	"\n" +
-	"\x17proto/api/v1/talk.proto\x12\x06api.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1aproto/api/v1/message.proto\"\xfc\x02\n" +
+	"\x17proto/api/v1/talk.proto\x12\x06api.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1aproto/api/v1/message.proto\"\x9b\x03\n" +
 	"\x04Talk\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\tR\aownerId\x12\x14\n" +
@@ -827,7 +835,10 @@ const file_proto_api_v1_talk_proto_rawDesc = "" +
 	"\x06status\x18\x06 \x01(\x0e2\x12.api.v1.TalkStatusR\x06status\x12'\n" +
 	"\x0fremaining_count\x18\a \x01(\x05R\x0eremainingCount\x12A\n" +
 	"\x0elast_heartbeat\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\rlastHeartbeat\x12%\n" +
-	"\x06agents\x18\t \x03(\v2\r.api.v1.AgentR\x06agents\"Q\n" +
+	"\x06agents\x18\t \x03(\v2\r.api.v1.AgentR\x06agents\x12\x1d\n" +
+	"\n" +
+	"emoji_icon\x18\n" +
+	" \x01(\tR\temojiIcon\"Q\n" +
 	"\x05Agent\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x12\n" +

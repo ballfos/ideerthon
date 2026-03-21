@@ -51,6 +51,20 @@ export function RouteComponent() {
   const [talkStatus, setTalkStatus] = useState<TalkStatus>(
     TalkStatus.UNSPECIFIED,
   );
+  const talkStatusRef = useRef(talkStatus);
+
+  useEffect(() => {
+    talkStatusRef.current = talkStatus;
+  }, [talkStatus]);
+
+  // トークを抜ける際に自動で停止する
+  useEffect(() => {
+    return () => {
+      if (talkId && talkId !== "none" && talkStatusRef.current === TalkStatus.RUNNING) {
+        void talkClient.stopTalkStream({ talkId });
+      }
+    };
+  }, [talkId]);
   const [agents, setAgents] = useState<
     { name: string; description: string; icon?: string }[]
   >([]);
@@ -480,7 +494,11 @@ export function RouteComponent() {
     try {
       await talkClient.deleteTalk({ talkId: id });
       if (id === talkId) {
-        void navigate({ params: { talkId: "none" }, to: "/talks/$talkId" });
+        if (isDesktop) {
+          void navigate({ params: { talkId: "none" }, to: "/talks/$talkId" });
+        } else {
+          void navigate({ to: "/talks" });
+        }
       }
     } catch (err) {
       console.error("Failed to delete talk:", err);

@@ -34,12 +34,13 @@ export const useTalks = () => {
             q,
             (snapshot) => {
                 const fetchedTalks = snapshot.docs.map((doc) => {
-                    const data = doc.data() as { ownerId: string; topic: string; updatedAt: import('firebase/firestore').Timestamp };
+                    const data = doc.data() as { ownerId: string; topic: string; updatedAt: import('firebase/firestore').Timestamp; emojiIcon?: string };
                     return {
                         id: doc.id,
                         ownerId: data.ownerId,
                         topic: data.topic,
                         updatedAt: data.updatedAt,
+                        emojiIcon: data.emojiIcon,
                     };
                 });
                 setTalks(fetchedTalks);

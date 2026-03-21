@@ -65,8 +65,9 @@ function RouteComponent() {
               }}
             >
               <div className="flex flex-col overflow-hidden min-w-0 flex-1">
-                <h2 className="text-xl font-black tracking-wider text-[#5a4a35] font-yusei truncate">
-                  {talk.topic}
+                <h2 className="text-xl font-black tracking-wider text-[#5a4a35] font-yusei truncate flex items-center gap-2">
+                  {talk.emojiIcon && <span className="shrink-0">{talk.emojiIcon}</span>}
+                  <span className="truncate">{talk.topic}</span>
                 </h2>
                 <span className="text-[#8B5E3C] text-[10px] font-black mt-1 truncate">
                   {new Date(talk.updatedAt.toMillis()).toLocaleString('ja-JP')}

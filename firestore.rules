@@ -1,19 +1,31 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Helper function to check if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
 
-    // This rule allows anyone with your Firestore database reference to view, edit,
-    // and delete all data in your Firestore database. It is useful for getting
-    // started, but it is configured to expire after 30 days because it
-    // leaves your app open to attackers. At that time, all client
-    // requests to your Firestore database will be denied.
-    //
-    // Make sure to write security rules for your app before that time, or else
-    // all client requests to your Firestore database will be denied until you Update
-    // your rules
-    match /{document=**} {
-      allow read, write: if request.time < timestamp.date(2026, 4, 15);
+    // Helper function to check if the user is the owner of the talk
+    function isOwner(talkData) {
+      return isAuthenticated() && request.auth.uid == talkData.ownerId;
+    }
+
+    // talks collection
+    match /talks/{talkId} {
+      allow read: if isOwner(resource.data);
+      allow write: if false;
+
+      // messages subcollection
+      match /messages/{messageId} {
+        allow read: if isOwner(get(/databases/$(database)/documents/talks/$(talkId)).data);
+        allow write: if false;
+      }
+    }
+
+    // recycled_ideas collection (Backend only)
+    match /recycled_ideas/{ideaId} {
+      allow read, write: if false;
     }
   }
 }

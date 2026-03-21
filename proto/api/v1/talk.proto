@@ -21,6 +21,7 @@ message Talk {
   int32 remaining_count = 7;
   google.protobuf.Timestamp last_heartbeat = 8;
   repeated Agent agents = 9;
+  string emoji_icon = 10;
 }
 
 message Agent {
