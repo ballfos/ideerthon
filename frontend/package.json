@@ -10,6 +10,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:pbt": "vitest run -t PBT",
     "lint": "eslint src --fix"
   },
   "dependencies": {

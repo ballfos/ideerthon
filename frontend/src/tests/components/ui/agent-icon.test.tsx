@@ -3,11 +3,10 @@ import { render, screen, cleanup } from "@testing-library/react"
 import fc from "fast-check"
 import "@testing-library/jest-dom/vitest"
 import { describe, it, expect } from "vitest"
-import React from "react"
 
 import { AgentIcon, NAME_TO_ICON_MAP } from "#/features/talks/components/agent-icons"
 
-describe("AgentIcon Component Property-Based Tests", () => {
+describe("AgentIcon Component Property-Based Tests (PBT)", () => {
     it("どのような文字列（iconName, agentName）を渡してもクラッシュせずにレンダリングされること", () => {
         fc.assert(
             fc.property(
