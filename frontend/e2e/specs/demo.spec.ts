@@ -41,11 +41,12 @@ test('あいでぃあ村：トーク作成フローのデモ', async ({ page, co
   // 8. チャット画面でのインタラクション
   console.log('--- チャット操作のデモ ---');
   await page.waitForURL(/\/talks\/.+/);
-  await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(2000); // UIのアニメーション待ち
   
+  // 入力欄が表示されるまで待機（networkidleは厳しすぎるため、特定の要素を待つ）
   const chatInput = page.getByPlaceholder(/メッセージを入力.../i);
-  await expect(chatInput).toBeVisible();
+  await expect(chatInput).toBeVisible({ timeout: 10000 });
+  await page.waitForTimeout(1000); // UIのアニメーション待ち
+  
   await chatInput.fill('【デモ検証】宇宙で一番人気のお土産は何ですか？具体的に教えてください。');
   await page.waitForTimeout(1000);
   
